@@ -146,7 +146,7 @@
             <span id="userEmail" class="text-sm font-semibold">carregando...</span>
           </div>
           <div class="h-8 w-px bg-blue-800 hidden md:block"></div>
-          <a href="index.html" class="btn-outline-white text-xs font-semibold px-3 py-1.5 rounded">Retornar ao Site</a>
+          <a href="index.html?home=1" class="btn-outline-white text-xs font-semibold px-3 py-1.5 rounded">Retornar ao Site</a>
           <button id="logoutBtn" type="button" class="bg-[var(--brand-accent)] text-black hover:bg-yellow-500 transition-colors text-xs font-bold px-4 py-1.5 rounded shadow-sm">
             Encerrar Sessão
           </button>
@@ -384,7 +384,8 @@
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem(AUTH_STORAGE_KEY);
-      window.location.replace("index.html");
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      window.location.replace("index.html?logout=1");
     });
 
     const notasModal = document.getElementById('notasModal');

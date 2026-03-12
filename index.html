@@ -635,9 +635,17 @@
     const TEST_LOGIN_EMAIL = "eugustavorodriguesalves@gmail.com";
     const TEST_LOGIN_PASSWORD = "Gu130106.";
     const AUTH_STORAGE_KEY = "ceeja_portal_auth";
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceHomeView = urlParams.get("home") === "1";
+    const logoutRequested = urlParams.get("logout") === "1";
 
-    // Auto-login se matenha-me conectado foi marcado antes
-    if (localStorage.getItem(AUTH_STORAGE_KEY)) {
+    if (logoutRequested) {
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+
+    // Auto-login apenas quando nao houver pedido explicito para exibir a home
+    if (!forceHomeView && !logoutRequested && localStorage.getItem(AUTH_STORAGE_KEY)) {
       sessionStorage.setItem(AUTH_STORAGE_KEY, localStorage.getItem(AUTH_STORAGE_KEY));
       window.location.href = "portal.html";
     }
