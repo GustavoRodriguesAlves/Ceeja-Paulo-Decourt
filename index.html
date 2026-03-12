@@ -671,7 +671,18 @@
     const loginError = document.getElementById("loginError");
     const keepConnectedCheckbox = document.getElementById("keepConnected");
 
+    const redirectToPortal = (email) => {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, email);
+      window.location.href = "portal.html";
+    };
+
     const openLogin = () => {
+      const rememberedEmail = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (rememberedEmail) {
+        redirectToPortal(rememberedEmail);
+        return;
+      }
+
       loginModal.classList.add("active");
       loginError.classList.add("hidden");
       document.body.style.overflow = "hidden";
@@ -702,15 +713,13 @@
         return;
       }
 
-      sessionStorage.setItem(AUTH_STORAGE_KEY, email);
-      
       if (keepConnectedCheckbox.checked) {
         localStorage.setItem(AUTH_STORAGE_KEY, email);
       } else {
         localStorage.removeItem(AUTH_STORAGE_KEY);
       }
 
-      window.location.href = "portal.html";
+      redirectToPortal(email);
     });
 
     // Photo Modal
