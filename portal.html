@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal do Aluno Institucional | CEEJA Paulo Decourt</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-primary: #003366;
+      --brand-secondary: #00509E;
+      --brand-accent: #FFC000;
+      --bg-dashboard: #F4F7F6;
+      --text-main: #2D3748;
+      --border-color: #E2E8F0;
+      --success: #2B9B4B;
+      --danger: #C74A4A;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg-dashboard);
+    }
+    .serif {
+      font-family: 'Merriweather', serif;
+    }
+    .topbar {
+      background-color: var(--brand-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-outline-white {
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      transition: all 0.2s;
+    }
+    .btn-outline-white:hover {
+      background-color: rgba(255,255,255,0.1);
+      border-color: #fff;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      transition: box-shadow 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .card-header {
+      background-color: #F8FAFC;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      border-radius: 6px 6px 0 0;
+      font-weight: 600;
+      color: var(--brand-primary);
+    }
+    .card-body {
+      padding: 1.5rem;
+    }
+    .dashboard-link {
+      display: block;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
+      background-color: #fff;
+    }
+    .dashboard-link:hover {
+      border-color: var(--brand-secondary);
+      background-color: #F8FAFC;
+    }
+    .dashboard-link.action-btn {
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: #E6F4EA;
+      color: #1E8E3E;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #1E8E3E;
+      margin-right: 6px;
+    }
+    .modal-scrim {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(10px);
+    }
+    .popup-panel {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+    }
+    .popup-action {
+      background-color: var(--brand-secondary);
+      color: #fff;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .popup-action:hover {
+      background-color: var(--brand-primary);
+      transform: translateY(-1px);
+    }
+    .field-shell {
+      border: 1px solid var(--border-color);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-shell:focus-within {
+      border-color: var(--brand-secondary);
+      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
+    }
+  </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+  <!-- Desktop & Mobile Topbar -->
+  <header class="topbar border-b-4 border-[var(--brand-accent)] sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <img src="assets/logo-ceeja.svg" alt="Brasão do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <div class="hidden sm:block">
+            <h1 class="serif text-lg font-bold leading-tight">Portal Acadêmico</h1>
+            <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <div class="hidden md:flex flex-col items-end mr-4">
+            <span class="text-xs text-blue-200">Usuário Autenticado</span>
+            <span id="userEmail" class="text-sm font-semibold">carregando...</span>
+          </div>
+          <div class="h-8 w-px bg-blue-800 hidden md:block"></div>
+          <a href="index.html" class="btn-outline-white text-xs font-semibold px-3 py-1.5 rounded">Retornar ao Site</a>
+          <button id="logoutBtn" type="button" class="bg-[var(--brand-accent)] text-black hover:bg-yellow-500 transition-colors text-xs font-bold px-4 py-1.5 rounded shadow-sm">
+            Encerrar Sessão
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Welcome Panel -->
+    <div class="card mb-8">
+      <div class="card-body sm:flex items-start justify-between">
+        <div>
+          <h2 class="serif text-2xl font-bold text-[var(--brand-primary)] mb-2">Painel do Estudante</h2>
+          <p class="text-gray-600 max-w-3xl leading-relaxed text-sm">
+            Acesso aos sistemas acadêmicos, materiais didáticos e registros escolares. Todo o seu percurso educacional reunido em um único ambiente institucional, focado em organização e transparência das informações necessárias para a sua formação.
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-6 flex-shrink-0 bg-gray-50 p-4 border border-gray-200 rounded text-right">
+          <div class="status-badge mb-2">
+            <div class="status-dot"></div>
+            Sessão Ativa e Segura
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Ambiente Validado</p>
+        </div>
+      </div>
+      
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x border-t border-gray-200 mt-6">
+        <div class="p-4 text-center">
+          <p class="text-[var(--brand-primary)] font-bold text-lg">Consulta</p>
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Histórico Escolar</p>
+        </div>
+        <div class="p-4 text-center">
+          <p class="text-[var(--brand-primary)] font-bold text-lg">Materiais</p>
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Livros e Roteiros</p>
+        </div>
+        <div class="p-4 text-center">
+          <p class="text-[var(--brand-primary)] font-bold text-lg">Serviços</p>
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Notas e Boletins</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Modules -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      
+      <!-- Modulo de Consulta -->
+      <section class="card h-full flex flex-col">
+        <div class="card-header flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--brand-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          Módulo de Consulta
+        </div>
+        <div class="card-body flex-grow bg-gray-50 flex flex-col gap-2 relative">
+          <p class="text-sm text-gray-500 mb-2">Verificação de dados gerais do aluno junto ao sistema da Secretaria da Educação.</p>
+          <a class="dashboard-link action-btn flex items-center justify-between group !mb-0" href="https://sed.educacao.sp.gov.br/SedCon/ConsultaPublica/Index" target="_blank" rel="noopener noreferrer">
+            <div>
+              <p class="font-bold text-gray-800 text-sm group-hover:text-[var(--brand-primary)] transition-colors">Meu histórico escolar está pronto?</p>
+              <p class="text-xs text-gray-500">Acesso direto ao portal de consulta pública (SED).</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-[var(--brand-primary)] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </a>
+          <a class="dashboard-link action-btn flex items-center justify-between group mb-0" href="wifi.html" rel="noopener noreferrer">
+            <div>
+              <p class="font-bold text-gray-800 text-sm group-hover:text-[var(--brand-primary)] transition-colors">Acesso à Rede Wi-Fi SEDUC</p>
+              <p class="text-xs text-gray-500">Credenciamento de conexão para alunos nas dependências do CEEJA.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-[var(--brand-primary)] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- Modulo de Materiais -->
+      <section class="card h-full flex flex-col">
+        <div class="card-header flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--brand-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          Acervo e Materiais
+        </div>
+        <div class="card-body flex-grow bg-gray-50 flex flex-col gap-2 relative">
+          <p class="text-sm text-gray-500 mb-2">Repositório de obras e roteiros de estudo fundamentais para o desenvolvimento disciplinar.</p>
+          <a class="dashboard-link action-btn flex items-center justify-between group !mb-0" href="livros.html" rel="noopener noreferrer">
+            <div>
+              <p class="font-bold text-gray-800 text-sm group-hover:text-[var(--brand-primary)] transition-colors">Coleção: EJA Mundo do Trabalho</p>
+              <p class="text-xs text-gray-500">Biblioteca oficial de apoio bibliográfico.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-[var(--brand-primary)] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+          <a class="dashboard-link action-btn flex items-center justify-between group !mb-0" href="https://drive.google.com/drive/folders/1_hkKQy9n3WhtIUOoMNI3exLiqag0odps" target="_blank" rel="noopener noreferrer">
+            <div>
+              <p class="font-bold text-gray-800 text-sm group-hover:text-[var(--brand-primary)] transition-colors">Coleção Complementar: Escola e Vida</p>
+              <p class="text-xs text-gray-500">Hospedagem externa em formato digital (Drive).</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-[var(--brand-primary)] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+          <a class="dashboard-link action-btn flex items-center justify-between group mb-0" href="roteiros.html">
+            <div>
+              <p class="font-bold text-gray-800 text-sm group-hover:text-[var(--brand-primary)] transition-colors">Roteiros de Estudos Dirigidos</p>
+              <p class="text-xs text-gray-500">Guias de estudos categorizados por componente curricular.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-[var(--brand-primary)] shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- Modulo de Servicos -->
+      <section class="card h-full flex flex-col">
+        <div class="card-header flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--brand-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Serviços Operacionais
+        </div>
+        <div class="card-body flex-grow bg-gray-50 flex flex-col gap-2 relative">
+          <p class="text-sm text-gray-500 mb-2">Acesso a relatórios de freqüência, notas e emissão de documentos acadêmicos legados.</p>
+          
+          <button type="button" onclick="openNotasModal()" class="dashboard-link action-btn flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-[var(--success)] text-sm group-hover:text-green-800 transition-colors">Notas Correntes</p>
+              <p class="text-xs text-gray-500">Avaliações do período letivo atual.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </button>
+
+          <button type="button" class="dashboard-link action-btn flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-[var(--danger)] text-sm group-hover:text-red-800 transition-colors flex items-center flex-wrap gap-2">Notas antigas <span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] tracking-wider uppercase border border-red-200 whitespace-nowrap inline-block">Restrito</span></p>
+              <p class="text-xs text-gray-500">Histórico de períodos anteriores.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-red-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+
+          <button type="button" class="dashboard-link action-btn flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-[var(--danger)] text-sm group-hover:text-red-800 transition-colors flex items-center flex-wrap gap-2">Imprimir boletins <span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] tracking-wider uppercase border border-red-200 whitespace-nowrap inline-block">Restrito</span></p>
+              <p class="text-xs text-gray-500">Impressão oficial via sistema legado.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-red-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+
+          <button type="button" class="dashboard-link action-btn flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-[var(--danger)] text-sm group-hover:text-red-800 transition-colors flex items-center flex-wrap gap-2">Importar dados antigos <span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] tracking-wider uppercase border border-red-200 whitespace-nowrap inline-block">Restrito</span></p>
+              <p class="text-xs text-gray-500">Ferramenta restrita administrativa.</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-red-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+
+          <button type="button" class="dashboard-link action-btn flex items-center justify-between group mb-0">
+            <div>
+              <p class="font-bold text-[var(--danger)] text-sm group-hover:text-red-800 transition-colors flex items-center flex-wrap gap-2">Consultar número de matrícula <span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px] tracking-wider uppercase border border-red-200 whitespace-nowrap inline-block">Restrito</span></p>
+              <p class="text-xs text-gray-500">Localização de identificador acadêmico (RA).</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-red-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-400 text-xs py-4 border-t border-gray-700 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left sm:flex justify-between items-center flex-wrap gap-2">
+      <p>Desenvolvido para CEEJA Paulo Decourt | Sistema Operacional Integrado</p>
+      <p class="opacity-70">Licença: Creative Commons Atribuição 4.0 Internacional.</p>
+    </div>
+  </footer>
+
+  <!-- Modal para Acesso às Notas -->
+  <div id="notasModal" class="modal-scrim fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="popup-panel w-full max-w-lg rounded-2xl overflow-hidden">
+      <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-[var(--brand-secondary)]">Acesso seguro</p>
+            <h3 class="mt-1 text-lg font-bold text-[var(--brand-primary)]">Consulta de notas correntes</h3>
+          </div>
+          <button id="closeNotasModal" type="button" class="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:text-red-600">Fechar</button>
+        </div>
+      </div>
+      <div class="px-6 py-5">
+        <p class="text-sm leading-6 text-gray-600">
+          O ambiente oficial de notas será aberto em uma janela separada e centralizada. Assim, o portal principal permanece disponível enquanto a consulta é realizada no sistema da SEDUC.
+        </p>
+        <div class="mt-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          Informe o RA com UF aqui para deixar a consulta preparada. Na janela seguinte, o sistema oficial será aberto já autenticado e o RA ficará pronto para você copiar e colar no campo de busca.
+        </div>
+        <div class="mt-5">
+          <label for="raWithUfInput" class="mb-2 block text-sm font-semibold text-gray-700">RA com UF</label>
+          <div class="field-shell rounded-lg px-4 py-3">
+            <input id="raWithUfInput" type="text" maxlength="20" class="w-full bg-transparent text-sm outline-none" placeholder="Ex.: 1234567SP" />
+          </div>
+          <p id="raValidationMessage" class="mt-2 hidden text-sm font-medium text-red-700">
+            Informe o RA com UF para abrir a consulta preparada.
+          </p>
+          <p id="raPreparedMessage" class="mt-2 hidden text-sm font-medium text-green-700">
+            RA preparado. Se o navegador permitir, ele também será copiado para facilitar o preenchimento.
+          </p>
+        </div>
+        <p id="popupBlockedMessage" class="mt-4 hidden text-sm font-medium text-red-700">
+          O navegador bloqueou a janela. Libere popups para este site e tente novamente, ou use o link direto abaixo.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button id="launchNotasPopup" type="button" class="popup-action rounded-md px-5 py-3 text-sm font-semibold shadow-sm">
+            Abrir ambiente de notas
+          </button>
+          <a id="notasDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="rounded-md border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+            Abrir link direto
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AUTH_STORAGE_KEY = "ceeja_portal_auth";
+    const TEST_LOGIN_EMAIL = "eugustavorodriguesalves@gmail.com";
+    const NOTES_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjUzMDcyNGQ0OTE3M2EzZWQ2YjRhMDBhYTYzNDQyMDMwMGQ3MmFlNWIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTE1Nzg3Mzk5MTg0MDg5MjE5ODc0IiwiZW1haWwiOiJldWd1c3Rhdm9yb2RyaWd1ZXNhbHZlc0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IkFhVmgyU2MwSHBDeHN4QTYtRExkMmciLCJuYmYiOjE3NzMzNDgxMDUsIm5hbWUiOiJHdXN0YXZvIFJvZHJpZ3VlcyBBbHZlcyIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMMUQtSWoyd2s5SlV4cF9WWFJvMDgyS3pJMER1OXVmQWI2cllsWTVZMEQyeTBqSXc9czk2LWMiLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiUm9kcmlndWVzIEFsdmVzIiwiaWF0IjoxNzczMzQ4NDA1LCJleHAiOjE3NzMzNTIwMDUsImp0aSI6IjZkMDNkYzc2MGM2Yzc5ZmVmNzNmNTFjNzgxNWNjYzdiNzRmM2VlYzIifQ.ABVzBNz-S6hTeDgACwOyafRzgQltKJd0THkPT1YekGo4ntO44oLdef6NtudsAe4C_NWKKyJqAJb4NSFRO_VS0XqqKx6HtmkbJxOyMBmu46bAIkBAY6EpNi-o1-b3YSNQr3heA3z7PpPrfcGWvkZsdmDEHeGUrgtMEtY22q43Kj5Ge3hCaW49enscGrF0U0TE3TlvlrLBNTNnbeWmmi1evo9DW9n1w75qkbuf8XftbywTKeSEHKO06CraJMZUde4YUHgJsj6zY9Bnb5mv_fRKJzfIjTAWDGCc962QdPlW2ZB8nw8CuN9mEVnZ1WzE2gA9vnw3MHneHLEljAxRhp_Wzg";
+
+    // Auth Check
+    const userEmail = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    const isLoggedIn = !!userEmail;
+
+    if (!isLoggedIn) {
+      window.location.replace("index.html");
+    } else {
+      // Validate specifically for the test email as per previous requirements if needed
+      if (userEmail !== TEST_LOGIN_EMAIL) {
+        window.location.replace("index.html");
+      } else {
+        document.getElementById('userEmail').textContent = userEmail;
+      }
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      window.location.replace("index.html");
+    });
+
+    const notasModal = document.getElementById('notasModal');
+    const popupBlockedMessage = document.getElementById('popupBlockedMessage');
+    const notasDirectLink = document.getElementById('notasDirectLink');
+    const launchNotasPopup = document.getElementById('launchNotasPopup');
+    const closeNotasModalButton = document.getElementById('closeNotasModal');
+    const raWithUfInput = document.getElementById('raWithUfInput');
+    const raValidationMessage = document.getElementById('raValidationMessage');
+    const raPreparedMessage = document.getElementById('raPreparedMessage');
+    const RA_STORAGE_KEY = 'ceeja_prepared_ra';
+
+    function buildNotasUrl() {
+      const email = sessionStorage.getItem(AUTH_STORAGE_KEY) || TEST_LOGIN_EMAIL;
+      const gscriptBaseUrl = 'https://script.google.com/macros/s/AKfycbyVf3T34dxhgWYWebvuPE8o2JHQIhzLrIqOfDCK1UvdC_vGz6gLj20A30FS5EwTGZXdxw/exec';
+      return `${gscriptBaseUrl}?usuario=${encodeURIComponent(email)}&ra=&tel=&token=${NOTES_TOKEN}`;
+    }
+
+    function openNotasModal() {
+      popupBlockedMessage.classList.add('hidden');
+      raValidationMessage.classList.add('hidden');
+      raPreparedMessage.classList.add('hidden');
+      notasDirectLink.href = buildNotasUrl();
+      raWithUfInput.value = sessionStorage.getItem(RA_STORAGE_KEY) || '';
+      notasModal.classList.remove('hidden');
+      notasModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => raWithUfInput.focus(), 0);
+    }
+
+    function closeNotasModal() {
+      notasModal.classList.add('hidden');
+      notasModal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    function openNotasPopup() {
+      const raValue = raWithUfInput.value.trim().toUpperCase();
+      if (!raValue) {
+        raValidationMessage.classList.remove('hidden');
+        raPreparedMessage.classList.add('hidden');
+        raWithUfInput.focus();
+        return;
+      }
+
+      sessionStorage.setItem(RA_STORAGE_KEY, raValue);
+      const targetUrl = buildNotasUrl();
+      notasDirectLink.href = targetUrl;
+      raValidationMessage.classList.add('hidden');
+      raPreparedMessage.classList.remove('hidden');
+
+      const popupWidth = Math.min(980, Math.floor(window.screen.availWidth * 0.82));
+      const popupHeight = Math.min(760, Math.floor(window.screen.availHeight * 0.82));
+      const left = Math.max(0, Math.floor((window.screen.availWidth - popupWidth) / 2));
+      const top = Math.max(0, Math.floor((window.screen.availHeight - popupHeight) / 2));
+      const features = `popup=yes,width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(raValue).catch(() => {});
+      }
+
+      const popupWindow = window.open(targetUrl, 'ceejaNotasPopup', features);
+      if (!popupWindow) {
+        popupBlockedMessage.classList.remove('hidden');
+        return;
+      }
+
+      popupWindow.focus();
+      closeNotasModal();
+    }
+
+    launchNotasPopup.addEventListener('click', openNotasPopup);
+    closeNotasModalButton.addEventListener('click', closeNotasModal);
+    raWithUfInput.addEventListener('input', () => {
+      raValidationMessage.classList.add('hidden');
+      raPreparedMessage.classList.add('hidden');
+      raWithUfInput.value = raWithUfInput.value.toUpperCase();
+    });
+    notasModal.addEventListener('click', (event) => {
+      if (event.target === notasModal) closeNotasModal();
+    });
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !notasModal.classList.contains('hidden')) closeNotasModal();
+    });
+  </script>
+</body>
+</html>

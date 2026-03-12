@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="206" height="206">
+  <rect x="1" y="1" rx="10" ry="10" width="204" height="204" style="fill:#00A0FF; stroke-width:1; stroke:#000000"/>
+  <path d="
+  M 103,199 
+  C 116,199 118,191 130,187
+  C 142,183 148,189 159,181 C 170,173 166,166 174,155 
+  C 182,144 190,145 194,133 C 198,121 191,116 191,103
+  C 191,90 198,85 194,73 C 190,61 182,62 174,51
+  C 166,40 170,33 159,25 C 148,17 142,23 130,19
+  C 118,15 116,7 103,7 C 90,7 88,15 76,19
+  C 64,23 58,17 47,25 C 36,33 40,40 32,51
+  C 24,62 16,61 12,73 C 8,85 15,90 15,103
+  C 15,116 8,121 12,133 C 16,145 24,144 32,155
+  C 40,166 36,173 47,181 C 58,189 64,183 76,187
+  C 88,191 90,199 103,199 Z
+    " style="fill:#0050B0;" />
+    
+
+<!--
+n = 20; a_18 = Math.PI/10; r1 = 88; r2 = 96; px1 = Math.round(r1*Math.sin((n-1)*a_18)) + 103; py1 = Math.round(r1*Math.cos((n-1)*a_18)) + 103; px2 = px1 + Math.round(13*Math.sin((n-1)*a_18 + Math.PI/2)); py2 = py1 + Math.round(13*Math.cos((n-1)*a_18 + Math.PI/2)); console.log(`<path style="fill:none; stroke-width:1; stroke:#00FF00" d="M 103,103 L ${px1},${py1} L ${px2},${py2}" />`); px5 = Math.round(r1*Math.sin((n+1)*a_18)) + 103; py5 = Math.round(r1*Math.cos((n+1)*a_18)) + 103; px6 = px5 + Math.round(-13*Math.sin((n+1)*a_18 + Math.PI/2)); py6 = py5 + Math.round(-13*Math.cos((n+1)*a_18 + Math.PI/2)); console.log(`<path style="fill:none; stroke-width:1; stroke:#FFFF00" d="M 103,103 L ${px5},${py5} L ${px6},${py6}" />`); px3= Math.round(r2*Math.sin(n*a_18)) + 103; py3= Math.round(r2*Math.cos(n*a_18)) + 103; px4 = px3 + Math.round(-13*Math.sin(n*a_18 + Math.PI/2)); py4 = py3 + Math.round(-13*Math.cos(n*a_18 + Math.PI/2)); px7 = px3 + Math.round(13*Math.sin(n*a_18 + Math.PI/2)); py7 = py3 + Math.round(13*Math.cos(n*a_18 + Math.PI/2)); console.log(`<path style="fill:none; stroke-width:1; stroke:#00FFFF" d="M 103,103 L ${px3},${py3} L ${px4},${py4} L ${px7},${py7}" />`); console.log(`C ${px2},${py2} ${px4},${py4} ${px3},${py3} C ${px7},${py7} ${px6},${py6} ${px5},${py5}`)
+-->
+
+  <ellipse cx="103" cy="103" rx="80" ry="80" style="fill:none; stroke:#FFCD53; stroke-width:3"/>
+  
+
+ <defs>
+<path id="path1" style="fill:none; stroke-width:1; stroke:#00FF00" d="M 48,103 A 55,55 0 0,1 158,103" />
+</defs>
+  <text x="10" y="100" style="fill:#FFDD30;">
+    <textPath href="#path1" style="font-family:sans-serif; font-size:12.5px; font-weight:bold">CEEJA PAULO DECOURT</textPath>
+  </text>
+
+
+<path style="fill:#FFFFFF; stroke-width:1; stroke:#000000" d="M 73,118 A 30,30 0 0,1 133,118 A 30,30 0 0,1 73,118 Z" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 73,118 A 30,24 0 0,1 133,118" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 73,118 A 30,9 0 0,1 133,118" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 73,118 A 30,24 0 1,0 133,118" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 73,118 A 30,9 0 1,0 133,118" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 103,88 A 9,30 0 1,0 103,148" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 103,88 A 24,30 0 1,0 103,148" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 103,88 A 9,30 0 0,1 103,148" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 103,88 A 24,30 0 0,1 103,148" />
+
+  <circle cx="90" cy="100" r="1" style="fill:#FF0000"/>
+  <circle cx="116" cy="100" r="1" style="fill:#FF0000"/>
+
+  <circle cx="103" cy="88" r="1" style="fill:#FF0000"/>
+
+
+<path style="fill:#00E0FF; stroke-width:1; stroke:#0050B0" d="M 73,109 C 90,100 90,100 103,109 C 116,100 116,100 133,109 L 128,88 L 78,88 Z" />
+
+<path style="fill:#00E0FF; stroke-width:0.5; stroke:#000000" d="M 148,88 L 103,78 L 58,88 L 103,98  Z" />
+
+<path style="fill:none; stroke-width:1; stroke:#000000" d="M 148,88 L 148,104" />
+
+<path style="fill:#FFFFFF; stroke-width:0.5; stroke:#000000" d="M 143,118 L 153,118 L 148,104 Z" />
+
+<circle cx="148" cy="104" r="2" style="fill:#FFFFFF; stroke-width:0.5; stroke:#000000"/>
+
+<!-- 
+MAIS 10 NA LATERAL DA ABA
+STROKE ESCURO
+
+  <circle cx="103" cy="118" r="1" style="fill:#FF0000"/>
+  <circle cx="103" cy="103" r="1" style="fill:#FF0000"/>
+-->
+</svg>
+
