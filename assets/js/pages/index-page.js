@@ -1,4 +1,4 @@
-import {
+﻿import {
   clearPortalAuth,
   forgetAdmin,
   forgetPortal,
@@ -48,10 +48,6 @@ const adminLoginEmail = document.getElementById("adminLoginEmail");
 const adminLoginPassword = document.getElementById("adminLoginPassword");
 const adminLoginError = document.getElementById("adminLoginError");
 const keepAdminConnectedCheckbox = document.getElementById("keepAdminConnected");
-const noticeList = document.getElementById("noticeList");
-const quickLinksList = document.getElementById("quickLinksList");
-const homepageHighlightTitle = document.getElementById("homepageHighlightTitle");
-const homepageHighlightText = document.getElementById("homepageHighlightText");
 const carouselTrack = document.getElementById("carouselTrack");
 const carouselIndicators = document.getElementById("carouselIndicators");
 const photoModal = document.getElementById("photoModal");
@@ -70,17 +66,6 @@ const escapeHtml = (value = "") =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
-
-const formatDisplayDate = (value) => {
-  if (!value) {
-    return "";
-  }
-  const parsed = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  return parsed.toLocaleDateString("pt-BR");
-};
 
 const redirectToPortal = (email) => {
   setPortalSession(email);
@@ -195,17 +180,7 @@ function applyHomepageContent(content) {
     : [];
   const homepage = content?.homepage || {};
 
-  if (homepageHighlightTitle && homepage.highlightTitle) {
-    const safeTitle = escapeHtml(homepage.highlightTitle);
-    homepageHighlightTitle.innerHTML = safeTitle.replace(
-      /propósito e clareza/i,
-      '<span class="text-[var(--brand-accent)]">propósito e clareza</span>'
-    );
-  }
 
-  if (homepageHighlightText && homepage.highlightText) {
-    homepageHighlightText.textContent = homepage.highlightText;
-  }
 
   if (carouselTrack && carouselIndicators) {
     carouselTrack.innerHTML = gallery
@@ -243,47 +218,7 @@ function applyHomepageContent(content) {
     } else {
       clearInterval(slideInterval);
     }
-  }
-
-  if (noticeList) {
-    noticeList.innerHTML = notices.length
-      ? notices
-          .slice(0, 4)
-          .map(
-            (notice) => `
-              <article class="notice-card">
-                <div class="flex flex-wrap items-center gap-3">
-                  <span class="notice-pill">${escapeHtml(notice.category || "Aviso")}</span>
-                  <span class="text-xs text-gray-500">${escapeHtml(formatDisplayDate(notice.date))}</span>
-                </div>
-                <h3 class="mt-3 text-lg font-bold text-primary">${escapeHtml(notice.title || "")}</h3>
-                <p class="mt-2 text-gray-600 leading-relaxed">${escapeHtml(notice.summary || "")}</p>
-              </article>
-            `
-          )
-          .join("")
-      : '<div class="empty-state">Nenhum aviso publicado no momento.</div>';
-  }
-
-  if (quickLinksList) {
-    quickLinksList.innerHTML = quickLinks.length
-      ? quickLinks
-          .slice(0, 5)
-          .map(
-            (link) => `
-              <a class="dashboard-link action-btn flex items-center justify-between group !mb-0" href="${escapeHtml(link.url || "#")}" target="_blank" rel="noopener noreferrer">
-                <div>
-                  <p class="font-bold text-gray-800 text-sm group-hover:text-primary transition-colors">${escapeHtml(link.label || "")}</p>
-                  <p class="mt-1 text-xs text-gray-500">Acesso rápido publicado pela secretaria.</p>
-                </div>
-                <svg class="w-4 h-4 text-gray-400 group-hover:text-primary shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5h5m0 0v5m0-5L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9v10h10"></path></svg>
-              </a>
-            `
-          )
-          .join("")
-      : '<div class="empty-state">Nenhum link em destaque cadastrado.</div>';
-  }
-}
+  }}
 
 async function loadHomepageContent() {
   try {

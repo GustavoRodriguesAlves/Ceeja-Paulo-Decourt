@@ -1,4 +1,4 @@
-import {
+﻿import {
   TEST_LOGIN_EMAIL,
   clearAdminAuth,
   getAdminSessionEmail,
@@ -58,11 +58,6 @@ const mediaAlt = document.getElementById("mediaAlt");
 const mediaOrder = document.getElementById("mediaOrder");
 const mediaPublished = document.getElementById("mediaPublished");
 
-const homepageForm = document.getElementById("homepageForm");
-const homepageTitle = document.getElementById("homepageTitle");
-const homepageText = document.getElementById("homepageText");
-const homepagePreviewTitle = document.getElementById("homepagePreviewTitle");
-const homepagePreviewText = document.getElementById("homepagePreviewText");
 
 const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
 const dashboardLinkCount = document.getElementById("dashboardLinkCount");
@@ -71,7 +66,6 @@ const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
 const publishNoticeCount = document.getElementById("publishNoticeCount");
 const publishLinkCount = document.getElementById("publishLinkCount");
 const publishGalleryCount = document.getElementById("publishGalleryCount");
-const publishHomepageState = document.getElementById("publishHomepageState");
 const jsonPreview = document.getElementById("jsonPreview");
 const adminStatus = document.getElementById("adminStatus");
 
@@ -315,14 +309,6 @@ function renderGallery() {
   });
 }
 
-function renderHomepagePreview() {
-  homepageTitle.value = adminState.homepage.highlightTitle || "";
-  homepageText.value = adminState.homepage.highlightText || "";
-  homepagePreviewTitle.textContent = adminState.homepage.highlightTitle || "Sem destaque configurado.";
-  homepagePreviewText.textContent =
-    adminState.homepage.highlightText || "Cadastre o texto principal para visualizar a prévia.";
-}
-
 function renderDashboard() {
   const publishedNotices = adminState.notices.filter((item) => item.published).length;
   const publishedLinks = adminState.quickLinks.filter((item) => item.published).length;
@@ -337,8 +323,6 @@ function renderDashboard() {
   if (publishNoticeCount) publishNoticeCount.textContent = publishedNotices;
   if (publishLinkCount) publishLinkCount.textContent = publishedLinks;
   if (publishGalleryCount) publishGalleryCount.textContent = publishedGallery;
-  if (publishHomepageState) publishHomepageState.textContent =
-    adminState.homepage.highlightTitle || "Título principal ainda não preenchido.";
   jsonPreview.textContent = JSON.stringify(adminState, null, 2);
 }
 
@@ -346,7 +330,6 @@ function renderAll() {
   renderNotices();
   renderLinks();
   renderGallery();
-  renderHomepagePreview();
   renderDashboard();
 }
 
@@ -424,13 +407,6 @@ mediaForm.addEventListener("submit", (event) => {
   }
   fillMediaForm();
   saveState("Imagem salva na galeria local.");
-});
-
-homepageForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  adminState.homepage.highlightTitle = homepageTitle.value.trim();
-  adminState.homepage.highlightText = homepageText.value.trim();
-  saveState("Texto principal da home atualizado.");
 });
 
 clearNoticeFormButton.addEventListener("click", () => fillNoticeForm());
