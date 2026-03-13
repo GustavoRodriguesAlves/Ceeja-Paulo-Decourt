@@ -49,6 +49,48 @@
       "published": true
     }
   ],
+  "gallery": [
+    {
+      "id": "media-001",
+      "title": "Fachada do CEEJA",
+      "src": "assets/DSC06864.JPG",
+      "alt": "Fachada do CEEJA Paulo Decourt",
+      "order": 1,
+      "published": true
+    },
+    {
+      "id": "media-002",
+      "title": "Equipe escolar e atendimento",
+      "src": "assets/WhatsApp%20Image%202026-02-26%20at%2013.04.05.jpeg",
+      "alt": "Equipe escolar e atendimento",
+      "order": 2,
+      "published": true
+    },
+    {
+      "id": "media-003",
+      "title": "Ambiente de estudo",
+      "src": "assets/WhatsApp%20Image%202026-02-26%20at%2013.04.04.jpeg",
+      "alt": "Ambiente de estudo e salas",
+      "order": 3,
+      "published": true
+    },
+    {
+      "id": "media-004",
+      "title": "Infraestrutura interna",
+      "src": "assets/WhatsApp%20Image%202026-02-27%20at%2013.16.21.jpeg",
+      "alt": "Infraestrutura interna",
+      "order": 4,
+      "published": true
+    },
+    {
+      "id": "media-005",
+      "title": "Área de convivência",
+      "src": "assets/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
+      "alt": "Área de convivência escolar",
+      "order": 5,
+      "published": true
+    }
+  ],
   "homepage": {
     "highlightTitle": "Uma instituição para quem busca retomar os estudos com propósito e clareza.",
     "highlightText": "O CEEJA Paulo Decourt oferece um percurso flexível, com orientação pedagógica presencial, materiais de estudo qualificados e certificação oficial para a conclusão da Educação Básica."

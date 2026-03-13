@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -13,52 +13,122 @@
       --brand-primary: #003366;
       --brand-secondary: #00509E;
       --brand-accent: #FFC000;
-      --bg-admin: #F3F6FA;
       --panel: #FFFFFF;
-      --text-main: #253246;
-      --text-muted: #6B7280;
-      --line: #E5EAF1;
-      --success: #2B9B4B;
-      --danger: #C74A4A;
+      --line: #E2E8F0;
+      --text-main: #223047;
+      --text-muted: #64748B;
+      --success: #1F8F4C;
+      --danger: #C94D4D;
     }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
+      margin: 0;
+      overflow-x: hidden;
       font-family: "Inter", sans-serif;
       color: var(--text-main);
-      background: linear-gradient(180deg, #F5F8FB 0%, #EEF3F8 100%);
+      background:
+        radial-gradient(circle at top right, rgba(255, 192, 0, 0.15), transparent 28%),
+        linear-gradient(180deg, #F6F8FC 0%, #EEF3F8 100%);
     }
-    .serif {
-      font-family: "Merriweather", serif;
-    }
+    .serif { font-family: "Merriweather", serif; }
     .admin-shell {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
       min-height: 100vh;
     }
     .sidebar {
-      background: linear-gradient(180deg, #082C53 0%, #0B3D71 100%);
+      position: sticky;
+      top: 0;
+      align-self: start;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #082C53 0%, #0A3B6B 100%);
       color: #fff;
-      border-right: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     .sidebar-link {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      color: rgba(255,255,255,0.8);
-      transition: background-color 0.2s, color 0.2s;
+      width: 100%;
+      border-radius: 14px;
+      padding: 0.95rem 1rem;
+      color: rgba(255, 255, 255, 0.78);
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.18s ease;
     }
     .sidebar-link:hover,
     .sidebar-link.active {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
+      transform: translateX(2px);
+    }
+    .content-area { min-width: 0; }
+    .content-wrap {
+      width: min(100%, 1440px);
+      margin: 0 auto;
     }
     .panel {
+      min-width: 0;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+      border-radius: 20px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
     }
+    .panel-soft {
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      border-radius: 18px;
+    }
+    .field {
+      width: 100%;
+      border: 1px solid #CBD5E1;
+      border-radius: 14px;
+      background: #fff;
+      padding: 0.9rem 1rem;
+      color: var(--text-main);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .field:focus {
+      outline: none;
+      border-color: var(--brand-secondary);
+      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
+    }
+    textarea.field { resize: vertical; }
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: 14px;
+      padding: 0.85rem 1.05rem;
+      font-weight: 600;
+      transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    }
+    .btn-primary {
+      background: var(--brand-primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--brand-secondary);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--brand-primary);
+      border: 1px solid #CBD5E1;
+    }
+    .btn-secondary:hover {
+      border-color: #94A3B8;
+      transform: translateY(-1px);
+    }
+    .btn-danger {
+      background: #FFF5F5;
+      color: var(--danger);
+      border: 1px solid #FED7D7;
+    }
+    .btn-danger:hover { transform: translateY(-1px); }
     .chip {
       display: inline-flex;
       align-items: center;
@@ -71,112 +141,138 @@
       text-transform: uppercase;
       padding: 0.35rem 0.8rem;
     }
-    .field {
-      width: 100%;
-      border: 1px solid #CBD5E1;
-      border-radius: 10px;
-      background: #fff;
-      padding: 0.8rem 0.95rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .field:focus {
-      outline: none;
-      border-color: var(--brand-secondary);
-      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
-    }
-    .btn-primary {
-      background: var(--brand-primary);
-      color: #fff;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 0.8rem 1rem;
-      transition: transform 0.18s, background-color 0.18s;
-    }
-    .btn-primary:hover {
-      background: var(--brand-secondary);
-      transform: translateY(-1px);
-    }
-    .btn-secondary {
-      background: #fff;
-      color: var(--brand-primary);
-      font-weight: 600;
-      border: 1px solid #CBD5E1;
-      border-radius: 10px;
-      padding: 0.8rem 1rem;
-    }
-    .btn-danger {
-      background: #fff5f5;
-      color: var(--danger);
-      border: 1px solid #FED7D7;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 0.7rem 0.95rem;
-    }
-    .list-item {
+    .metric-card {
+      min-width: 0;
+      border-radius: 18px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      background: #fff;
+      padding: 1.35rem;
+    }
+    .metric-number {
+      color: var(--brand-primary);
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .list-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 18px;
       background: #fff;
       padding: 1rem;
-      transition: box-shadow 0.2s, transform 0.2s;
+      transition: box-shadow 0.18s ease, transform 0.18s ease;
     }
-    .list-item:hover {
+    .list-card:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 14px 26px rgba(15, 23, 42, 0.05);
     }
-    .badge {
+    .status-badge {
       display: inline-flex;
       align-items: center;
       border-radius: 999px;
-      padding: 0.28rem 0.6rem;
+      padding: 0.28rem 0.65rem;
       font-size: 0.75rem;
       font-weight: 700;
     }
-    .badge-success {
-      background: #E6F4EA;
-      color: #1E8E3E;
-    }
-    .badge-muted {
-      background: #EDF2F7;
-      color: #4A5568;
-    }
-    .hidden-panel {
-      display: none;
-    }
-    .notice-preview,
-    .link-preview {
-      border: 1px dashed #CBD5E1;
-      border-radius: 12px;
-      background: #F8FAFC;
-      padding: 1rem;
-    }
+    .status-live { background: #E8F7ED; color: var(--success); }
+    .status-draft { background: #EFF2F6; color: #475569; }
     .empty-state {
       border: 1px dashed #CBD5E1;
-      border-radius: 12px;
+      border-radius: 18px;
       background: #F8FAFC;
       padding: 1rem;
       color: var(--text-muted);
-      font-size: 0.95rem;
     }
-    .status-box {
-      border-radius: 12px;
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .json-shell {
+      min-width: 0;
+      border: 1px solid #0F172A;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #020617;
+    }
+    .json-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      background: #0F172A;
       padding: 0.85rem 1rem;
-      font-size: 0.92rem;
-      line-height: 1.6;
+      color: #E2E8F0;
     }
-    .status-info {
-      background: #EFF6FF;
-      border: 1px solid #BFDBFE;
-      color: #1E3A8A;
+    .json-preview {
+      max-height: 620px;
+      overflow: auto;
+      margin: 0;
+      padding: 1rem;
+      color: #E2E8F0;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .media-thumb {
+      width: 100%;
+      max-width: 132px;
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #E2E8F0;
+      border: 1px solid var(--line);
+    }
+    .content-panel { display: none; }
+    .content-panel.active { display: block; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 28, 53, 0.72);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      width: min(100%, 460px);
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
+      padding: 1.5rem;
+    }
+    .summary-card {
+      min-width: 0;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 1rem;
+    }
+    .helper-text {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+    @media (max-width: 1200px) {
+      .section-grid,
+      .preview-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 1024px) {
-      .admin-shell {
-        grid-template-columns: 1fr;
-      }
-      .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-      }
+      .admin-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; min-height: auto; }
     }
   </style>
 </head>
@@ -187,267 +283,288 @@
         <img src="assets/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded-xl bg-white p-1 shadow-sm" />
         <div>
           <p class="text-sm uppercase tracking-[0.22em] text-blue-200">Secretaria</p>
-          <h1 class="serif text-xl font-bold text-white">Painel editorial</h1>
+          <h1 class="serif text-2xl font-bold text-white">Painel editorial</h1>
         </div>
       </div>
 
       <div class="mt-8 space-y-2">
-        <button class="sidebar-link active w-full text-left" data-panel="dashboardPanel">
-          <span>Visão geral</span>
-        </button>
-        <button class="sidebar-link w-full text-left" data-panel="noticesPanel">
-          <span>Avisos do dia</span>
-        </button>
-        <button class="sidebar-link w-full text-left" data-panel="linksPanel">
-          <span>Links rápidos</span>
-        </button>
-        <button class="sidebar-link w-full text-left" data-panel="homepagePanel">
-          <span>Texto da home</span>
-        </button>
-        <button class="sidebar-link w-full text-left" data-panel="publishPanel">
-          <span>Publicação</span>
-        </button>
+        <button class="sidebar-link active" data-panel="dashboardPanel">Visão geral</button>
+        <button class="sidebar-link" data-panel="noticesPanel">Avisos do dia</button>
+        <button class="sidebar-link" data-panel="linksPanel">Links rápidos</button>
+        <button class="sidebar-link" data-panel="mediaPanel">Imagens da home</button>
+        <button class="sidebar-link" data-panel="homepagePanel">Texto da home</button>
+        <button class="sidebar-link" data-panel="publishPanel">Publicação</button>
       </div>
 
-      <div class="mt-10 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-blue-100">
-        <p class="font-semibold text-white">Objetivo do painel</p>
-        <p class="mt-2 leading-6">
-          Organizar avisos, links e destaques do site em um fluxo simples, inspirado em WordPress, mas adaptado ao modelo estático do projeto.
+      <div class="mt-10 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm leading-7 text-blue-100">
+        <p class="font-semibold text-white">Como este painel foi pensado</p>
+        <p class="mt-2">
+          O objetivo é dar para a secretaria um fluxo claro: cadastrar aviso, atualizar links, cuidar das imagens e revisar a saída final sem abrir o código do site.
         </p>
       </div>
     </aside>
 
-    <main class="p-4 sm:p-6 lg:p-8">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-secondary)]">Protótipo administrativo</p>
-          <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Painel da secretaria</h2>
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <a href="index.html" class="btn-secondary">Ver site público</a>
-          <button id="resetDraftButton" type="button" class="btn-danger">Restaurar base</button>
-        </div>
+    <main class="content-area p-4 sm:p-6 lg:p-8">
+      <div class="content-wrap">
+        <header class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-secondary)]">Painel administrativo</p>
+            <h2 class="serif mt-2 text-3xl font-bold text-[var(--brand-primary)] sm:text-4xl">Secretaria em modo de edição</h2>
+            <p class="helper-text mt-3 max-w-2xl">
+              Tudo aqui foi organizado para deixar a manutenção diária mais prática. O foco é registrar o que precisa ir para o site sem espalhar informação em vários lugares.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="index.html?home=1" class="btn-secondary">Ver site público</a>
+            <button id="logoutAdminButton" type="button" class="btn-secondary">Encerrar acesso</button>
+            <button id="resetDraftButton" type="button" class="btn-danger">Restaurar base</button>
+          </div>
+        </header>
+
+        <section id="dashboardPanel" class="content-panel active mt-8">
+          <div class="grid gap-4 lg:grid-cols-4">
+            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos publicados</p><p id="dashboardNoticeCount" class="metric-number mt-3">0</p></article>
+            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links ativos</p><p id="dashboardLinkCount" class="metric-number mt-3">0</p></article>
+            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Imagens ativas</p><p id="dashboardGalleryCount" class="metric-number mt-3">0</p></article>
+            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Última atualização</p><p id="dashboardUpdatedAt" class="mt-3 text-lg font-bold text-[var(--brand-primary)]">-</p></article>
+          </div>
+
+          <div class="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo operacional</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">O que a secretaria consegue fazer aqui</h3>
+              <div class="mt-5 grid gap-4 md:grid-cols-2">
+                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Comunicação diária</p><p class="helper-text mt-2">Cadastrar avisos, deixar recados em destaque e manter informações que não podem se perder no site.</p></div>
+                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Acesso rápido</p><p class="helper-text mt-2">Organizar links úteis da escola e deixar os atalhos mais importantes sempre visíveis na home.</p></div>
+                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Mídia</p><p class="helper-text mt-2">Cadastrar imagens do projeto e montar uma galeria limpa para a home.</p></div>
+                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Publicação</p><p class="helper-text mt-2">Revisar a estrutura final do conteúdo antes de gerar o arquivo que alimenta o site público.</p></div>
+              </div>
+            </div>
+            <div class="panel-soft p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Fluxo recomendado</p>
+              <ol class="mt-4 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--text-muted)]">
+                <li>Cadastre primeiro o aviso ou link que precisa entrar na home.</li>
+                <li>Depois revise as imagens que vão para a galeria.</li>
+                <li>Confira a prévia do texto principal da home.</li>
+                <li>Por fim, abra a aba de publicação e revise o conteúdo gerado.</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <section id="noticesPanel" class="content-panel mt-8">
+          <div class="section-grid">
+            <div class="panel p-6">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos do dia</p>
+                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Cadastrar ou editar aviso</h3>
+                </div>
+                <span class="chip">Home pública</span>
+              </div>
+              <p class="helper-text mt-3">Use este espaço para registrar orientações, horários e comunicados que precisam continuar visíveis no site.</p>
+
+              <form id="noticeForm" class="mt-6 space-y-4">
+                <input id="noticeId" type="hidden" />
+                <div><label for="noticeTitle" class="mb-2 block text-sm font-semibold">Título</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Orientação geral para novos alunos" required /></div>
+                <div><label for="noticeSummary" class="mb-2 block text-sm font-semibold">Resumo</label><textarea id="noticeSummary" class="field min-h-[130px]" placeholder="Texto curto para aparecer na home" required></textarea></div>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div><label for="noticeCategory" class="mb-2 block text-sm font-semibold">Categoria</label><input id="noticeCategory" type="text" class="field" placeholder="Matrículas, Secretaria, Serviços..." required /></div>
+                  <div><label for="noticeDate" class="mb-2 block text-sm font-semibold">Data</label><input id="noticeDate" type="date" class="field" required /></div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                  <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="noticeFeatured" type="checkbox" class="rounded border-gray-300" />Marcar como destaque</label>
+                  <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="noticePublished" type="checkbox" class="rounded border-gray-300" checked />Publicado</label>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" class="btn-primary">Salvar aviso</button>
+                  <button id="clearNoticeForm" type="button" class="btn-secondary">Limpar formulário</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="panel p-6">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lista de avisos</p>
+                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Conteúdo já cadastrado</h3>
+                </div>
+              </div>
+              <div id="noticeItems" class="mt-6 grid gap-4"></div>
+            </div>
+          </div>
+        </section>
+        <section id="linksPanel" class="content-panel mt-8">
+          <div class="section-grid">
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links rápidos</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Cadastrar atalho útil</h3>
+              <p class="helper-text mt-3">Aqui ficam os links que a secretaria quer deixar em evidência na home para acesso rápido.</p>
+
+              <form id="linkForm" class="mt-6 space-y-4">
+                <input id="linkId" type="hidden" />
+                <div><label for="linkLabel" class="mb-2 block text-sm font-semibold">Título do link</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: WhatsApp da direção" required /></div>
+                <div><label for="linkUrl" class="mb-2 block text-sm font-semibold">URL</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
+                <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="linkPublished" type="checkbox" class="rounded border-gray-300" checked />Publicado</label>
+                <div class="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" class="btn-primary">Salvar link</button>
+                  <button id="clearLinkForm" type="button" class="btn-secondary">Limpar formulário</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links cadastrados</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Atalhos ativos e ocultos</h3>
+              <div id="linkItems" class="mt-6 grid gap-4"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="mediaPanel" class="content-panel mt-8">
+          <div class="section-grid">
+            <div class="panel p-6">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Imagens da home</p>
+                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Organizar galeria</h3>
+                </div>
+                <span class="chip">Carrossel</span>
+              </div>
+              <p class="helper-text mt-3">Cadastre o caminho da imagem já existente dentro do projeto, defina o texto alternativo e deixe a ordem da galeria mais coerente.</p>
+
+              <form id="mediaForm" class="mt-6 space-y-4">
+                <input id="mediaId" type="hidden" />
+                <div><label for="mediaTitle" class="mb-2 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Fachada do CEEJA" required /></div>
+                <div><label for="mediaPath" class="mb-2 block text-sm font-semibold">Caminho da imagem</label><input id="mediaPath" type="text" class="field" placeholder="assets/DSC06864.JPG" required /></div>
+                <div><label for="mediaAlt" class="mb-2 block text-sm font-semibold">Texto alternativo</label><input id="mediaAlt" type="text" class="field" placeholder="Descrição breve da foto" required /></div>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div><label for="mediaOrder" class="mb-2 block text-sm font-semibold">Ordem</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
+                  <div class="flex items-end"><label class="inline-flex items-center gap-2 text-sm font-medium"><input id="mediaPublished" type="checkbox" class="rounded border-gray-300" checked />Exibir na galeria</label></div>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" class="btn-primary">Salvar imagem</button>
+                  <button id="clearMediaForm" type="button" class="btn-secondary">Limpar formulário</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Galeria cadastrada</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Imagens prontas para a home</h3>
+              <div id="mediaItems" class="mt-6 grid gap-4"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="homepagePanel" class="content-panel mt-8">
+          <div class="section-grid">
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Texto da home</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Mensagem institucional</h3>
+              <p class="helper-text mt-3">Ajuste o texto de abertura do site para refletir a prioridade do momento, sem perder o tom institucional.</p>
+
+              <form id="homepageForm" class="mt-6 space-y-4">
+                <div><label for="homepageTitle" class="mb-2 block text-sm font-semibold">Título de destaque</label><textarea id="homepageTitle" class="field min-h-[110px]" required></textarea></div>
+                <div><label for="homepageText" class="mb-2 block text-sm font-semibold">Texto de apoio</label><textarea id="homepageText" class="field min-h-[150px]" required></textarea></div>
+                <button type="submit" class="btn-primary">Salvar texto da home</button>
+              </form>
+            </div>
+
+            <div class="panel p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Prévia</p>
+              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Como o destaque será apresentado</h3>
+              <div class="mt-5 rounded-[22px] bg-[var(--brand-primary)] p-6 text-white shadow-lg">
+                <span class="inline-flex rounded-full bg-[var(--brand-accent)] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-950">Ensino com autonomia</span>
+                <h4 id="homepagePreviewTitle" class="serif mt-5 text-3xl leading-tight"></h4>
+                <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-blue-100"></p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="publishPanel" class="content-panel mt-8">
+          <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <div class="space-y-6">
+              <div class="panel p-6">
+                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Publicação</p>
+                <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Saída do conteúdo editorial</h3>
+                <p class="helper-text mt-4">Este painel salva o rascunho no navegador da secretaria e usa o mesmo formato que abastece o site. Antes de publicar no GitHub Pages, vale revisar tudo por aqui.</p>
+                <div id="adminStatus" class="panel-soft mt-5 p-4 text-sm leading-7 text-[var(--brand-primary)]">Painel carregado.</div>
+                <div class="mt-6 flex flex-wrap gap-3">
+                  <button id="downloadJsonButton" type="button" class="btn-primary">Baixar JSON</button>
+                  <button id="copyJsonButton" type="button" class="btn-secondary">Copiar JSON</button>
+                  <a href="index.html?home=1" class="btn-secondary">Abrir home com rascunho</a>
+                  <label class="btn-secondary cursor-pointer">Importar JSON<input id="importJsonInput" type="file" accept="application/json" class="hidden" /></label>
+                </div>
+              </div>
+
+              <div class="panel p-6">
+                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo final</p>
+                <div class="preview-grid mt-5">
+                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Avisos ativos</p><p id="publishNoticeCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
+                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Links ativos</p><p id="publishLinkCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
+                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Imagens ativas</p><p id="publishGalleryCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
+                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Título da home</p><p id="publishHomepageState" class="mt-2 text-sm leading-6 text-[var(--text-muted)]">-</p></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel p-6">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">JSON atual</p>
+                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Estrutura pronta para publicação</h3>
+                </div>
+              </div>
+              <div class="json-shell mt-5">
+                <div class="json-toolbar"><span class="text-sm font-semibold">Visualização formatada do arquivo</span><span class="text-xs uppercase tracking-[0.2em] text-slate-400">site-content.json</span></div>
+                <pre id="jsonPreview" class="json-preview"></pre>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <section id="dashboardPanel" class="panel mt-6 p-6">
-        <div class="grid gap-4 md:grid-cols-3">
-          <article class="panel p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos publicados</p>
-            <p id="dashboardNoticeCount" class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">0</p>
-          </article>
-          <article class="panel p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links ativos</p>
-            <p id="dashboardLinkCount" class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">0</p>
-          </article>
-          <article class="panel p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Última atualização</p>
-            <p id="dashboardUpdatedAt" class="mt-2 text-lg font-bold text-[var(--brand-primary)]">-</p>
-          </article>
-        </div>
-
-        <div class="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div class="panel p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo editorial</p>
-            <h3 class="mt-2 text-xl font-bold text-[var(--brand-primary)]">O que este painel já entrega</h3>
-            <ul class="mt-4 space-y-3 text-sm leading-6 text-[var(--text-muted)]">
-              <li>Cadastro de avisos para a home com categoria, data e destaque.</li>
-              <li>Gerenciamento de links rápidos da secretaria.</li>
-              <li>Edição do texto principal da home.</li>
-              <li>Rascunho persistido localmente e exportação para publicação futura.</li>
-            </ul>
-          </div>
-          <div class="notice-preview">
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Próximo passo recomendado</p>
-            <p class="mt-3 text-sm leading-6 text-[var(--text-muted)]">
-              Este é um rascunho funcional do painel. O próximo estágio ideal é conectar esse conteúdo a um backend ou fluxo de publicação automatizada para que a secretaria não dependa de exportar arquivos manualmente.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="noticesPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div class="panel p-6">
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos do dia</p>
-              <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Novo aviso</h3>
-            </div>
-            <span class="chip">Estilo WordPress</span>
-          </div>
-
-          <form id="noticeForm" class="mt-6 space-y-4">
-            <input id="noticeId" type="hidden" />
-            <div>
-              <label class="mb-2 block text-sm font-semibold">Título</label>
-              <input id="noticeTitle" type="text" class="field" placeholder="Ex.: Orientação geral para novos alunos" required />
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-semibold">Resumo</label>
-              <textarea id="noticeSummary" class="field min-h-[120px]" placeholder="Resumo curto para aparecer na home" required></textarea>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-              <div>
-                <label class="mb-2 block text-sm font-semibold">Categoria</label>
-                <input id="noticeCategory" type="text" class="field" placeholder="Matrículas, Secretaria, Serviços..." required />
-              </div>
-              <div>
-                <label class="mb-2 block text-sm font-semibold">Data</label>
-                <input id="noticeDate" type="date" class="field" required />
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-4">
-              <label class="inline-flex items-center gap-2 text-sm font-medium">
-                <input id="noticeFeatured" type="checkbox" class="rounded border-gray-300" />
-                Marcar como destaque
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm font-medium">
-                <input id="noticePublished" type="checkbox" class="rounded border-gray-300" checked />
-                Publicado
-              </label>
-            </div>
-            <div class="flex flex-wrap gap-3 pt-2">
-              <button type="submit" class="btn-primary">Salvar aviso</button>
-              <button id="clearNoticeForm" type="button" class="btn-secondary">Limpar formulário</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="panel p-6">
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lista de avisos</p>
-              <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Publicados na home</h3>
-            </div>
-          </div>
-          <div id="noticeItems" class="mt-6 grid gap-4"></div>
-        </div>
-      </section>
-
-      <section id="linksPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links rápidos</p>
-          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Novo link</h3>
-          <form id="linkForm" class="mt-6 space-y-4">
-            <input id="linkId" type="hidden" />
-            <div>
-              <label class="mb-2 block text-sm font-semibold">Título do link</label>
-              <input id="linkLabel" type="text" class="field" placeholder="Ex.: WhatsApp da direção" required />
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-semibold">URL</label>
-              <input id="linkUrl" type="url" class="field" placeholder="https://..." required />
-            </div>
-            <label class="inline-flex items-center gap-2 text-sm font-medium">
-              <input id="linkPublished" type="checkbox" class="rounded border-gray-300" checked />
-              Publicado
-            </label>
-            <div class="flex flex-wrap gap-3 pt-2">
-              <button type="submit" class="btn-primary">Salvar link</button>
-              <button id="clearLinkForm" type="button" class="btn-secondary">Limpar formulário</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links cadastrados</p>
-          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Atalhos do site</h3>
-          <div id="linkItems" class="mt-6 grid gap-4"></div>
-        </div>
-      </section>
-
-      <section id="homepagePanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Texto principal da home</p>
-          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Mensagem institucional</h3>
-          <form id="homepageForm" class="mt-6 space-y-4">
-            <div>
-              <label class="mb-2 block text-sm font-semibold">Título de destaque</label>
-              <textarea id="homepageTitle" class="field min-h-[110px]" required></textarea>
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-semibold">Texto de apoio</label>
-              <textarea id="homepageText" class="field min-h-[140px]" required></textarea>
-            </div>
-            <button type="submit" class="btn-primary">Salvar texto da home</button>
-          </form>
-        </div>
-
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Prévia editorial</p>
-          <div class="notice-preview mt-4">
-            <p class="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Destaque atual</p>
-            <h3 id="homepagePreviewTitle" class="mt-3 text-2xl font-bold text-[var(--brand-primary)]"></h3>
-            <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-[var(--text-muted)]"></p>
-          </div>
-        </div>
-      </section>
-
-      <section id="publishPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Publicação</p>
-          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Saída dos dados editoriais</h3>
-          <div class="mt-6 space-y-4 text-sm leading-6 text-[var(--text-muted)]">
-            <p>
-              Este painel grava rascunhos localmente no navegador e já alimenta a home neste mesmo ambiente. Para transformar isso em atualização pública permanente no GitHub Pages, o próximo estágio é conectar o painel a um fluxo de publicação.
-            </p>
-            <p>
-              Enquanto esse backend não existe, você já consegue exportar o conteúdo em JSON. Esse arquivo pode substituir `data/site-content.json` no repositório.
-            </p>
-          </div>
-          <div id="adminStatus" class="status-box status-info mt-6">
-            Tudo o que for salvo aqui já pode ser visualizado nesta máquina ao abrir a home do site.
-          </div>
-          <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-[var(--text-muted)]">
-            <p class="font-semibold text-[var(--brand-primary)]">Fluxo manual de publicação</p>
-            <ol class="mt-3 list-decimal space-y-2 pl-5">
-              <li>Baixe o JSON gerado neste painel.</li>
-              <li>Substitua o arquivo `data/site-content.json` no projeto.</li>
-              <li>Faça commit e envie ao GitHub para atualizar o site público.</li>
-            </ol>
-          </div>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <button id="downloadJsonButton" type="button" class="btn-primary">Baixar JSON do conteúdo</button>
-            <button id="copyJsonButton" type="button" class="btn-secondary">Copiar JSON</button>
-            <a href="index.html?home=1" class="btn-secondary">Abrir home com rascunho</a>
-            <label class="btn-secondary cursor-pointer">
-              Importar JSON
-              <input id="importJsonInput" type="file" accept="application/json" class="hidden" />
-            </label>
-          </div>
-        </div>
-
-        <div class="panel p-6">
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">JSON atual</p>
-          <pre id="jsonPreview" class="mt-4 overflow-auto rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-100"></pre>
-        </div>
-      </section>
     </main>
   </div>
 
+  <div id="confirmModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--danger)]">Confirmar exclusão</p>
+      <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
+      <p id="confirmMessage" class="helper-text mt-4">Essa ação vai retirar o item do rascunho atual.</p>
+      <div class="mt-6 flex flex-wrap justify-end gap-3">
+        <button id="cancelConfirmButton" type="button" class="btn-secondary">Cancelar</button>
+        <button id="confirmActionButton" type="button" class="btn-danger">Excluir</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const TEST_LOGIN_EMAIL = "eugustavorodriguesalves@gmail.com";
+    const TEST_LOGIN_PASSWORD = "Gu130106.";
+    const ADMIN_SESSION_KEY = "ceeja_admin_auth";
+    const ADMIN_REMEMBER_KEY = "ceeja_admin_auth_remembered";
     const SITE_CONTENT_STORAGE_KEY = "ceeja_site_content_draft";
     const SITE_CONTENT_SOURCE = "data/site-content.json";
+
+    const rememberedAdmin = localStorage.getItem(ADMIN_REMEMBER_KEY);
+    if (!sessionStorage.getItem(ADMIN_SESSION_KEY) && rememberedAdmin) sessionStorage.setItem(ADMIN_SESSION_KEY, rememberedAdmin);
+    if (!sessionStorage.getItem(ADMIN_SESSION_KEY)) window.location.replace("index.html?admin=1");
 
     const defaultContent = {
       updatedAt: new Date().toISOString(),
       notices: [],
       quickLinks: [],
-      homepage: {
-        highlightTitle: "",
-        highlightText: ""
-      }
+      gallery: [],
+      homepage: { highlightTitle: "", highlightText: "" }
     };
 
     let adminState = structuredClone(defaultContent);
+    let pendingConfirmation = null;
 
     const panelButtons = [...document.querySelectorAll("[data-panel]")];
-    const panels = {
-      dashboardPanel: document.getElementById("dashboardPanel"),
-      noticesPanel: document.getElementById("noticesPanel"),
-      linksPanel: document.getElementById("linksPanel"),
-      homepagePanel: document.getElementById("homepagePanel"),
-      publishPanel: document.getElementById("publishPanel")
-    };
+    const panels = [...document.querySelectorAll(".content-panel")];
 
     const noticeForm = document.getElementById("noticeForm");
     const noticeItems = document.getElementById("noticeItems");
@@ -466,6 +583,15 @@
     const linkUrl = document.getElementById("linkUrl");
     const linkPublished = document.getElementById("linkPublished");
 
+    const mediaForm = document.getElementById("mediaForm");
+    const mediaItems = document.getElementById("mediaItems");
+    const mediaId = document.getElementById("mediaId");
+    const mediaTitle = document.getElementById("mediaTitle");
+    const mediaPath = document.getElementById("mediaPath");
+    const mediaAlt = document.getElementById("mediaAlt");
+    const mediaOrder = document.getElementById("mediaOrder");
+    const mediaPublished = document.getElementById("mediaPublished");
+
     const homepageForm = document.getElementById("homepageForm");
     const homepageTitle = document.getElementById("homepageTitle");
     const homepageText = document.getElementById("homepageText");
@@ -474,39 +600,58 @@
 
     const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
     const dashboardLinkCount = document.getElementById("dashboardLinkCount");
+    const dashboardGalleryCount = document.getElementById("dashboardGalleryCount");
     const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
+    const publishNoticeCount = document.getElementById("publishNoticeCount");
+    const publishLinkCount = document.getElementById("publishLinkCount");
+    const publishGalleryCount = document.getElementById("publishGalleryCount");
+    const publishHomepageState = document.getElementById("publishHomepageState");
     const jsonPreview = document.getElementById("jsonPreview");
     const adminStatus = document.getElementById("adminStatus");
 
-    function showPanel(panelId) {
-      Object.entries(panels).forEach(([id, panel]) => {
-        panel.classList.toggle("hidden-panel", id !== panelId);
-      });
-      panelButtons.forEach((button) => {
-        button.classList.toggle("active", button.dataset.panel === panelId);
-      });
-    }
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmMessage = document.getElementById("confirmMessage");
+    const cancelConfirmButton = document.getElementById("cancelConfirmButton");
+    const confirmActionButton = document.getElementById("confirmActionButton");
 
-    panelButtons.forEach((button) => {
-      button.addEventListener("click", () => showPanel(button.dataset.panel));
+    const escapeHtml = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+    const formatDate = (value) => {
+      if (!value) return "-";
+      const parsed = new Date(`${value}T00:00:00`);
+      if (Number.isNaN(parsed.getTime())) return value;
+      return parsed.toLocaleDateString("pt-BR");
+    };
+    function setStatus(message) { adminStatus.textContent = message; }
+
+    function showPanel(panelId) {
+      panels.forEach((panel) => panel.classList.toggle("active", panel.id === panelId));
+      panelButtons.forEach((button) => button.classList.toggle("active", button.dataset.panel === panelId));
+    }
+    panelButtons.forEach((button) => button.addEventListener("click", () => showPanel(button.dataset.panel)));
+
+    function openConfirmModal(message, onConfirm) {
+      pendingConfirmation = onConfirm;
+      confirmMessage.textContent = message;
+      confirmModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    function closeConfirmModal() {
+      pendingConfirmation = null;
+      confirmModal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+    cancelConfirmButton.addEventListener("click", closeConfirmModal);
+    confirmModal.addEventListener("click", (event) => { if (event.target === confirmModal) closeConfirmModal(); });
+    confirmActionButton.addEventListener("click", () => {
+      if (typeof pendingConfirmation === "function") pendingConfirmation();
+      closeConfirmModal();
     });
 
-    const escapeHtml = (value = "") =>
-      String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-
-    function setStatus(message) {
-      adminStatus.textContent = message;
-    }
-
-    function saveState() {
+    function saveState(message) {
       adminState.updatedAt = new Date().toISOString();
       localStorage.setItem(SITE_CONTENT_STORAGE_KEY, JSON.stringify(adminState));
       renderAll();
+      if (message) setStatus(message);
     }
 
     function fillNoticeForm(item = null) {
@@ -518,42 +663,45 @@
       noticeFeatured.checked = Boolean(item?.featured);
       noticePublished.checked = item?.published !== false;
     }
-
     function fillLinkForm(item = null) {
       linkId.value = item?.id || "";
       linkLabel.value = item?.label || "";
       linkUrl.value = item?.url || "";
       linkPublished.checked = item?.published !== false;
     }
+    function fillMediaForm(item = null) {
+      mediaId.value = item?.id || "";
+      mediaTitle.value = item?.title || "";
+      mediaPath.value = item?.src || "";
+      mediaAlt.value = item?.alt || "";
+      mediaOrder.value = item?.order || adminState.gallery.length + 1;
+      mediaPublished.checked = item?.published !== false;
+    }
 
     function renderNotices() {
       const notices = [...adminState.notices].sort((a, b) => {
-        if (Boolean(a.featured) !== Boolean(b.featured)) {
-          return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
-        }
+        if (Boolean(a.featured) !== Boolean(b.featured)) return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
         return String(b.date).localeCompare(String(a.date));
       });
       if (!notices.length) {
         noticeItems.innerHTML = '<div class="empty-state">Nenhum aviso cadastrado ainda.</div>';
         return;
       }
-
       noticeItems.innerHTML = notices.map((item) => `
-        <article class="list-item">
+        <article class="list-card">
           <div class="flex flex-wrap items-center gap-3">
             <span class="chip">${escapeHtml(item.category || "Aviso")}</span>
-            <span class="text-xs text-slate-500">${escapeHtml(item.date || "")}</span>
-            <span class="badge ${item.published ? "badge-success" : "badge-muted"}">${item.published ? "Publicado" : "Rascunho"}</span>
+            <span class="text-xs text-slate-500">${escapeHtml(formatDate(item.date))}</span>
+            <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Rascunho"}</span>
           </div>
-          <h4 class="mt-3 text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
-          <p class="mt-2 text-sm leading-6 text-[var(--text-muted)]">${escapeHtml(item.summary || "")}</p>
-          <div class="mt-4 flex flex-wrap gap-3">
+          <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
+          <p class="helper-text mt-3">${escapeHtml(item.summary || "")}</p>
+          <div class="mt-5 flex flex-wrap gap-3">
             <button type="button" class="btn-secondary" data-edit-notice="${item.id}">Editar</button>
             <button type="button" class="btn-danger" data-delete-notice="${item.id}">Excluir</button>
           </div>
         </article>
       `).join("");
-
       noticeItems.querySelectorAll("[data-edit-notice]").forEach((button) => {
         button.addEventListener("click", () => {
           const item = adminState.notices.find((entry) => entry.id === button.dataset.editNotice);
@@ -562,11 +710,12 @@
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       });
-
       noticeItems.querySelectorAll("[data-delete-notice]").forEach((button) => {
         button.addEventListener("click", () => {
-          adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
-          saveState();
+          openConfirmModal("Esse aviso será removido do rascunho atual da home.", () => {
+            adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
+            saveState("Aviso removido do rascunho local.");
+          });
         });
       });
     }
@@ -577,21 +726,19 @@
         linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
         return;
       }
-
       linkItems.innerHTML = links.map((item) => `
-        <article class="list-item">
+        <article class="list-card">
           <div class="flex flex-wrap items-center gap-3">
-            <span class="badge ${item.published ? "badge-success" : "badge-muted"}">${item.published ? "Publicado" : "Oculto"}</span>
+            <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Oculto"}</span>
           </div>
-          <h4 class="mt-3 text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.label || "")}</h4>
-          <p class="mt-2 text-sm break-all text-[var(--text-muted)]">${escapeHtml(item.url || "")}</p>
-          <div class="mt-4 flex flex-wrap gap-3">
+          <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.label || "")}</h4>
+          <p class="mt-3 break-all text-sm text-[var(--text-muted)]">${escapeHtml(item.url || "")}</p>
+          <div class="mt-5 flex flex-wrap gap-3">
             <button type="button" class="btn-secondary" data-edit-link="${item.id}">Editar</button>
             <button type="button" class="btn-danger" data-delete-link="${item.id}">Excluir</button>
           </div>
         </article>
       `).join("");
-
       linkItems.querySelectorAll("[data-edit-link]").forEach((button) => {
         button.addEventListener("click", () => {
           const item = adminState.quickLinks.find((entry) => entry.id === button.dataset.editLink);
@@ -600,15 +747,59 @@
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       });
-
       linkItems.querySelectorAll("[data-delete-link]").forEach((button) => {
         button.addEventListener("click", () => {
-          adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
-          saveState();
+          openConfirmModal("Esse link deixará de aparecer na home do site.", () => {
+            adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
+            saveState("Link removido do rascunho local.");
+          });
         });
       });
     }
 
+    function renderGallery() {
+      const gallery = [...adminState.gallery].sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+      if (!gallery.length) {
+        mediaItems.innerHTML = '<div class="empty-state">Nenhuma imagem cadastrada para a galeria.</div>';
+        return;
+      }
+      mediaItems.innerHTML = gallery.map((item) => `
+        <article class="list-card">
+          <div class="flex flex-col gap-4 md:flex-row md:items-start">
+            <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" class="media-thumb" />
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="chip">Imagem ${escapeHtml(String(item.order || "-"))}</span>
+                <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Na home" : "Oculta"}</span>
+              </div>
+              <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
+              <p class="mt-2 text-sm text-[var(--text-muted)]"><strong>Caminho:</strong> ${escapeHtml(item.src || "")}</p>
+              <p class="mt-1 text-sm text-[var(--text-muted)]"><strong>Texto alternativo:</strong> ${escapeHtml(item.alt || "")}</p>
+              <div class="mt-5 flex flex-wrap gap-3">
+                <button type="button" class="btn-secondary" data-edit-media="${item.id}">Editar</button>
+                <button type="button" class="btn-danger" data-delete-media="${item.id}">Excluir</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `).join("");
+      mediaItems.querySelectorAll("[data-edit-media]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = adminState.gallery.find((entry) => entry.id === button.dataset.editMedia);
+          fillMediaForm(item);
+          showPanel("mediaPanel");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      mediaItems.querySelectorAll("[data-delete-media]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openConfirmModal("Essa imagem será retirada da galeria configurada para a home.", () => {
+            adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
+            saveState("Imagem removida da galeria local.");
+          });
+        });
+      });
+    }
     function renderHomepagePreview() {
       homepageTitle.value = adminState.homepage.highlightTitle || "";
       homepageText.value = adminState.homepage.highlightText || "";
@@ -617,15 +808,24 @@
     }
 
     function renderDashboard() {
-      dashboardNoticeCount.textContent = adminState.notices.filter((item) => item.published).length;
-      dashboardLinkCount.textContent = adminState.quickLinks.filter((item) => item.published).length;
+      const publishedNotices = adminState.notices.filter((item) => item.published).length;
+      const publishedLinks = adminState.quickLinks.filter((item) => item.published).length;
+      const publishedGallery = adminState.gallery.filter((item) => item.published).length;
+      dashboardNoticeCount.textContent = publishedNotices;
+      dashboardLinkCount.textContent = publishedLinks;
+      dashboardGalleryCount.textContent = publishedGallery;
       dashboardUpdatedAt.textContent = adminState.updatedAt ? new Date(adminState.updatedAt).toLocaleString("pt-BR") : "-";
+      publishNoticeCount.textContent = publishedNotices;
+      publishLinkCount.textContent = publishedLinks;
+      publishGalleryCount.textContent = publishedGallery;
+      publishHomepageState.textContent = adminState.homepage.highlightTitle || "Título principal ainda não preenchido.";
       jsonPreview.textContent = JSON.stringify(adminState, null, 2);
     }
 
     function renderAll() {
       renderNotices();
       renderLinks();
+      renderGallery();
       renderHomepagePreview();
       renderDashboard();
     }
@@ -641,17 +841,11 @@
         featured: noticeFeatured.checked,
         published: noticePublished.checked
       };
-
       const existingIndex = adminState.notices.findIndex((item) => item.id === payload.id);
-      if (existingIndex >= 0) {
-        adminState.notices[existingIndex] = payload;
-      } else {
-        adminState.notices.unshift(payload);
-      }
-
+      if (existingIndex >= 0) adminState.notices[existingIndex] = payload;
+      else adminState.notices.unshift(payload);
       fillNoticeForm();
-      saveState();
-      setStatus("Aviso salvo no rascunho local e refletido na home deste navegador.");
+      saveState("Aviso salvo no rascunho local.");
     });
 
     linkForm.addEventListener("submit", (event) => {
@@ -662,29 +856,40 @@
         url: linkUrl.value.trim(),
         published: linkPublished.checked
       };
-
       const existingIndex = adminState.quickLinks.findIndex((item) => item.id === payload.id);
-      if (existingIndex >= 0) {
-        adminState.quickLinks[existingIndex] = payload;
-      } else {
-        adminState.quickLinks.unshift(payload);
-      }
-
+      if (existingIndex >= 0) adminState.quickLinks[existingIndex] = payload;
+      else adminState.quickLinks.unshift(payload);
       fillLinkForm();
-      saveState();
-      setStatus("Link rápido salvo no rascunho local.");
+      saveState("Link rápido salvo no rascunho local.");
+    });
+
+    mediaForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const payload = {
+        id: mediaId.value || `media-${Date.now()}`,
+        title: mediaTitle.value.trim(),
+        src: mediaPath.value.trim(),
+        alt: mediaAlt.value.trim(),
+        order: Number(mediaOrder.value) || adminState.gallery.length + 1,
+        published: mediaPublished.checked
+      };
+      const existingIndex = adminState.gallery.findIndex((item) => item.id === payload.id);
+      if (existingIndex >= 0) adminState.gallery[existingIndex] = payload;
+      else adminState.gallery.push(payload);
+      fillMediaForm();
+      saveState("Imagem salva na galeria local.");
     });
 
     homepageForm.addEventListener("submit", (event) => {
       event.preventDefault();
       adminState.homepage.highlightTitle = homepageTitle.value.trim();
       adminState.homepage.highlightText = homepageText.value.trim();
-      saveState();
-      setStatus("Texto principal da home atualizado no rascunho local.");
+      saveState("Texto principal da home atualizado.");
     });
 
     document.getElementById("clearNoticeForm").addEventListener("click", () => fillNoticeForm());
     document.getElementById("clearLinkForm").addEventListener("click", () => fillLinkForm());
+    document.getElementById("clearMediaForm").addEventListener("click", () => fillMediaForm());
 
     document.getElementById("downloadJsonButton").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify(adminState, null, 2)], { type: "application/json" });
@@ -702,37 +907,43 @@
         await navigator.clipboard.writeText(JSON.stringify(adminState, null, 2));
         setStatus("JSON copiado para a área de transferência.");
       } catch (error) {
-        setStatus("Não foi possível copiar automaticamente. Use o bloco de JSON ao lado para copiar manualmente.");
+        setStatus("Não foi possível copiar automaticamente. Use o bloco de JSON à direita para copiar manualmente.");
       }
     });
 
     document.getElementById("importJsonInput").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
-      const text = await file.text();
-      const imported = JSON.parse(text);
+      const imported = JSON.parse(await file.text());
       adminState = {
         updatedAt: imported.updatedAt || new Date().toISOString(),
         notices: Array.isArray(imported.notices) ? imported.notices : [],
         quickLinks: Array.isArray(imported.quickLinks) ? imported.quickLinks : [],
+        gallery: Array.isArray(imported.gallery) ? imported.gallery : [],
         homepage: imported.homepage || { highlightTitle: "", highlightText: "" }
       };
-      saveState();
+      saveState("Arquivo importado para o rascunho local.");
       event.target.value = "";
-      setStatus("Arquivo importado com sucesso para o rascunho local.");
     });
 
     document.getElementById("resetDraftButton").addEventListener("click", async () => {
-      localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
-      await bootstrap();
-      setStatus("Rascunho local removido. O painel voltou para a base pública do projeto.");
+      openConfirmModal("O rascunho salvo neste navegador será descartado e a base pública será restaurada.", async () => {
+        localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
+        await bootstrap();
+        setStatus("Base restaurada a partir do conteúdo público do projeto.");
+      });
+    });
+
+    document.getElementById("logoutAdminButton").addEventListener("click", () => {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      localStorage.removeItem(ADMIN_REMEMBER_KEY);
+      window.location.href = "index.html?home=1";
     });
 
     async function bootstrap() {
       const draft = localStorage.getItem(SITE_CONTENT_STORAGE_KEY);
-      if (draft) {
-        adminState = JSON.parse(draft);
-      } else {
+      if (draft) adminState = JSON.parse(draft);
+      else {
         try {
           const response = await fetch(SITE_CONTENT_SOURCE, { cache: "no-store" });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -742,16 +953,14 @@
           adminState = structuredClone(defaultContent);
         }
       }
-
-      if (!adminState.homepage) {
-        adminState.homepage = { highlightTitle: "", highlightText: "" };
-      }
-
+      if (!adminState.homepage) adminState.homepage = { highlightTitle: "", highlightText: "" };
+      if (!Array.isArray(adminState.gallery)) adminState.gallery = [];
       fillNoticeForm();
       fillLinkForm();
+      fillMediaForm();
       renderAll();
       showPanel("dashboardPanel");
-      setStatus("Painel carregado. Alterações salvas aqui ficam disponíveis na home deste navegador.");
+      setStatus("Painel carregado. As alterações feitas aqui ficam visíveis na home deste navegador.");
     }
 
     bootstrap();
