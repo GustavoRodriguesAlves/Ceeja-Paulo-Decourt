@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,78 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/secondary-pages.css">
-  <style>
-    :root {
-      --success: #2B9B4B;
-      --danger: #C74A4A;
-    }
-    .card-body {
-      padding: 1.5rem;
-    }
-    .dashboard-link {
-      display: block;
-      padding: 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
-      transition: all 0.2s;
-      background-color: #fff;
-    }
-    .dashboard-link:hover {
-      border-color: var(--brand-secondary);
-      background-color: #F8FAFC;
-    }
-    .dashboard-link.action-btn {
-      text-align: left;
-      width: 100%;
-      cursor: pointer;
-    }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background-color: #E6F4EA;
-      color: #1E8E3E;
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #1E8E3E;
-      margin-right: 6px;
-    }
-    .modal-scrim {
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(10px);
-    }
-    .popup-panel {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border: 1px solid var(--border-color);
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
-    }
-    .popup-action {
-      background-color: var(--brand-secondary);
-      color: #fff;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .popup-action:hover {
-      background-color: var(--brand-primary);
-      transform: translateY(-1px);
-    }
-    .field-shell {
-      border: 1px solid var(--border-color);
-      background: #fff;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .field-shell:focus-within {
-      border-color: var(--brand-secondary);
-      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/shared/secondary-pages.css">
+    <link rel="stylesheet" href="assets/css/pages/portal.css">
 </head>
 <body class="antialiased flex flex-col min-h-screen">
 
@@ -88,7 +18,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-3">
-          <img src="assets/logo-ceeja.svg" alt="Bras�o do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <img src="assets/images/logo-ceeja.svg" alt="Bras�o do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
           <div class="hidden sm:block">
             <h1 class="serif text-lg font-bold leading-tight">Portal Acad�mico</h1>
             <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
@@ -316,6 +246,6 @@
     </div>
   </div>
 
-  <script type="module" src="assets/js/portal-page.js"></script>
+  <script type="module" src="assets/js/pages/portal-page.js"></script>
 </body>
 </html>

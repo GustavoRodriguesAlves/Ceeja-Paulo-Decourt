@@ -8,32 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/secondary-pages.css">
-  <style>
-    .card-body {
-      padding: 1.5rem;
-    }
-    .drive-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background-color: #F1F5F9;
-      color: var(--brand-secondary);
-      font-weight: 600;
-      padding: 0.75rem 1.25rem;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      transition: all 0.2s;
-      text-decoration: none;
-      width: 100%;
-      justify-content: center;
-    }
-    .drive-link:hover {
-      background-color: var(--brand-secondary);
-      color: #fff;
-      border-color: var(--brand-secondary);
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/shared/secondary-pages.css">
+    <link rel="stylesheet" href="assets/css/pages/roteiros.css">
 </head>
 <body class="antialiased flex flex-col min-h-screen">
 
@@ -42,7 +18,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-3">
-          <img src="assets/logo-ceeja.svg" alt="Brasão do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <img src="assets/images/logo-ceeja.svg" alt="BrasÃ£o do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
           <div class="hidden sm:block">
             <h1 class="serif text-lg font-bold leading-tight">Roteiros de Estudos</h1>
             <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
@@ -67,22 +43,22 @@
       <span class="inline-block py-1 px-3 rounded bg-blue-100 text-blue-800 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-200">Guias de Estudo</span>
       <h2 class="serif text-3xl md:text-4xl font-black text-[var(--brand-primary)] mb-4">Roteiros de Estudos Dirigidos</h2>
       <p class="text-gray-600 leading-relaxed text-lg">
-        Acesse as pastas abaixo divididas por áreas do conhecimento para encontrar os roteiros de orientação e atividades de cada componente curricular.
+        Acesse as pastas abaixo divididas por Ã¡reas do conhecimento para encontrar os roteiros de orientaÃ§Ã£o e atividades de cada componente curricular.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
       
-      <!-- Ciências da Natureza -->
+      <!-- CiÃªncias da Natureza -->
       <a href="https://drive.google.com/drive/folders/16rVWeazAtYwM5pUSTcNYRQ0q8NKFKOi6" target="_blank" rel="noopener noreferrer" class="card block hover:no-underline">
         <div class="card-header bg-green-50 border-b-green-100">
           <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-700">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
           </div>
-          <span class="text-green-800 font-bold serif">Ciências da Natureza</span>
+          <span class="text-green-800 font-bold serif">CiÃªncias da Natureza</span>
         </div>
         <div class="card-body">
-            <p class="text-sm text-gray-500 mb-6">Física, Química e Biologia (Ensino Médio e Anos Finais).</p>
+            <p class="text-sm text-gray-500 mb-6">FÃ­sica, QuÃ­mica e Biologia (Ensino MÃ©dio e Anos Finais).</p>
             <div class="drive-link group-hover:bg-green-700 group-hover:text-white group-hover:border-green-700">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 3C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11.8284C19 11.298 18.7893 10.7893 18.4142 10.4142L11.5858 3.58579C11.2107 3.21071 10.702 3 10.1716 3H7ZM12 4.41421L17.5858 10H13C12.4477 10 12 9.55228 12 9V4.41421ZM10 10.354V4.02008C10.0567 4.04169 10.1118 4.06842 10.1642 4.10095V9C10.1642 10.1046 11.0596 11 12.1642 11H17.0621C17.0946 11.0524 17.1213 11.1075 17.1429 11.1642H13.5C12.1193 11.1642 11 12.2835 11 13.6642V17H9V12C9 11.4477 9.44772 11 10 11V10.354Z"/></svg>
                Acessar Pasta do Drive
@@ -90,16 +66,16 @@
         </div>
       </a>
 
-      <!-- Ciências Humanas -->
+      <!-- CiÃªncias Humanas -->
       <a href="https://drive.google.com/drive/folders/1r-0DJUkbPv2rOgldlJGQJ6K2HdrL5IL0" target="_blank" rel="noopener noreferrer" class="card block hover:no-underline">
         <div class="card-header bg-orange-50 border-b-orange-100">
            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700">
              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
            </div>
-           <span class="text-orange-800 font-bold serif">Ciências Humanas</span>
+           <span class="text-orange-800 font-bold serif">CiÃªncias Humanas</span>
         </div>
         <div class="card-body">
-            <p class="text-sm text-gray-500 mb-6">História, Geografia, Sociologia e Filosofia.</p>
+            <p class="text-sm text-gray-500 mb-6">HistÃ³ria, Geografia, Sociologia e Filosofia.</p>
             <div class="drive-link group-hover:bg-orange-700 group-hover:text-white group-hover:border-orange-700">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 3C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11.8284C19 11.298 18.7893 10.7893 18.4142 10.4142L11.5858 3.58579C11.2107 3.21071 10.702 3 10.1716 3H7ZM12 4.41421L17.5858 10H13C12.4477 10 12 9.55228 12 9V4.41421ZM10 10.354V4.02008C10.0567 4.04169 10.1118 4.06842 10.1642 4.10095V9C10.1642 10.1046 11.0596 11 12.1642 11H17.0621C17.0946 11.0524 17.1213 11.1075 17.1429 11.1642H13.5C12.1193 11.1642 11 12.2835 11 13.6642V17H9V12C9 11.4477 9.44772 11 10 11V10.354Z"/></svg>
                Acessar Pasta do Drive
@@ -113,10 +89,10 @@
            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
            </div>
-           <span class="text-blue-800 font-bold serif">Matemática e Exatas</span>
+           <span class="text-blue-800 font-bold serif">MatemÃ¡tica e Exatas</span>
         </div>
         <div class="card-body">
-            <p class="text-sm text-gray-500 mb-6">Matemática em todos os níveis de ensino.</p>
+            <p class="text-sm text-gray-500 mb-6">MatemÃ¡tica em todos os nÃ­veis de ensino.</p>
             <div class="drive-link group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 3C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11.8284C19 11.298 18.7893 10.7893 18.4142 10.4142L11.5858 3.58579C11.2107 3.21071 10.702 3 10.1716 3H7ZM12 4.41421L17.5858 10H13C12.4477 10 12 9.55228 12 9V4.41421ZM10 10.354V4.02008C10.0567 4.04169 10.1118 4.06842 10.1642 4.10095V9C10.1642 10.1046 11.0596 11 12.1642 11H17.0621C17.0946 11.0524 17.1213 11.1075 17.1429 11.1642H13.5C12.1193 11.1642 11 12.2835 11 13.6642V17H9V12C9 11.4477 9.44772 11 10 11V10.354Z"/></svg>
                Acessar Pasta do Drive
@@ -133,7 +109,7 @@
            <span class="text-purple-800 font-bold serif">Linguagens</span>
         </div>
         <div class="card-body">
-            <p class="text-sm text-gray-500 mb-6">Língua Portuguesa, Arte, Inglês e Educação Física.</p>
+            <p class="text-sm text-gray-500 mb-6">LÃ­ngua Portuguesa, Arte, InglÃªs e EducaÃ§Ã£o FÃ­sica.</p>
             <div class="drive-link group-hover:bg-purple-700 group-hover:text-white group-hover:border-purple-700">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 3C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11.8284C19 11.298 18.7893 10.7893 18.4142 10.4142L11.5858 3.58579C11.2107 3.21071 10.702 3 10.1716 3H7ZM12 4.41421L17.5858 10H13C12.4477 10 12 9.55228 12 9V4.41421ZM10 10.354V4.02008C10.0567 4.04169 10.1118 4.06842 10.1642 4.10095V9C10.1642 10.1046 11.0596 11 12.1642 11H17.0621C17.0946 11.0524 17.1213 11.1075 17.1429 11.1642H13.5C12.1193 11.1642 11 12.2835 11 13.6642V17H9V12C9 11.4477 9.44772 11 10 11V10.354Z"/></svg>
                Acessar Pasta do Drive
@@ -149,7 +125,7 @@
   <footer class="site-footer text-xs py-4 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left sm:flex justify-between items-center flex-wrap gap-2">
       <p>Desenvolvido para CEEJA Paulo Decourt | Autoria Original: <a href="https://tarcisomesquita.github.io" target="_blank" class="underline hover:text-white">Tarciso Mesquita</a></p>
-      <p class="opacity-70">Licença: <a href="http://creativecommons.org/licenses/by/4.0/deed.pt_BR" target="_blank" class="hover:text-white">Creative Commons Atribuição 4.0 Internacional</a>.</p>
+      <p class="opacity-70">LicenÃ§a: <a href="http://creativecommons.org/licenses/by/4.0/deed.pt_BR" target="_blank" class="hover:text-white">Creative Commons AtribuiÃ§Ã£o 4.0 Internacional</a>.</p>
     </div>
   </footer>
 

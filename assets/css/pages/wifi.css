@@ -1,0 +1,39 @@
+.card-body {
+  padding: 1.5rem;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--brand-secondary);
+  color: white;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.info-box {
+  border-left: 4px solid var(--brand-secondary);
+  border-radius: 0 4px 4px 0;
+  background-color: #EBF4FF;
+  padding: 1rem;
+}
+
+.btn-primary {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--brand-primary);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-secondary);
+  transform: translateY(-1px);
+}

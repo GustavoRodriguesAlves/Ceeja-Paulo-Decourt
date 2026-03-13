@@ -8,64 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/secondary-pages.css">
-  <style>
-    .card-body {
-      padding: 1.25rem;
-    }
-    .vol-link {
-      display: inline-block;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--brand-secondary);
-      transition: all 0.2s;
-      background-color: #fff;
-      text-decoration: none;
-    }
-    .vol-link:hover {
-      background-color: var(--brand-secondary);
-      color: #fff;
-      border-color: var(--brand-secondary);
-    }
-    .sub-link {
-       display: inline-block;
-       font-size: 0.75rem;
-       font-weight: 600;
-       color: #64748B;
-       border-bottom: 1px dashed #64748B;
-       margin-top: 0.25rem;
-       margin-right: 0.5rem;
-       transition: color 0.2s, border-color 0.2s;
-       text-decoration: none;
-    }
-    .sub-link:hover {
-        color: var(--brand-secondary);
-        border-color: var(--brand-secondary);
-    }
-    
-    .section-title-wrapper {
-        display: flex;
-        align-items: center;
-        margin-top: 3rem;
-        margin-bottom: 1.5rem;
-    }
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--brand-primary);
-        margin-right: 1rem;
-    }
-    .section-line {
-        flex-grow: 1;
-        height: 1px;
-        background-color: var(--border-color);
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/shared/secondary-pages.css">
+    <link rel="stylesheet" href="assets/css/pages/livros.css">
 </head>
 <body class="antialiased flex flex-col min-h-screen">
 
@@ -74,9 +18,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-3">
-          <img src="assets/logo-ceeja.svg" alt="Brasão do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <img src="assets/images/logo-ceeja.svg" alt="BrasÃ£o do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
           <div class="hidden sm:block">
-            <h1 class="serif text-lg font-bold leading-tight">Acervo Bibliográfico</h1>
+            <h1 class="serif text-lg font-bold leading-tight">Acervo BibliogrÃ¡fico</h1>
             <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
           </div>
         </div>
@@ -96,9 +40,9 @@
     
     <!-- Title Area -->
     <div class="mb-8">
-      <h2 class="serif text-3xl font-black text-[var(--brand-primary)] mb-3">Coleção EJA Mundo do Trabalho</h2>
+      <h2 class="serif text-3xl font-black text-[var(--brand-primary)] mb-3">ColeÃ§Ã£o EJA Mundo do Trabalho</h2>
       <p class="text-gray-600 max-w-3xl leading-relaxed">
-        Acesse abaixo a versão digital e oficial dos materiais didáticos categorizados. Para visualizar o conteúdo, clique no volume correspondente à disciplina desejada. Todos os arquivos encontram-se hospedados em ambiente seguro (Google Drive).
+        Acesse abaixo a versÃ£o digital e oficial dos materiais didÃ¡ticos categorizados. Para visualizar o conteÃºdo, clique no volume correspondente Ã  disciplina desejada. Todos os arquivos encontram-se hospedados em ambiente seguro (Google Drive).
       </p>
     </div>
 
@@ -130,7 +74,7 @@
       <article class="card">
         <div class="card-header !bg-green-50 !border-b-green-200 !text-green-800">
           <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-          Ciências
+          CiÃªncias
         </div>
         <div class="card-body">
             <div class="flex flex-wrap">
@@ -146,7 +90,7 @@
       <article class="card">
         <div class="card-header !bg-purple-50 !border-b-purple-200 !text-purple-800">
           <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
-          Inglês
+          InglÃªs
         </div>
         <div class="card-body">
             <div class="flex flex-wrap">
@@ -162,7 +106,7 @@
       <article class="card">
         <div class="card-header !bg-purple-50 !border-b-purple-200 !text-purple-800">
           <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          Língua Portuguesa
+          LÃ­ngua Portuguesa
         </div>
         <div class="card-body">
             <div class="flex flex-wrap">
@@ -178,7 +122,7 @@
       <article class="card">
         <div class="card-header !bg-blue-50 !border-b-blue-200 !text-blue-800">
           <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-          Matemática
+          MatemÃ¡tica
         </div>
         <div class="card-body">
             <div class="flex flex-wrap">
@@ -194,7 +138,7 @@
 
     <!-- ENSINO MEDIO -->
     <div class="section-title-wrapper mt-16">
-        <h3 class="serif section-title">Ensino Médio</h3>
+        <h3 class="serif section-title">Ensino MÃ©dio</h3>
         <div class="section-line"></div>
     </div>
 
@@ -224,18 +168,18 @@
           <div class="card-body p-4 flex flex-col gap-3">
                 <div class="flex flex-wrap items-center gap-2">
                     <a href="https://drive.google.com/open?id=12kBk7010rN4k73pLKEJFeaSl27LK9f3M" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 1</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P1</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P2</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P1</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P2</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                     <a href="https://drive.google.com/open?id=1UFpzFcsrV-YvQOEgAYx5Tx09OViOCz-q" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 2</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P3</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P4</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P3</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P4</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                     <a href="https://drive.google.com/open?id=1SJc1ExO-61L5IZjtNB7six5kZp66pIGk" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 3</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P5</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P6</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P5</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/BIO_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P6</a>
                 </div>
           </div>
         </article>
@@ -244,23 +188,23 @@
         <article class="card">
             <div class="card-header !bg-green-50 !border-b-green-200 !text-green-800">
               <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              Física
+              FÃ­sica
             </div>
             <div class="card-body p-4 flex flex-col gap-3">
                 <div class="flex flex-wrap items-center gap-2">
                     <a href="https://drive.google.com/open?id=1t4RsKLQof5sYMkUEOuX1FoNRiiPu6Lvt" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 1</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P1</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P2</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P1</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P2</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                     <a href="https://drive.google.com/open?id=1u4ewYoxZHYHnbiQJWFdBBa64xfvfXT0D" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 2</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P3</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P4</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P3</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P4</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                     <a href="https://drive.google.com/open?id=1ILvQAIRu_LKjNGARbKFNj6Msyi_Mt5LO" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 3</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P5</a>
-                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P6</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P5</a>
+                    <a href="https://tarcisomesquita.github.io/ceejapd/av/FIS_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P6</a>
                 </div>
             </div>
         </article>
@@ -269,7 +213,7 @@
         <article class="card">
             <div class="card-header !bg-purple-50 !border-b-purple-200 !text-purple-800">
                 <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
-                Inglês
+                InglÃªs
             </div>
             <div class="card-body p-4">
                 <div class="flex flex-wrap gap-2">
@@ -284,7 +228,7 @@
         <article class="card">
           <div class="card-header !bg-purple-50 !border-b-purple-200 !text-purple-800">
             <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            Língua Portuguesa
+            LÃ­ngua Portuguesa
           </div>
           <div class="card-body p-4">
               <div class="flex flex-wrap gap-2">
@@ -299,7 +243,7 @@
         <article class="card">
           <div class="card-header !bg-blue-50 !border-b-blue-200 !text-blue-800">
             <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-            Matemática
+            MatemÃ¡tica
           </div>
           <div class="card-body p-4 flex flex-col gap-3">
                 <div class="flex flex-wrap items-center gap-2">
@@ -321,23 +265,23 @@
         <article class="card">
             <div class="card-header !bg-green-50 !border-b-green-200 !text-green-800">
               <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-              Química
+              QuÃ­mica
             </div>
             <div class="card-body p-4 flex flex-col gap-3">
                   <div class="flex flex-wrap items-center gap-2">
                         <a href="https://drive.google.com/open?id=1tZ5hgMLA016xQ2Wf8TCUCrgi0gEmruAX" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 1</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P1</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P2</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P1.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P1</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P2.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P2</a>
                   </div>
                   <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                         <a href="https://drive.google.com/open?id=1NY0etTgAYP2q_dHduAMUv9gbxYWMoq6c" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 2</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P3</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P4</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P3.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P3</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P4.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P4</a>
                   </div>
                   <div class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
                         <a href="https://drive.google.com/open?id=1wixZ90MVViDUXHnCJQWlsFUieagssNWv" target="_blank" rel="noopener noreferrer" class="vol-link !mb-0 !mr-0">Vol. 3</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P5</a>
-                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">Exercícios P6</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P5.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P5</a>
+                        <a href="https://tarcisomesquita.github.io/ceejapd/av/QUI_P6.html" target="_blank" class="sub-link !mt-0 !mr-0">ExercÃ­cios P6</a>
                   </div>
             </div>
           </article>
@@ -350,7 +294,7 @@
   <footer class="site-footer text-xs py-4 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left sm:flex justify-between items-center flex-wrap gap-2">
       <p>Desenvolvido para CEEJA Paulo Decourt | Sistema Operacional Integrado</p>
-      <p class="opacity-70">Licença: Creative Commons Atribuição 4.0 Internacional.</p>
+      <p class="opacity-70">LicenÃ§a: Creative Commons AtribuiÃ§Ã£o 4.0 Internacional.</p>
     </div>
   </footer>
 

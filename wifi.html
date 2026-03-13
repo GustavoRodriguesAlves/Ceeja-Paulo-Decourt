@@ -8,44 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/secondary-pages.css">
-  <style>
-    .card-body {
-      padding: 1.5rem;
-    }
-    .step-number {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      background-color: var(--brand-secondary);
-      color: white;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .info-box {
-      background-color: #EBF4FF;
-      border-left: 4px solid var(--brand-secondary);
-      padding: 1rem;
-      border-radius: 0 4px 4px 0;
-    }
-    .btn-primary {
-      background-color: var(--brand-primary);
-      color: #fff;
-      font-weight: 600;
-      padding: 0.75rem 1.5rem;
-      border-radius: 4px;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      display: inline-block;
-      text-align: center;
-    }
-    .btn-primary:hover {
-      background-color: var(--brand-secondary);
-      transform: translateY(-1px);
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/shared/secondary-pages.css">
+    <link rel="stylesheet" href="assets/css/pages/wifi.css">
 </head>
 <body class="antialiased flex flex-col min-h-screen">
 
@@ -54,9 +18,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-3">
-          <img src="assets/logo-ceeja.svg" alt="Brasão do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <img src="assets/images/logo-ceeja.svg" alt="BrasÃ£o do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
           <div class="hidden sm:block">
-            <h1 class="serif text-lg font-bold leading-tight">Serviços Acadêmicos</h1>
+            <h1 class="serif text-lg font-bold leading-tight">ServiÃ§os AcadÃªmicos</h1>
             <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
           </div>
         </div>
@@ -81,7 +45,7 @@
         <h2 class="serif text-3xl font-black">Rede Wi-Fi: SEDUC - Alunos e Professores</h2>
       </div>
       <p class="text-gray-600 max-w-3xl leading-relaxed">
-        Siga as instruções abaixo para realizar a autenticação segura e obter acesso à rede sem fio disponível nas dependências do CEEJA. O acesso é exclusivo e vinculado às suas credenciais institucionais.
+        Siga as instruÃ§Ãµes abaixo para realizar a autenticaÃ§Ã£o segura e obter acesso Ã  rede sem fio disponÃ­vel nas dependÃªncias do CEEJA. O acesso Ã© exclusivo e vinculado Ã s suas credenciais institucionais.
       </p>
     </div>
 
@@ -92,29 +56,29 @@
       <div class="lg:col-span-2 space-y-6">
         <article class="card">
           <div class="card-header">
-            Guia de Configuração e Acesso
+            Guia de ConfiguraÃ§Ã£o e Acesso
           </div>
           <div class="card-body space-y-8">
             
             <div class="flex gap-4">
               <div class="step-number">1</div>
               <div>
-                <h4 class="font-bold text-lg text-gray-800 mb-1">Conecte-se à rede SSID</h4>
-                <p class="text-gray-600 text-sm">No seu dispositivo (celular ou notebook), vá nas configurações de Wi-Fi e procure pela rede com o nome exato <strong>SEDUC-Alunos e Professores</strong>. Selecione-a para conectar.</p>
+                <h4 class="font-bold text-lg text-gray-800 mb-1">Conecte-se Ã  rede SSID</h4>
+                <p class="text-gray-600 text-sm">No seu dispositivo (celular ou notebook), vÃ¡ nas configuraÃ§Ãµes de Wi-Fi e procure pela rede com o nome exato <strong>SEDUC-Alunos e Professores</strong>. Selecione-a para conectar.</p>
               </div>
             </div>
 
             <div class="flex gap-4">
               <div class="step-number">2</div>
               <div>
-                <h4 class="font-bold text-lg text-gray-800 mb-1">Preencha o Usuário (Identificador)</h4>
-                <p class="text-gray-600 text-sm mb-3">Para a autenticação na rede, você deve utilizar o mesmo formato de login do site <strong>Secretaria Escolar Digital (SED)</strong>.</p>
+                <h4 class="font-bold text-lg text-gray-800 mb-1">Preencha o UsuÃ¡rio (Identificador)</h4>
+                <p class="text-gray-600 text-sm mb-3">Para a autenticaÃ§Ã£o na rede, vocÃª deve utilizar o mesmo formato de login do site <strong>Secretaria Escolar Digital (SED)</strong>.</p>
                 <div class="info-box">
                   <p class="text-sm text-[var(--brand-primary)]">
-                    <strong>Formato do login:</strong> <code>[Número do RA]</code> + <code>[dígito do RA]</code> + <code>[UF do RA]</code>
+                    <strong>Formato do login:</strong> <code>[NÃºmero do RA]</code> + <code>[dÃ­gito do RA]</code> + <code>[UF do RA]</code>
                   </p>
                   <p class="text-sm mt-2 text-gray-600">
-                    <em>Exemplo prático:</em> Se o seu Registro de Aluno é completo é <span class="font-mono">987654321-X</span> e a uf é de São Paulo, o seu usuário a ser inserido será <span class="font-mono font-bold">987654321xsp</span> (tudo junto e sem traços).
+                    <em>Exemplo prÃ¡tico:</em> Se o seu Registro de Aluno Ã© completo Ã© <span class="font-mono">987654321-X</span> e a uf Ã© de SÃ£o Paulo, o seu usuÃ¡rio a ser inserido serÃ¡ <span class="font-mono font-bold">987654321xsp</span> (tudo junto e sem traÃ§os).
                   </p>
                 </div>
               </div>
@@ -124,11 +88,11 @@
               <div class="step-number">3</div>
               <div>
                 <h4 class="font-bold text-lg text-gray-800 mb-1">Insira a Senha Pessoal</h4>
-                <p class="text-gray-600 text-sm mb-3">Após o usuário, você será solicitado a fornecer uma credencial de acesso.</p>
+                <p class="text-gray-600 text-sm mb-3">ApÃ³s o usuÃ¡rio, vocÃª serÃ¡ solicitado a fornecer uma credencial de acesso.</p>
                 <div class="border border-gray-200 rounded p-4 bg-gray-50">
                    <p class="text-sm text-gray-800">
                      <svg class="w-5 h-5 inline text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                     A senha de cada aluno para a rede sem fio é <strong>exclusiva e criada diretamente na secretaria</strong> da escola. Caso não possua ou tenha esquecido, dirija-se ao setor administrativo.
+                     A senha de cada aluno para a rede sem fio Ã© <strong>exclusiva e criada diretamente na secretaria</strong> da escola. Caso nÃ£o possua ou tenha esquecido, dirija-se ao setor administrativo.
                    </p>
                 </div>
               </div>
@@ -142,8 +106,8 @@
       <div class="space-y-6">
         <div class="card border-t-4 border-t-[var(--brand-primary)]">
           <div class="card-body">
-            <h3 class="font-bold text-gray-800 mb-3 text-lg">Acesso à SED</h3>
-             <p class="text-sm text-gray-600 mb-4">Caso queira conferir os seus dados ou necessite de recuperar sua conta governamental, acesse o portal da Secretaria da Educação no botão abaixo.</p>
+            <h3 class="font-bold text-gray-800 mb-3 text-lg">Acesso Ã  SED</h3>
+             <p class="text-sm text-gray-600 mb-4">Caso queira conferir os seus dados ou necessite de recuperar sua conta governamental, acesse o portal da Secretaria da EducaÃ§Ã£o no botÃ£o abaixo.</p>
              <a href="https://sed.educacao.sp.gov.br/" target="_blank" rel="noopener noreferrer" class="btn-primary w-full shadow-sm">Abrir Portal SED</a>
           </div>
         </div>
@@ -153,7 +117,7 @@
             <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             <div>
               <h4 class="font-bold text-yellow-800 text-sm mb-1">Termos de Uso</h4>
-              <p class="text-xs text-yellow-800 opacity-80 leading-relaxed">O acesso à rede institucional pressupõe a utilização para fins pedagógicos. O tráfego é monitorado pela PRODESP visando a segurança dos usuários sob os regimentos estaduais.</p>
+              <p class="text-xs text-yellow-800 opacity-80 leading-relaxed">O acesso Ã  rede institucional pressupÃµe a utilizaÃ§Ã£o para fins pedagÃ³gicos. O trÃ¡fego Ã© monitorado pela PRODESP visando a seguranÃ§a dos usuÃ¡rios sob os regimentos estaduais.</p>
             </div>
           </div>
         </div>
@@ -167,7 +131,7 @@
   <footer class="site-footer text-xs py-4 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left sm:flex justify-between items-center flex-wrap gap-2">
       <p>Desenvolvido para CEEJA Paulo Decourt | Sistema Operacional Integrado</p>
-      <p class="opacity-70">Licença: Creative Commons Atribuição 4.0 Internacional.</p>
+      <p class="opacity-70">LicenÃ§a: Creative Commons AtribuiÃ§Ã£o 4.0 Internacional.</p>
     </div>
   </footer>
 

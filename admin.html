@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,279 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --brand-primary: #003366;
-      --brand-secondary: #00509E;
-      --brand-accent: #FFC000;
-      --panel: #FFFFFF;
-      --line: #E2E8F0;
-      --text-main: #223047;
-      --text-muted: #64748B;
-      --success: #1F8F4C;
-      --danger: #C94D4D;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      overflow-x: hidden;
-      font-family: "Inter", sans-serif;
-      color: var(--text-main);
-      background:
-        radial-gradient(circle at top right, rgba(255, 192, 0, 0.15), transparent 28%),
-        linear-gradient(180deg, #F6F8FC 0%, #EEF3F8 100%);
-    }
-    .serif { font-family: "Merriweather", serif; }
-    .admin-shell {
-      display: grid;
-      grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
-      min-height: 100vh;
-    }
-    .sidebar {
-      position: sticky;
-      top: 0;
-      align-self: start;
-      min-height: 100vh;
-      background: linear-gradient(180deg, #082C53 0%, #0A3B6B 100%);
-      color: #fff;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      width: 100%;
-      border-radius: 14px;
-      padding: 0.95rem 1rem;
-      color: rgba(255, 255, 255, 0.78);
-      transition: background-color 0.2s ease, color 0.2s ease, transform 0.18s ease;
-    }
-    .sidebar-link:hover,
-    .sidebar-link.active {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      transform: translateX(2px);
-    }
-    .content-area { min-width: 0; }
-    .content-wrap {
-      width: min(100%, 1440px);
-      margin: 0 auto;
-    }
-    .panel {
-      min-width: 0;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
-    }
-    .panel-soft {
-      background: #F8FAFC;
-      border: 1px dashed #CBD5E1;
-      border-radius: 18px;
-    }
-    .field {
-      width: 100%;
-      border: 1px solid #CBD5E1;
-      border-radius: 14px;
-      background: #fff;
-      padding: 0.9rem 1rem;
-      color: var(--text-main);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .field:focus {
-      outline: none;
-      border-color: var(--brand-secondary);
-      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
-    }
-    textarea.field { resize: vertical; }
-    .btn-primary,
-    .btn-secondary,
-    .btn-danger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      border-radius: 14px;
-      padding: 0.85rem 1.05rem;
-      font-weight: 600;
-      transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
-    }
-    .btn-primary {
-      background: var(--brand-primary);
-      color: #fff;
-    }
-    .btn-primary:hover {
-      background: var(--brand-secondary);
-      transform: translateY(-1px);
-    }
-    .btn-secondary {
-      background: #fff;
-      color: var(--brand-primary);
-      border: 1px solid #CBD5E1;
-    }
-    .btn-secondary:hover {
-      border-color: #94A3B8;
-      transform: translateY(-1px);
-    }
-    .btn-danger {
-      background: #FFF5F5;
-      color: var(--danger);
-      border: 1px solid #FED7D7;
-    }
-    .btn-danger:hover { transform: translateY(-1px); }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      background: #FFF4CC;
-      color: var(--brand-primary);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.35rem 0.8rem;
-    }
-    .metric-card {
-      min-width: 0;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: #fff;
-      padding: 1.35rem;
-    }
-    .metric-number {
-      color: var(--brand-primary);
-      font-size: 2rem;
-      font-weight: 800;
-      line-height: 1;
-    }
-    .list-card {
-      min-width: 0;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-      padding: 1rem;
-      transition: box-shadow 0.18s ease, transform 0.18s ease;
-    }
-    .list-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 26px rgba(15, 23, 42, 0.05);
-    }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 0.28rem 0.65rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .status-live { background: #E8F7ED; color: var(--success); }
-    .status-draft { background: #EFF2F6; color: #475569; }
-    .empty-state {
-      border: 1px dashed #CBD5E1;
-      border-radius: 18px;
-      background: #F8FAFC;
-      padding: 1rem;
-      color: var(--text-muted);
-    }
-    .section-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
-      gap: 1.5rem;
-    }
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-    }
-    .json-shell {
-      min-width: 0;
-      border: 1px solid #0F172A;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #020617;
-    }
-    .json-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-      background: #0F172A;
-      padding: 0.85rem 1rem;
-      color: #E2E8F0;
-    }
-    .json-preview {
-      max-height: 620px;
-      overflow: auto;
-      margin: 0;
-      padding: 1rem;
-      color: #E2E8F0;
-      font-size: 0.82rem;
-      line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-    .media-thumb {
-      width: 100%;
-      max-width: 132px;
-      aspect-ratio: 4 / 3;
-      border-radius: 14px;
-      object-fit: cover;
-      background: #E2E8F0;
-      border: 1px solid var(--line);
-    }
-    .content-panel { display: none; }
-    .content-panel.active { display: block; }
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(8, 28, 53, 0.72);
-      backdrop-filter: blur(5px);
-      z-index: 100;
-      padding: 1rem;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-card {
-      width: min(100%, 460px);
-      border-radius: 22px;
-      background: #fff;
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
-      padding: 1.5rem;
-    }
-    .summary-card {
-      min-width: 0;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: #fff;
-      padding: 1rem;
-    }
-    .helper-text {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      line-height: 1.65;
-    }
-    @media (max-width: 1200px) {
-      .section-grid,
-      .preview-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 1024px) {
-      .admin-shell { grid-template-columns: 1fr; }
-      .sidebar { position: relative; min-height: auto; }
-    }
-  </style>
+    <link rel="stylesheet" href="assets/css/pages/admin.css">
 </head>
 <body>
   <div class="admin-shell">
     <aside class="sidebar p-5 lg:p-6">
       <div class="flex items-center gap-3">
-        <img src="assets/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded-xl bg-white p-1 shadow-sm" />
+        <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded-xl bg-white p-1 shadow-sm" />
         <div>
           <p class="text-sm uppercase tracking-[0.22em] text-blue-200">Secretaria</p>
           <h1 class="serif text-2xl font-bold text-white">Painel editorial</h1>
@@ -436,7 +170,7 @@
               <form id="mediaForm" class="mt-6 space-y-4">
                 <input id="mediaId" type="hidden" />
                 <div><label for="mediaTitle" class="mb-2 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Fachada do CEEJA" required /></div>
-                <div><label for="mediaPath" class="mb-2 block text-sm font-semibold">Caminho da imagem</label><input id="mediaPath" type="text" class="field" placeholder="assets/DSC06864.JPG" required /></div>
+                <div><label for="mediaPath" class="mb-2 block text-sm font-semibold">Caminho da imagem</label><input id="mediaPath" type="text" class="field" placeholder="assets/images/DSC06864.JPG" required /></div>
                 <div><label for="mediaAlt" class="mb-2 block text-sm font-semibold">Texto alternativo</label><input id="mediaAlt" type="text" class="field" placeholder="Descrição breve da foto" required /></div>
                 <div class="grid gap-4 md:grid-cols-2">
                   <div><label for="mediaOrder" class="mb-2 block text-sm font-semibold">Ordem</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
@@ -540,6 +274,6 @@
     </div>
   </div>
 
-    <script type="module" src="assets/js/admin-page.js"></script>
+    <script type="module" src="assets/js/pages/admin-page.js"></script>
 </body>
 </html>

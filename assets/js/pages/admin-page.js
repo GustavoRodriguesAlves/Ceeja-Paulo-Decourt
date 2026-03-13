@@ -3,13 +3,13 @@ import {
   clearAdminAuth,
   getAdminSessionEmail,
   syncRememberedAdminSession
-} from "./auth.js";
+} from "../core/auth.js";
 import {
   clearDraftSiteContent,
   loadSiteContent,
   normalizeSiteContent,
   saveDraftSiteContent
-} from "./site-content.js";
+} from "../core/site-content.js";
 
 const rememberedAdminEmail = syncRememberedAdminSession();
 const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
@@ -209,7 +209,7 @@ function renderNotices() {
 
   noticeItems.querySelectorAll("[data-delete-notice]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse aviso será removido do rascunho atual da home.", () => {
+      openConfirmModal("Esse aviso serÃ¡ removido do rascunho atual da home.", () => {
         adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
         saveState("Aviso removido do rascunho local.");
       });
@@ -220,7 +220,7 @@ function renderNotices() {
 function renderLinks() {
   const links = [...adminState.quickLinks];
   if (!links.length) {
-    linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
+    linkItems.innerHTML = '<div class="empty-state">Nenhum link rÃ¡pido cadastrado.</div>';
     return;
   }
 
@@ -253,7 +253,7 @@ function renderLinks() {
 
   linkItems.querySelectorAll("[data-delete-link]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse link deixará de aparecer na home do site.", () => {
+      openConfirmModal("Esse link deixarÃ¡ de aparecer na home do site.", () => {
         adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
         saveState("Link removido do rascunho local.");
       });
@@ -304,7 +304,7 @@ function renderGallery() {
 
   mediaItems.querySelectorAll("[data-delete-media]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem será retirada da galeria configurada para a home.", () => {
+      openConfirmModal("Essa imagem serÃ¡ retirada da galeria configurada para a home.", () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
         saveState("Imagem removida da galeria local.");
       });
@@ -317,7 +317,7 @@ function renderHomepagePreview() {
   homepageText.value = adminState.homepage.highlightText || "";
   homepagePreviewTitle.textContent = adminState.homepage.highlightTitle || "Sem destaque configurado.";
   homepagePreviewText.textContent =
-    adminState.homepage.highlightText || "Cadastre o texto principal para visualizar a prévia.";
+    adminState.homepage.highlightText || "Cadastre o texto principal para visualizar a prÃ©via.";
 }
 
 function renderDashboard() {
@@ -335,7 +335,7 @@ function renderDashboard() {
   publishLinkCount.textContent = publishedLinks;
   publishGalleryCount.textContent = publishedGallery;
   publishHomepageState.textContent =
-    adminState.homepage.highlightTitle || "Título principal ainda não preenchido.";
+    adminState.homepage.highlightTitle || "TÃ­tulo principal ainda nÃ£o preenchido.";
   jsonPreview.textContent = JSON.stringify(adminState, null, 2);
 }
 
@@ -400,7 +400,7 @@ linkForm.addEventListener("submit", (event) => {
     adminState.quickLinks.unshift(payload);
   }
   fillLinkForm();
-  saveState("Link rápido salvo no rascunho local.");
+  saveState("Link rÃ¡pido salvo no rascunho local.");
 });
 
 mediaForm.addEventListener("submit", (event) => {
@@ -442,15 +442,15 @@ downloadJsonButton.addEventListener("click", () => {
   anchor.download = "site-content.json";
   anchor.click();
   URL.revokeObjectURL(url);
-  setStatus("Arquivo JSON baixado. Ele já pode substituir data/site-content.json no projeto.");
+  setStatus("Arquivo JSON baixado. Ele jÃ¡ pode substituir data/site-content.json no projeto.");
 });
 
 copyJsonButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(JSON.stringify(adminState, null, 2));
-    setStatus("JSON copiado para a área de transferência.");
+    setStatus("JSON copiado para a Ã¡rea de transferÃªncia.");
   } catch (error) {
-    setStatus("Não foi possível copiar automaticamente. Use o bloco de JSON para copiar manualmente.");
+    setStatus("NÃ£o foi possÃ­vel copiar automaticamente. Use o bloco de JSON para copiar manualmente.");
   }
 });
 
@@ -465,17 +465,17 @@ importJsonInput.addEventListener("change", async (event) => {
     saveState("Arquivo importado para o rascunho local.");
   } catch (error) {
     console.warn("Falha ao importar JSON.", error);
-    setStatus("O arquivo informado não pôde ser importado.");
+    setStatus("O arquivo informado nÃ£o pÃ´de ser importado.");
   } finally {
     event.target.value = "";
   }
 });
 
 resetDraftButton.addEventListener("click", () => {
-  openConfirmModal("O rascunho salvo neste navegador será descartado e a base pública será restaurada.", async () => {
+  openConfirmModal("O rascunho salvo neste navegador serÃ¡ descartado e a base pÃºblica serÃ¡ restaurada.", async () => {
     clearDraftSiteContent();
     await bootstrap();
-    setStatus("Base restaurada a partir do conteúdo público do projeto.");
+    setStatus("Base restaurada a partir do conteÃºdo pÃºblico do projeto.");
   });
 });
 
@@ -494,7 +494,7 @@ async function bootstrap() {
   try {
     adminState = await loadSiteContent();
   } catch (error) {
-    console.warn("Falha ao carregar conteúdo base.", error);
+    console.warn("Falha ao carregar conteÃºdo base.", error);
     adminState = structuredClone(defaultContent);
   }
 
@@ -504,7 +504,7 @@ async function bootstrap() {
   fillMediaForm();
   renderAll();
   showPanel("dashboardPanel");
-  setStatus("Painel carregado. As alterações feitas aqui ficam visíveis na home deste navegador.");
+  setStatus("Painel carregado. As alteraÃ§Ãµes feitas aqui ficam visÃ­veis na home deste navegador.");
 }
 
 bootstrap();

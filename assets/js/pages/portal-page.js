@@ -4,7 +4,7 @@ import {
   clearPortalAuth,
   getPortalSessionEmail,
   syncRememberedPortalSession
-} from "./auth.js";
+} from "../core/auth.js";
 
 const NOTES_TOKEN =
   "eyJhbGciOiJSUzI1NiIsImtpZCI6IjUzMDcyNGQ0OTE3M2EzZWQ2YjRhMDBhYTYzNDQyMDMwMGQ3MmFlNWIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTE1Nzg3Mzk5MTg0MDg5MjE5ODc0IiwiZW1haWwiOiJldWd1c3Rhdm9yb2RyaWd1ZXNhbHZlc0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IkFhVmgyU2MwSHBDeHN4QTYtRExkMmciLCJuYmYiOjE3NzMzNDgxMDUsIm5hbWUiOiJHdXN0YXZvIFJvZHJpZ3VlcyBBbHZlcyIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMMUQtSWoyd2s5SlV4cF9WWFJvMDgyS3pJMER1OXVmQWI2cllsWTVZMEQyeTBqSXc9czk2LWMiLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiUm9kcmlndWVzIEFsdmVzIiwiaWF0IjoxNzczMzQ4NDA1LCJleHAiOjE3NzMzNTIwMDUsImp0aSI6IjZkMDNkYzc2MGM2Yzc5ZmVmNzNmNTFjNzgxNWNjYzdiNzRmM2VlYzIifQ.ABVzBNz-S6hTeDgACwOyafRzgQltKJd0THkPT1YekGo4ntO44oLdef6NtudsAe4C_NWKKyJqAJb4NSFRO_VS0XqqKx6HtmkbJxOyMBmu46bAIkBAY6EpNi-o1-b3YSNQr3heA3z7PpPrfcGWvkZsdmDEHeGUrgtMEtY22q43Kj5Ge3hCaW49enscGrF0U0TE3TlvlrLBNTNnbeWmmi1evo9DW9n1w75qkbuf8XftbywTKeSEHKO06CraJMZUde4YUHgJsj6zY9Bnb5mv_fRKJzfIjTAWDGCc962QdPlW2ZB8nw8CuN9mEVnZ1WzE2gA9vnw3MHneHLEljAxRhp_Wzg";
@@ -81,7 +81,7 @@ async function openNotasPopup() {
     try {
       await navigator.clipboard.writeText(raValue);
     } catch (error) {
-      console.warn("Não foi possível copiar o RA automaticamente.", error);
+      console.warn("NÃ£o foi possÃ­vel copiar o RA automaticamente.", error);
     }
   }
 
