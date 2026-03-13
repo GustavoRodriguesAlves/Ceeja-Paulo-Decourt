@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel da Secretaria | CEEJA Paulo Decourt</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-primary: #003366;
+      --brand-secondary: #00509E;
+      --brand-accent: #FFC000;
+      --bg-admin: #F3F6FA;
+      --panel: #FFFFFF;
+      --text-main: #253246;
+      --text-muted: #6B7280;
+      --line: #E5EAF1;
+      --success: #2B9B4B;
+      --danger: #C74A4A;
+    }
+    body {
+      font-family: "Inter", sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(180deg, #F5F8FB 0%, #EEF3F8 100%);
+    }
+    .serif {
+      font-family: "Merriweather", serif;
+    }
+    .admin-shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: linear-gradient(180deg, #082C53 0%, #0B3D71 100%);
+      color: #fff;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      color: rgba(255,255,255,0.8);
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .sidebar-link:hover,
+    .sidebar-link.active {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #FFF4CC;
+      color: var(--brand-primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.8rem;
+    }
+    .field {
+      width: 100%;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      background: #fff;
+      padding: 0.8rem 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field:focus {
+      outline: none;
+      border-color: var(--brand-secondary);
+      box-shadow: 0 0 0 4px rgba(0, 80, 158, 0.12);
+    }
+    .btn-primary {
+      background: var(--brand-primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      transition: transform 0.18s, background-color 0.18s;
+    }
+    .btn-primary:hover {
+      background: var(--brand-secondary);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--brand-primary);
+      font-weight: 600;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+    }
+    .btn-danger {
+      background: #fff5f5;
+      color: var(--danger);
+      border: 1px solid #FED7D7;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 0.7rem 0.95rem;
+    }
+    .list-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 1rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .list-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.05);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.28rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-success {
+      background: #E6F4EA;
+      color: #1E8E3E;
+    }
+    .badge-muted {
+      background: #EDF2F7;
+      color: #4A5568;
+    }
+    .hidden-panel {
+      display: none;
+    }
+    .notice-preview,
+    .link-preview {
+      border: 1px dashed #CBD5E1;
+      border-radius: 12px;
+      background: #F8FAFC;
+      padding: 1rem;
+    }
+    .empty-state {
+      border: 1px dashed #CBD5E1;
+      border-radius: 12px;
+      background: #F8FAFC;
+      padding: 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .status-box {
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .status-info {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E3A8A;
+    }
+    @media (max-width: 1024px) {
+      .admin-shell {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar p-5 lg:p-6">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded-xl bg-white p-1 shadow-sm" />
+        <div>
+          <p class="text-sm uppercase tracking-[0.22em] text-blue-200">Secretaria</p>
+          <h1 class="serif text-xl font-bold text-white">Painel editorial</h1>
+        </div>
+      </div>
+
+      <div class="mt-8 space-y-2">
+        <button class="sidebar-link active w-full text-left" data-panel="dashboardPanel">
+          <span>Visão geral</span>
+        </button>
+        <button class="sidebar-link w-full text-left" data-panel="noticesPanel">
+          <span>Avisos do dia</span>
+        </button>
+        <button class="sidebar-link w-full text-left" data-panel="linksPanel">
+          <span>Links rápidos</span>
+        </button>
+        <button class="sidebar-link w-full text-left" data-panel="homepagePanel">
+          <span>Texto da home</span>
+        </button>
+        <button class="sidebar-link w-full text-left" data-panel="publishPanel">
+          <span>Publicação</span>
+        </button>
+      </div>
+
+      <div class="mt-10 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-blue-100">
+        <p class="font-semibold text-white">Objetivo do painel</p>
+        <p class="mt-2 leading-6">
+          Organizar avisos, links e destaques do site em um fluxo simples, inspirado em WordPress, mas adaptado ao modelo estático do projeto.
+        </p>
+      </div>
+    </aside>
+
+    <main class="p-4 sm:p-6 lg:p-8">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-secondary)]">Protótipo administrativo</p>
+          <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Painel da secretaria</h2>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="index.html" class="btn-secondary">Ver site público</a>
+          <button id="resetDraftButton" type="button" class="btn-danger">Restaurar base</button>
+        </div>
+      </div>
+
+      <section id="dashboardPanel" class="panel mt-6 p-6">
+        <div class="grid gap-4 md:grid-cols-3">
+          <article class="panel p-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos publicados</p>
+            <p id="dashboardNoticeCount" class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">0</p>
+          </article>
+          <article class="panel p-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links ativos</p>
+            <p id="dashboardLinkCount" class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">0</p>
+          </article>
+          <article class="panel p-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Última atualização</p>
+            <p id="dashboardUpdatedAt" class="mt-2 text-lg font-bold text-[var(--brand-primary)]">-</p>
+          </article>
+        </div>
+
+        <div class="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div class="panel p-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo editorial</p>
+            <h3 class="mt-2 text-xl font-bold text-[var(--brand-primary)]">O que este painel já entrega</h3>
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-[var(--text-muted)]">
+              <li>Cadastro de avisos para a home com categoria, data e destaque.</li>
+              <li>Gerenciamento de links rápidos da secretaria.</li>
+              <li>Edição do texto principal da home.</li>
+              <li>Rascunho persistido localmente e exportação para publicação futura.</li>
+            </ul>
+          </div>
+          <div class="notice-preview">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Próximo passo recomendado</p>
+            <p class="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+              Este é um rascunho funcional do painel. O próximo estágio ideal é conectar esse conteúdo a um backend ou fluxo de publicação automatizada para que a secretaria não dependa de exportar arquivos manualmente.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="noticesPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div class="panel p-6">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos do dia</p>
+              <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Novo aviso</h3>
+            </div>
+            <span class="chip">Estilo WordPress</span>
+          </div>
+
+          <form id="noticeForm" class="mt-6 space-y-4">
+            <input id="noticeId" type="hidden" />
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Título</label>
+              <input id="noticeTitle" type="text" class="field" placeholder="Ex.: Orientação geral para novos alunos" required />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Resumo</label>
+              <textarea id="noticeSummary" class="field min-h-[120px]" placeholder="Resumo curto para aparecer na home" required></textarea>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="mb-2 block text-sm font-semibold">Categoria</label>
+                <input id="noticeCategory" type="text" class="field" placeholder="Matrículas, Secretaria, Serviços..." required />
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold">Data</label>
+                <input id="noticeDate" type="date" class="field" required />
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+              <label class="inline-flex items-center gap-2 text-sm font-medium">
+                <input id="noticeFeatured" type="checkbox" class="rounded border-gray-300" />
+                Marcar como destaque
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm font-medium">
+                <input id="noticePublished" type="checkbox" class="rounded border-gray-300" checked />
+                Publicado
+              </label>
+            </div>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="submit" class="btn-primary">Salvar aviso</button>
+              <button id="clearNoticeForm" type="button" class="btn-secondary">Limpar formulário</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel p-6">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lista de avisos</p>
+              <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Publicados na home</h3>
+            </div>
+          </div>
+          <div id="noticeItems" class="mt-6 grid gap-4"></div>
+        </div>
+      </section>
+
+      <section id="linksPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links rápidos</p>
+          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Novo link</h3>
+          <form id="linkForm" class="mt-6 space-y-4">
+            <input id="linkId" type="hidden" />
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Título do link</label>
+              <input id="linkLabel" type="text" class="field" placeholder="Ex.: WhatsApp da direção" required />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-semibold">URL</label>
+              <input id="linkUrl" type="url" class="field" placeholder="https://..." required />
+            </div>
+            <label class="inline-flex items-center gap-2 text-sm font-medium">
+              <input id="linkPublished" type="checkbox" class="rounded border-gray-300" checked />
+              Publicado
+            </label>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="submit" class="btn-primary">Salvar link</button>
+              <button id="clearLinkForm" type="button" class="btn-secondary">Limpar formulário</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links cadastrados</p>
+          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Atalhos do site</h3>
+          <div id="linkItems" class="mt-6 grid gap-4"></div>
+        </div>
+      </section>
+
+      <section id="homepagePanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Texto principal da home</p>
+          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Mensagem institucional</h3>
+          <form id="homepageForm" class="mt-6 space-y-4">
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Título de destaque</label>
+              <textarea id="homepageTitle" class="field min-h-[110px]" required></textarea>
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Texto de apoio</label>
+              <textarea id="homepageText" class="field min-h-[140px]" required></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Salvar texto da home</button>
+          </form>
+        </div>
+
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Prévia editorial</p>
+          <div class="notice-preview mt-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Destaque atual</p>
+            <h3 id="homepagePreviewTitle" class="mt-3 text-2xl font-bold text-[var(--brand-primary)]"></h3>
+            <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-[var(--text-muted)]"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="publishPanel" class="hidden-panel mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Publicação</p>
+          <h3 class="mt-1 text-2xl font-bold text-[var(--brand-primary)]">Saída dos dados editoriais</h3>
+          <div class="mt-6 space-y-4 text-sm leading-6 text-[var(--text-muted)]">
+            <p>
+              Este painel grava rascunhos localmente no navegador e já alimenta a home neste mesmo ambiente. Para transformar isso em atualização pública permanente no GitHub Pages, o próximo estágio é conectar o painel a um fluxo de publicação.
+            </p>
+            <p>
+              Enquanto esse backend não existe, você já consegue exportar o conteúdo em JSON. Esse arquivo pode substituir `data/site-content.json` no repositório.
+            </p>
+          </div>
+          <div id="adminStatus" class="status-box status-info mt-6">
+            Tudo o que for salvo aqui já pode ser visualizado nesta máquina ao abrir a home do site.
+          </div>
+          <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-[var(--text-muted)]">
+            <p class="font-semibold text-[var(--brand-primary)]">Fluxo manual de publicação</p>
+            <ol class="mt-3 list-decimal space-y-2 pl-5">
+              <li>Baixe o JSON gerado neste painel.</li>
+              <li>Substitua o arquivo `data/site-content.json` no projeto.</li>
+              <li>Faça commit e envie ao GitHub para atualizar o site público.</li>
+            </ol>
+          </div>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button id="downloadJsonButton" type="button" class="btn-primary">Baixar JSON do conteúdo</button>
+            <button id="copyJsonButton" type="button" class="btn-secondary">Copiar JSON</button>
+            <a href="index.html?home=1" class="btn-secondary">Abrir home com rascunho</a>
+            <label class="btn-secondary cursor-pointer">
+              Importar JSON
+              <input id="importJsonInput" type="file" accept="application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div class="panel p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">JSON atual</p>
+          <pre id="jsonPreview" class="mt-4 overflow-auto rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-100"></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const SITE_CONTENT_STORAGE_KEY = "ceeja_site_content_draft";
+    const SITE_CONTENT_SOURCE = "data/site-content.json";
+
+    const defaultContent = {
+      updatedAt: new Date().toISOString(),
+      notices: [],
+      quickLinks: [],
+      homepage: {
+        highlightTitle: "",
+        highlightText: ""
+      }
+    };
+
+    let adminState = structuredClone(defaultContent);
+
+    const panelButtons = [...document.querySelectorAll("[data-panel]")];
+    const panels = {
+      dashboardPanel: document.getElementById("dashboardPanel"),
+      noticesPanel: document.getElementById("noticesPanel"),
+      linksPanel: document.getElementById("linksPanel"),
+      homepagePanel: document.getElementById("homepagePanel"),
+      publishPanel: document.getElementById("publishPanel")
+    };
+
+    const noticeForm = document.getElementById("noticeForm");
+    const noticeItems = document.getElementById("noticeItems");
+    const noticeId = document.getElementById("noticeId");
+    const noticeTitle = document.getElementById("noticeTitle");
+    const noticeSummary = document.getElementById("noticeSummary");
+    const noticeCategory = document.getElementById("noticeCategory");
+    const noticeDate = document.getElementById("noticeDate");
+    const noticeFeatured = document.getElementById("noticeFeatured");
+    const noticePublished = document.getElementById("noticePublished");
+
+    const linkForm = document.getElementById("linkForm");
+    const linkItems = document.getElementById("linkItems");
+    const linkId = document.getElementById("linkId");
+    const linkLabel = document.getElementById("linkLabel");
+    const linkUrl = document.getElementById("linkUrl");
+    const linkPublished = document.getElementById("linkPublished");
+
+    const homepageForm = document.getElementById("homepageForm");
+    const homepageTitle = document.getElementById("homepageTitle");
+    const homepageText = document.getElementById("homepageText");
+    const homepagePreviewTitle = document.getElementById("homepagePreviewTitle");
+    const homepagePreviewText = document.getElementById("homepagePreviewText");
+
+    const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
+    const dashboardLinkCount = document.getElementById("dashboardLinkCount");
+    const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
+    const jsonPreview = document.getElementById("jsonPreview");
+    const adminStatus = document.getElementById("adminStatus");
+
+    function showPanel(panelId) {
+      Object.entries(panels).forEach(([id, panel]) => {
+        panel.classList.toggle("hidden-panel", id !== panelId);
+      });
+      panelButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.panel === panelId);
+      });
+    }
+
+    panelButtons.forEach((button) => {
+      button.addEventListener("click", () => showPanel(button.dataset.panel));
+    });
+
+    const escapeHtml = (value = "") =>
+      String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
+    function setStatus(message) {
+      adminStatus.textContent = message;
+    }
+
+    function saveState() {
+      adminState.updatedAt = new Date().toISOString();
+      localStorage.setItem(SITE_CONTENT_STORAGE_KEY, JSON.stringify(adminState));
+      renderAll();
+    }
+
+    function fillNoticeForm(item = null) {
+      noticeId.value = item?.id || "";
+      noticeTitle.value = item?.title || "";
+      noticeSummary.value = item?.summary || "";
+      noticeCategory.value = item?.category || "";
+      noticeDate.value = item?.date || "";
+      noticeFeatured.checked = Boolean(item?.featured);
+      noticePublished.checked = item?.published !== false;
+    }
+
+    function fillLinkForm(item = null) {
+      linkId.value = item?.id || "";
+      linkLabel.value = item?.label || "";
+      linkUrl.value = item?.url || "";
+      linkPublished.checked = item?.published !== false;
+    }
+
+    function renderNotices() {
+      const notices = [...adminState.notices].sort((a, b) => {
+        if (Boolean(a.featured) !== Boolean(b.featured)) {
+          return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+        }
+        return String(b.date).localeCompare(String(a.date));
+      });
+      if (!notices.length) {
+        noticeItems.innerHTML = '<div class="empty-state">Nenhum aviso cadastrado ainda.</div>';
+        return;
+      }
+
+      noticeItems.innerHTML = notices.map((item) => `
+        <article class="list-item">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="chip">${escapeHtml(item.category || "Aviso")}</span>
+            <span class="text-xs text-slate-500">${escapeHtml(item.date || "")}</span>
+            <span class="badge ${item.published ? "badge-success" : "badge-muted"}">${item.published ? "Publicado" : "Rascunho"}</span>
+          </div>
+          <h4 class="mt-3 text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
+          <p class="mt-2 text-sm leading-6 text-[var(--text-muted)]">${escapeHtml(item.summary || "")}</p>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button type="button" class="btn-secondary" data-edit-notice="${item.id}">Editar</button>
+            <button type="button" class="btn-danger" data-delete-notice="${item.id}">Excluir</button>
+          </div>
+        </article>
+      `).join("");
+
+      noticeItems.querySelectorAll("[data-edit-notice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = adminState.notices.find((entry) => entry.id === button.dataset.editNotice);
+          fillNoticeForm(item);
+          showPanel("noticesPanel");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      noticeItems.querySelectorAll("[data-delete-notice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
+          saveState();
+        });
+      });
+    }
+
+    function renderLinks() {
+      const links = [...adminState.quickLinks];
+      if (!links.length) {
+        linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
+        return;
+      }
+
+      linkItems.innerHTML = links.map((item) => `
+        <article class="list-item">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="badge ${item.published ? "badge-success" : "badge-muted"}">${item.published ? "Publicado" : "Oculto"}</span>
+          </div>
+          <h4 class="mt-3 text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.label || "")}</h4>
+          <p class="mt-2 text-sm break-all text-[var(--text-muted)]">${escapeHtml(item.url || "")}</p>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button type="button" class="btn-secondary" data-edit-link="${item.id}">Editar</button>
+            <button type="button" class="btn-danger" data-delete-link="${item.id}">Excluir</button>
+          </div>
+        </article>
+      `).join("");
+
+      linkItems.querySelectorAll("[data-edit-link]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = adminState.quickLinks.find((entry) => entry.id === button.dataset.editLink);
+          fillLinkForm(item);
+          showPanel("linksPanel");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      linkItems.querySelectorAll("[data-delete-link]").forEach((button) => {
+        button.addEventListener("click", () => {
+          adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
+          saveState();
+        });
+      });
+    }
+
+    function renderHomepagePreview() {
+      homepageTitle.value = adminState.homepage.highlightTitle || "";
+      homepageText.value = adminState.homepage.highlightText || "";
+      homepagePreviewTitle.textContent = adminState.homepage.highlightTitle || "Sem destaque configurado.";
+      homepagePreviewText.textContent = adminState.homepage.highlightText || "Cadastre o texto principal para visualizar a prévia.";
+    }
+
+    function renderDashboard() {
+      dashboardNoticeCount.textContent = adminState.notices.filter((item) => item.published).length;
+      dashboardLinkCount.textContent = adminState.quickLinks.filter((item) => item.published).length;
+      dashboardUpdatedAt.textContent = adminState.updatedAt ? new Date(adminState.updatedAt).toLocaleString("pt-BR") : "-";
+      jsonPreview.textContent = JSON.stringify(adminState, null, 2);
+    }
+
+    function renderAll() {
+      renderNotices();
+      renderLinks();
+      renderHomepagePreview();
+      renderDashboard();
+    }
+
+    noticeForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const payload = {
+        id: noticeId.value || `notice-${Date.now()}`,
+        title: noticeTitle.value.trim(),
+        summary: noticeSummary.value.trim(),
+        category: noticeCategory.value.trim(),
+        date: noticeDate.value,
+        featured: noticeFeatured.checked,
+        published: noticePublished.checked
+      };
+
+      const existingIndex = adminState.notices.findIndex((item) => item.id === payload.id);
+      if (existingIndex >= 0) {
+        adminState.notices[existingIndex] = payload;
+      } else {
+        adminState.notices.unshift(payload);
+      }
+
+      fillNoticeForm();
+      saveState();
+      setStatus("Aviso salvo no rascunho local e refletido na home deste navegador.");
+    });
+
+    linkForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const payload = {
+        id: linkId.value || `link-${Date.now()}`,
+        label: linkLabel.value.trim(),
+        url: linkUrl.value.trim(),
+        published: linkPublished.checked
+      };
+
+      const existingIndex = adminState.quickLinks.findIndex((item) => item.id === payload.id);
+      if (existingIndex >= 0) {
+        adminState.quickLinks[existingIndex] = payload;
+      } else {
+        adminState.quickLinks.unshift(payload);
+      }
+
+      fillLinkForm();
+      saveState();
+      setStatus("Link rápido salvo no rascunho local.");
+    });
+
+    homepageForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      adminState.homepage.highlightTitle = homepageTitle.value.trim();
+      adminState.homepage.highlightText = homepageText.value.trim();
+      saveState();
+      setStatus("Texto principal da home atualizado no rascunho local.");
+    });
+
+    document.getElementById("clearNoticeForm").addEventListener("click", () => fillNoticeForm());
+    document.getElementById("clearLinkForm").addEventListener("click", () => fillLinkForm());
+
+    document.getElementById("downloadJsonButton").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(adminState, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "site-content.json";
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setStatus("Arquivo JSON baixado. Ele já pode substituir data/site-content.json no projeto.");
+    });
+
+    document.getElementById("copyJsonButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(adminState, null, 2));
+        setStatus("JSON copiado para a área de transferência.");
+      } catch (error) {
+        setStatus("Não foi possível copiar automaticamente. Use o bloco de JSON ao lado para copiar manualmente.");
+      }
+    });
+
+    document.getElementById("importJsonInput").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      const imported = JSON.parse(text);
+      adminState = {
+        updatedAt: imported.updatedAt || new Date().toISOString(),
+        notices: Array.isArray(imported.notices) ? imported.notices : [],
+        quickLinks: Array.isArray(imported.quickLinks) ? imported.quickLinks : [],
+        homepage: imported.homepage || { highlightTitle: "", highlightText: "" }
+      };
+      saveState();
+      event.target.value = "";
+      setStatus("Arquivo importado com sucesso para o rascunho local.");
+    });
+
+    document.getElementById("resetDraftButton").addEventListener("click", async () => {
+      localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
+      await bootstrap();
+      setStatus("Rascunho local removido. O painel voltou para a base pública do projeto.");
+    });
+
+    async function bootstrap() {
+      const draft = localStorage.getItem(SITE_CONTENT_STORAGE_KEY);
+      if (draft) {
+        adminState = JSON.parse(draft);
+      } else {
+        try {
+          const response = await fetch(SITE_CONTENT_SOURCE, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          adminState = await response.json();
+        } catch (error) {
+          console.warn("Falha ao carregar conteúdo base.", error);
+          adminState = structuredClone(defaultContent);
+        }
+      }
+
+      if (!adminState.homepage) {
+        adminState.homepage = { highlightTitle: "", highlightText: "" };
+      }
+
+      fillNoticeForm();
+      fillLinkForm();
+      renderAll();
+      showPanel("dashboardPanel");
+      setStatus("Painel carregado. Alterações salvas aqui ficam disponíveis na home deste navegador.");
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
