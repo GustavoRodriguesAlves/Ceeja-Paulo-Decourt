@@ -1,0 +1,70 @@
+:root {
+  --brand-primary: #003366;
+  --brand-secondary: #00509E;
+  --brand-accent: #FFC000;
+  --bg-dashboard: #F4F7F6;
+  --text-main: #2D3748;
+  --border-color: #E2E8F0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-dashboard);
+}
+
+.serif {
+  font-family: "Merriweather", serif;
+}
+
+.topbar {
+  background-color: var(--brand-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-white {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.btn-outline-white:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 6px 6px 0 0;
+  color: var(--brand-primary);
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-footer {
+  background-color: #1F2937;
+  border-top: 1px solid #374151;
+  color: #9CA3AF;
+}

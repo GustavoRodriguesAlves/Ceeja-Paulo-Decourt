@@ -1,28 +1,29 @@
 # CEEJA Paulo Decourt
 
-Site estático preparado para publicação no GitHub Pages.
+Site institucional estático do CEEJA Paulo Decourt, publicado via GitHub Pages.
 
-## Estrutura principal
+## Estrutura
 
 - `index.html`: home pública
-- `portal.html`: área autenticada de teste
-- `assets/`: imagens e logo
-- `wifi.html`, `livros.html`, `roteiros.html`: páginas auxiliares
+- `portal.html`: portal do aluno de teste
+- `admin.html`: painel editorial da secretaria
+- `wifi.html`, `livros.html`, `roteiros.html`: páginas de apoio
+- `assets/`: imagens, CSS e JavaScript compartilhados
+- `data/site-content.json`: conteúdo estruturado da home
 
-## Publicação no GitHub Pages
+## Organização atual
 
-Este projeto já está configurado com workflow em `.github/workflows/deploy-pages.yml`.
+- autenticação e chaves compartilhadas em `assets/js/auth.js`
+- leitura e persistência do conteúdo público em `assets/js/site-content.js`
+- estilos comuns das páginas internas em `assets/css/secondary-pages.css`
 
-Quando o repositório for enviado para a branch `main`, o GitHub Actions fará o deploy automático no GitHub Pages.
+## Publicação
 
-## Passos que ainda dependem da sua conta GitHub
+O projeto já possui deploy automático configurado em `.github/workflows/deploy-pages.yml`.
 
-1. Criar um repositório no GitHub.
-2. Enviar estes arquivos para a branch `main`.
-3. No repositório, abrir `Settings > Pages`.
-4. Em `Source`, selecionar `GitHub Actions`.
-5. Após o primeiro push, aguardar o workflow `Deploy GitHub Pages`.
+Para publicar:
 
-## Observação
-
-Como o ambiente atual não possui `git` nem `gh`, a criação do repositório remoto e o push inicial não puderam ser executados daqui.
+1. envie o repositório para a branch `main`;
+2. abra `Settings > Pages`;
+3. selecione `GitHub Actions` em `Build and deployment`;
+4. aguarde a execução do workflow `Deploy GitHub Pages`.
