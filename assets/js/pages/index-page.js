@@ -198,8 +198,8 @@ function applyHomepageContent(content) {
   if (homepageHighlightTitle && homepage.highlightTitle) {
     const safeTitle = escapeHtml(homepage.highlightTitle);
     homepageHighlightTitle.innerHTML = safeTitle.replace(
-      /propÃ³sito e clareza/i,
-      '<span class="text-[var(--brand-accent)]">propÃ³sito e clareza</span>'
+      /propósito e clareza/i,
+      '<span class="text-[var(--brand-accent)]">propósito e clareza</span>'
     );
   }
 
@@ -274,7 +274,7 @@ function applyHomepageContent(content) {
               <a class="dashboard-link action-btn flex items-center justify-between group !mb-0" href="${escapeHtml(link.url || "#")}" target="_blank" rel="noopener noreferrer">
                 <div>
                   <p class="font-bold text-gray-800 text-sm group-hover:text-primary transition-colors">${escapeHtml(link.label || "")}</p>
-                  <p class="mt-1 text-xs text-gray-500">Acesso rÃ¡pido publicado pela secretaria.</p>
+                  <p class="mt-1 text-xs text-gray-500">Acesso rápido publicado pela secretaria.</p>
                 </div>
                 <svg class="w-4 h-4 text-gray-400 group-hover:text-primary shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5h5m0 0v5m0-5L10 14"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9v10h10"></path></svg>
               </a>
@@ -290,7 +290,7 @@ async function loadHomepageContent() {
     const content = await loadSiteContent();
     applyHomepageContent(content);
   } catch (error) {
-    console.warn("Falha ao carregar conteÃºdo estruturado da home.", error);
+    console.warn("Falha ao carregar conteúdo estruturado da home.", error);
     applyHomepageContent({ notices: [], quickLinks: [], gallery: [], homepage: {} });
   }
 }

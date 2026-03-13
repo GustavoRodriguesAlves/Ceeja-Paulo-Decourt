@@ -81,7 +81,7 @@ async function openNotasPopup() {
     try {
       await navigator.clipboard.writeText(raValue);
     } catch (error) {
-      console.warn("NÃ£o foi possÃ­vel copiar o RA automaticamente.", error);
+      console.warn("Não foi possível copiar o RA automaticamente.", error);
     }
   }
 

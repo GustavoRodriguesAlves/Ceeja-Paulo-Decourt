@@ -3,9 +3,9 @@
   "notices": [
     {
       "id": "notice-001",
-      "title": "OrientaÃ§Ã£o geral para novos alunos",
-      "summary": "A orientaÃ§Ã£o geral acontece em horÃ¡rios fixos durante a semana e apresenta o funcionamento da escola, materiais de estudo e avaliaÃ§Ãµes.",
-      "category": "MatrÃ­culas",
+      "title": "Orientação geral para novos alunos",
+      "summary": "A orientação geral acontece em horários fixos durante a semana e apresenta o funcionamento da escola, materiais de estudo e avaliações.",
+      "category": "Matrículas",
       "date": "2026-03-12",
       "featured": true,
       "published": true
@@ -13,7 +13,7 @@
     {
       "id": "notice-002",
       "title": "Atendimento da secretaria",
-      "summary": "A secretaria realiza matrÃ­culas e atendimento administrativo de segunda a sexta, das 08:30 Ã s 20:00.",
+      "summary": "A secretaria realiza matrículas e atendimento administrativo de segunda a sexta, das 08:30 às 20:00.",
       "category": "Secretaria",
       "date": "2026-03-12",
       "featured": false,
@@ -21,9 +21,9 @@
     },
     {
       "id": "notice-003",
-      "title": "RefeiÃ§Ãµes para alunos",
-      "summary": "AlmoÃ§o das 12h10 Ã s 13h10 e jantar das 18h10 Ã s 18h45 para alunos presentes na unidade.",
-      "category": "ServiÃ§os",
+      "title": "Refeições para alunos",
+      "summary": "Almoço das 12h10 às 13h10 e jantar das 18h10 às 18h45 para alunos presentes na unidade.",
+      "category": "Serviços",
       "date": "2026-03-12",
       "featured": false,
       "published": true
@@ -32,13 +32,13 @@
   "quickLinks": [
     {
       "id": "link-001",
-      "label": "WhatsApp da direÃ§Ã£o",
+      "label": "WhatsApp da direção",
       "url": "https://wa.me/5519995111514",
       "published": true
     },
     {
       "id": "link-002",
-      "label": "Consulta pÃºblica do histÃ³rico",
+      "label": "Consulta pública do histórico",
       "url": "https://sed.educacao.sp.gov.br/SedCon/ConsultaPublica/Index",
       "published": true
     },
@@ -84,15 +84,15 @@
     },
     {
       "id": "media-005",
-      "title": "Ãrea de convivÃªncia",
+      "title": "Área de convivência",
       "src": "assets/images/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
-      "alt": "Ãrea de convivÃªncia escolar",
+      "alt": "Área de convivência escolar",
       "order": 5,
       "published": true
     }
   ],
   "homepage": {
-    "highlightTitle": "Uma instituiÃ§Ã£o para quem busca retomar os estudos com propÃ³sito e clareza.",
-    "highlightText": "O CEEJA Paulo Decourt oferece um percurso flexÃ­vel, com orientaÃ§Ã£o pedagÃ³gica presencial, materiais de estudo qualificados e certificaÃ§Ã£o oficial para a conclusÃ£o da EducaÃ§Ã£o BÃ¡sica."
+    "highlightTitle": "Uma instituição para quem busca retomar os estudos com propósito e clareza.",
+    "highlightText": "O CEEJA Paulo Decourt oferece um percurso flexível, com orientação pedagógica presencial, materiais de estudo qualificados e certificação oficial para a conclusão da Educação Básica."
   }
 }
