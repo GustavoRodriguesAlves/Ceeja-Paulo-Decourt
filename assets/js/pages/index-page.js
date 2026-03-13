@@ -1,4 +1,4 @@
-﻿import {
+import {
   clearPortalAuth,
   forgetAdmin,
   forgetPortal,
@@ -10,7 +10,7 @@
   setAdminSession,
   setPortalSession
 } from "../core/auth.js";
-import { loadSiteContent } from "../core/site-content.js";
+import { fetchPublishedSiteContent } from "../core/site-content.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const forceHomeView = urlParams.get("home") === "1";
@@ -24,30 +24,25 @@ if (logoutRequested) {
 const rememberedPortalEmail = getRememberedPortalEmail();
 if (!forceHomeView && !logoutRequested && !adminRequested && rememberedPortalEmail) {
   setPortalSession(rememberedPortalEmail);
-  window.location.href = "portal.html";
+  window.location.replace("portal.html");
 }
 
 const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 const mobileMenu = document.getElementById("mobileMenu");
 const loginModal = document.getElementById("loginModal");
 const adminLoginModal = document.getElementById("adminLoginModal");
-const openLoginButtons = [
-  document.getElementById("openLoginBtn"),
-  document.getElementById("openLoginMobileBtn"),
-  document.getElementById("openLoginHero"),
-  document.getElementById("openLoginContact")
-];
-const openAdminLoginButton = document.getElementById("openAdminLoginBtn");
 const loginForm = document.getElementById("loginForm");
+const adminLoginForm = document.getElementById("adminLoginForm");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
-const loginError = document.getElementById("loginError");
-const keepConnectedCheckbox = document.getElementById("keepConnected");
-const adminLoginForm = document.getElementById("adminLoginForm");
 const adminLoginEmail = document.getElementById("adminLoginEmail");
 const adminLoginPassword = document.getElementById("adminLoginPassword");
+const loginError = document.getElementById("loginError");
 const adminLoginError = document.getElementById("adminLoginError");
+const keepConnectedCheckbox = document.getElementById("keepConnected");
 const keepAdminConnectedCheckbox = document.getElementById("keepAdminConnected");
+const homepageHighlightTitle = document.getElementById("homepageHighlightTitle");
+const homepageHighlightText = document.getElementById("homepageHighlightText");
 const carouselTrack = document.getElementById("carouselTrack");
 const carouselIndicators = document.getElementById("carouselIndicators");
 const photoModal = document.getElementById("photoModal");
@@ -56,8 +51,16 @@ const closePhotoModalButton = document.getElementById("closePhotoModalBtn");
 const closeLoginModalButton = document.getElementById("closeLoginModal");
 const closeAdminLoginModalButton = document.getElementById("closeAdminLoginModal");
 
+const openLoginButtons = [
+  document.getElementById("openLoginBtn"),
+  document.getElementById("openLoginMobileBtn"),
+  document.getElementById("openLoginHero"),
+  document.getElementById("openLoginContact")
+];
+const openAdminLoginButton = document.getElementById("openAdminLoginBtn");
+
 let currentSlide = 0;
-let slideInterval;
+let slideInterval = null;
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -84,14 +87,14 @@ function openLogin() {
     return;
   }
 
-  loginError.classList.add("hidden");
-  loginModal.classList.add("active");
+  loginError?.classList.add("hidden");
+  loginModal?.classList.add("active");
   document.body.style.overflow = "hidden";
-  setTimeout(() => loginEmail.focus(), 100);
+  setTimeout(() => loginEmail?.focus(), 80);
 }
 
 function closeLogin() {
-  loginModal.classList.remove("active");
+  loginModal?.classList.remove("active");
   document.body.style.overflow = "";
 }
 
@@ -102,18 +105,21 @@ function openAdminLogin() {
     return;
   }
 
-  adminLoginError.classList.add("hidden");
-  adminLoginModal.classList.add("active");
+  adminLoginError?.classList.add("hidden");
+  adminLoginModal?.classList.add("active");
   document.body.style.overflow = "hidden";
-  setTimeout(() => adminLoginEmail.focus(), 100);
+  setTimeout(() => adminLoginEmail?.focus(), 80);
 }
 
 function closeAdminLogin() {
-  adminLoginModal.classList.remove("active");
+  adminLoginModal?.classList.remove("active");
   document.body.style.overflow = "";
 }
 
 function openPhotoModal(src, alt) {
+  if (!modalImage || !photoModal) {
+    return;
+  }
   modalImage.src = src;
   modalImage.alt = alt;
   photoModal.classList.add("active");
@@ -121,27 +127,40 @@ function openPhotoModal(src, alt) {
 }
 
 function closePhotoModal() {
-  photoModal.classList.remove("active");
+  photoModal?.classList.remove("active");
   document.body.style.overflow = "";
 }
 
 function showSlide(index) {
-  const slides = document.querySelectorAll(".carousel-slide");
-  const dots = document.querySelectorAll(".indicator-dot");
+  const slides = [...document.querySelectorAll(".carousel-slide")];
+  const dots = [...document.querySelectorAll(".indicator-dot")];
   if (!slides.length) {
     return;
   }
 
-  slides.forEach((slide) => slide.classList.remove("active"));
-  dots.forEach((dot) => dot.classList.remove("active"));
   currentSlide = (index + slides.length) % slides.length;
-  slides[currentSlide].classList.add("active");
-  dots[currentSlide].classList.add("active");
+  slides.forEach((slide, slideIndex) => {
+    slide.classList.toggle("active", slideIndex === currentSlide);
+  });
+  dots.forEach((dot, dotIndex) => {
+    dot.classList.toggle("active", dotIndex === currentSlide);
+  });
 }
 
 function resetSlideTimer() {
-  clearInterval(slideInterval);
-  slideInterval = setInterval(nextSlide, 4000);
+  if (slideInterval) {
+    window.clearInterval(slideInterval);
+  }
+
+  const totalSlides = document.querySelectorAll(".carousel-slide").length;
+  if (totalSlides <= 1) {
+    slideInterval = null;
+    return;
+  }
+
+  slideInterval = window.setInterval(() => {
+    showSlide(currentSlide + 1);
+  }, 4000);
 }
 
 function nextSlide() {
@@ -160,29 +179,39 @@ function goToSlide(index) {
 }
 
 function applyHomepageContent(content) {
-  const notices = Array.isArray(content?.notices)
-    ? content.notices
-        .filter((item) => item.published)
-        .sort((a, b) => {
-          if (Boolean(a.featured) !== Boolean(b.featured)) {
-            return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
-          }
-          return String(b.date).localeCompare(String(a.date));
-        })
-    : [];
-  const quickLinks = Array.isArray(content?.quickLinks)
-    ? content.quickLinks.filter((item) => item.published)
-    : [];
+  const homepage = content?.homepage || {};
   const gallery = Array.isArray(content?.gallery)
     ? content.gallery
         .filter((item) => item.published !== false)
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
     : [];
-  const homepage = content?.homepage || {};
 
+  if (homepageHighlightTitle && homepage.highlightTitle) {
+    const safeTitle = escapeHtml(homepage.highlightTitle);
+    homepageHighlightTitle.innerHTML = safeTitle.replace(
+      /propósito e clareza/i,
+      '<span class="text-[var(--brand-accent)]">propósito e clareza</span>'
+    );
+  }
 
+  if (homepageHighlightText && homepage.highlightText) {
+    homepageHighlightText.textContent = homepage.highlightText;
+  }
 
   if (carouselTrack && carouselIndicators) {
+    if (!gallery.length) {
+      carouselTrack.innerHTML = `
+        <div class="carousel-slide active">
+          <div class="flex h-full items-center justify-center bg-slate-100 text-center text-sm text-slate-500">
+            Nenhuma imagem foi publicada para a galeria.
+          </div>
+        </div>
+      `;
+      carouselIndicators.innerHTML = "";
+      resetSlideTimer();
+      return;
+    }
+
     carouselTrack.innerHTML = gallery
       .map(
         (item, index) => `
@@ -191,7 +220,7 @@ function applyHomepageContent(content) {
               src="${escapeHtml(item.src || "")}"
               alt="${escapeHtml(item.alt || item.title || "")}"
               class="carousel-img"
-              loading="lazy"
+              loading="${index === 0 ? "eager" : "lazy"}"
               onclick="openPhotoModal(this.src, this.alt)"
             >
           </div>
@@ -203,6 +232,7 @@ function applyHomepageContent(content) {
       .map(
         (item, index) => `
           <button
+            type="button"
             class="indicator-dot ${index === 0 ? "active" : ""}"
             onclick="goToSlide(${index})"
             aria-label="${escapeHtml(item.title || `Slide ${index + 1}`)}"
@@ -212,70 +242,63 @@ function applyHomepageContent(content) {
       .join("");
 
     currentSlide = 0;
-    if (gallery.length) {
-      showSlide(0);
-      resetSlideTimer();
-    } else {
-      clearInterval(slideInterval);
-    }
-  }}
+    showSlide(0);
+    resetSlideTimer();
+  }
+}
 
 async function loadHomepageContent() {
   try {
-    const content = await loadSiteContent();
+    const content = await fetchPublishedSiteContent();
     applyHomepageContent(content);
   } catch (error) {
     console.warn("Falha ao carregar conteúdo estruturado da home.", error);
-    applyHomepageContent({ notices: [], quickLinks: [], gallery: [], homepage: {} });
+    applyHomepageContent({ gallery: [], homepage: {} });
   }
 }
 
-mobileMenuBtn.addEventListener("click", () => {
-  mobileMenu.classList.toggle("hidden");
+mobileMenuBtn?.addEventListener("click", () => {
+  mobileMenu?.classList.toggle("hidden");
 });
 
 openLoginButtons.forEach((button) => {
-  if (button) {
-    button.addEventListener("click", openLogin);
-  }
+  button?.addEventListener("click", openLogin);
 });
 
-if (openAdminLoginButton) {
-  openAdminLoginButton.addEventListener("click", openAdminLogin);
-}
+openAdminLoginButton?.addEventListener("click", openAdminLogin);
+closeLoginModalButton?.addEventListener("click", closeLogin);
+closeAdminLoginModalButton?.addEventListener("click", closeAdminLogin);
+closePhotoModalButton?.addEventListener("click", closePhotoModal);
 
-closeLoginModalButton.addEventListener("click", closeLogin);
-loginModal.addEventListener("click", (event) => {
+loginModal?.addEventListener("click", (event) => {
   if (event.target === loginModal) {
     closeLogin();
   }
 });
 
-closeAdminLoginModalButton.addEventListener("click", closeAdminLogin);
-adminLoginModal.addEventListener("click", (event) => {
+adminLoginModal?.addEventListener("click", (event) => {
   if (event.target === adminLoginModal) {
     closeAdminLogin();
   }
 });
 
-closePhotoModalButton.addEventListener("click", closePhotoModal);
-photoModal.addEventListener("click", (event) => {
+photoModal?.addEventListener("click", (event) => {
   if (event.target === photoModal) {
     closePhotoModal();
   }
 });
 
-loginForm.addEventListener("submit", (event) => {
+loginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const email = loginEmail.value.trim().toLowerCase();
   const password = loginPassword.value;
 
   if (!isValidTestCredential(email, password)) {
-    loginError.classList.remove("hidden");
+    loginError?.classList.remove("hidden");
     return;
   }
 
-  if (keepConnectedCheckbox.checked) {
+  if (keepConnectedCheckbox?.checked) {
     rememberPortal(email);
   } else {
     forgetPortal();
@@ -284,17 +307,17 @@ loginForm.addEventListener("submit", (event) => {
   redirectToPortal(email);
 });
 
-adminLoginForm.addEventListener("submit", (event) => {
+adminLoginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const email = adminLoginEmail.value.trim().toLowerCase();
   const password = adminLoginPassword.value;
 
   if (!isValidTestCredential(email, password)) {
-    adminLoginError.classList.remove("hidden");
+    adminLoginError?.classList.remove("hidden");
     return;
   }
 
-  if (keepAdminConnectedCheckbox.checked) {
+  if (keepAdminConnectedCheckbox?.checked) {
     rememberAdmin(email);
   } else {
     forgetAdmin();
@@ -304,15 +327,16 @@ adminLoginForm.addEventListener("submit", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeLogin();
-    closeAdminLogin();
-    closePhotoModal();
+  if (event.key !== "Escape") {
+    return;
   }
+  closeLogin();
+  closeAdminLogin();
+  closePhotoModal();
 });
 
 if (adminRequested) {
-  setTimeout(openAdminLogin, 120);
+  window.setTimeout(openAdminLogin, 120);
 }
 
 window.openPhotoModal = openPhotoModal;

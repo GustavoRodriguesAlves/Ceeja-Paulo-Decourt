@@ -1,4 +1,4 @@
-﻿import {
+import {
   TEST_LOGIN_EMAIL,
   clearAdminAuth,
   getAdminSessionEmail,
@@ -6,9 +6,15 @@
 } from "../core/auth.js";
 import {
   clearDraftSiteContent,
-  loadSiteContent,
+  clearGitHubPublishToken,
+  fetchPublishedSiteContentMeta,
+  fetchPublishedSiteContent,
+  getGitHubPublishToken,
+  loadEditorSiteContent,
   normalizeSiteContent,
-  saveDraftSiteContent
+  publishSiteContentToGitHub,
+  saveDraftSiteContent,
+  setGitHubPublishToken
 } from "../core/site-content.js";
 
 const rememberedAdminEmail = syncRememberedAdminSession();
@@ -28,6 +34,7 @@ const defaultContent = {
 
 let adminState = structuredClone(defaultContent);
 let pendingConfirmation = null;
+let publishQueue = Promise.resolve();
 
 const panelButtons = [...document.querySelectorAll("[data-panel]")];
 const panels = [...document.querySelectorAll(".content-panel")];
@@ -58,16 +65,16 @@ const mediaAlt = document.getElementById("mediaAlt");
 const mediaOrder = document.getElementById("mediaOrder");
 const mediaPublished = document.getElementById("mediaPublished");
 
-
 const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
 const dashboardLinkCount = document.getElementById("dashboardLinkCount");
 const dashboardGalleryCount = document.getElementById("dashboardGalleryCount");
 const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
-const publishNoticeCount = document.getElementById("publishNoticeCount");
-const publishLinkCount = document.getElementById("publishLinkCount");
-const publishGalleryCount = document.getElementById("publishGalleryCount");
-const jsonPreview = document.getElementById("jsonPreview");
 const adminStatus = document.getElementById("adminStatus");
+const githubTokenForm = document.getElementById("githubTokenForm");
+const githubTokenInput = document.getElementById("githubTokenInput");
+const githubTokenStatus = document.getElementById("githubTokenStatus");
+const clearGitHubTokenButton = document.getElementById("clearGitHubTokenButton");
+const usePublishedContentButton = document.getElementById("usePublishedContentButton");
 
 const confirmModal = document.getElementById("confirmModal");
 const confirmMessage = document.getElementById("confirmMessage");
@@ -77,10 +84,6 @@ const confirmActionButton = document.getElementById("confirmActionButton");
 const clearNoticeFormButton = document.getElementById("clearNoticeForm");
 const clearLinkFormButton = document.getElementById("clearLinkForm");
 const clearMediaFormButton = document.getElementById("clearMediaForm");
-const downloadJsonButton = document.getElementById("downloadJsonButton");
-const copyJsonButton = document.getElementById("copyJsonButton");
-const importJsonInput = document.getElementById("importJsonInput");
-const resetDraftButton = document.getElementById("resetDraftButton");
 const logoutAdminButton = document.getElementById("logoutAdminButton");
 
 const escapeHtml = (value = "") =>
@@ -102,9 +105,37 @@ const formatDate = (value) => {
   return parsed.toLocaleDateString("pt-BR");
 };
 
-function setStatus(message) {
-  if (adminStatus) {
-    adminStatus.innerHTML = `<svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> ` + message;
+function setStatus(message, tone = "info") {
+  if (!adminStatus) {
+    return;
+  }
+
+  const toneClass = {
+    info: "text-blue-800 bg-blue-50 border-blue-100",
+    success: "text-green-800 bg-green-50 border-green-100",
+    warning: "text-yellow-800 bg-yellow-50 border-yellow-100",
+    danger: "text-red-800 bg-red-50 border-red-100"
+  }[tone] || "text-blue-800 bg-blue-50 border-blue-100";
+
+  adminStatus.className = `status-banner ${toneClass}`;
+  adminStatus.textContent = message;
+}
+
+function updateGitHubTokenStatus() {
+  const hasToken = Boolean(getGitHubPublishToken());
+  if (!githubTokenStatus) {
+    return;
+  }
+
+  githubTokenStatus.textContent = hasToken
+    ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
+    : "Nenhum token conectado. As alterações ficarão apenas neste navegador até você conectar o GitHub.";
+  githubTokenStatus.className = hasToken
+    ? "text-sm text-green-700"
+    : "text-sm text-yellow-700";
+
+  if (clearGitHubTokenButton) {
+    clearGitHubTokenButton.disabled = !hasToken;
   }
 }
 
@@ -126,13 +157,44 @@ function closeConfirmModal() {
   document.body.style.overflow = "";
 }
 
-function saveState(message) {
+async function publishStateToGitHub(reason) {
+  const token = getGitHubPublishToken();
+  if (!token) {
+    setStatus(
+      "Alteração salva apenas neste navegador. Conecte um token fino do GitHub para publicar automaticamente para todos.",
+      "warning"
+    );
+    return;
+  }
+
+  publishQueue = publishQueue
+    .catch(() => null)
+    .then(async () => {
+      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info");
+      try {
+        await publishSiteContentToGitHub(adminState, token, reason);
+        setStatus(
+          "Alterações publicadas com sucesso. O GitHub Pages pode levar alguns segundos para refletir o novo conteúdo.",
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+        setStatus(
+          "Não foi possível publicar no GitHub. O rascunho continua salvo localmente. Verifique o token e as permissões de escrita no repositório.",
+          "danger"
+        );
+      }
+    });
+
+  return publishQueue;
+}
+
+function saveState(localMessage, publishMessage) {
   adminState.updatedAt = new Date().toISOString();
   saveDraftSiteContent(adminState);
   renderAll();
-  if (message) {
-    setStatus(message);
-  }
+  setStatus(localMessage, getGitHubPublishToken() ? "info" : "warning");
+  publishStateToGitHub(publishMessage);
 }
 
 function fillNoticeForm(item = null) {
@@ -182,7 +244,7 @@ function renderNotices() {
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <span class="chip">${escapeHtml(item.category || "Aviso")}</span>
               <span class="text-xs font-semibold text-gray-500">${escapeHtml(formatDate(item.date))}</span>
-              <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Rascunho"}</span>
+              <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Oculto"}</span>
             </div>
             <h4 class="text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
             <p class="helper-text mt-1 text-sm">${escapeHtml(item.summary || "")}</p>
@@ -207,9 +269,12 @@ function renderNotices() {
 
   noticeItems.querySelectorAll("[data-delete-notice]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse aviso será removido do rascunho atual da home.", () => {
+      openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", () => {
         adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
-        saveState("Aviso removido do rascunho local.");
+        saveState(
+          "Aviso removido do rascunho local.",
+          `Remove notice ${button.dataset.deleteNotice} from site content`
+        );
       });
     });
   });
@@ -253,9 +318,12 @@ function renderLinks() {
 
   linkItems.querySelectorAll("[data-delete-link]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse link deixará de aparecer na home do site.", () => {
+      openConfirmModal("Esse link deixará de aparecer para os alunos.", () => {
         adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
-        saveState("Link removido do rascunho local.");
+        saveState(
+          "Link removido do rascunho local.",
+          `Remove quick link ${button.dataset.deleteLink} from site content`
+        );
       });
     });
   });
@@ -272,7 +340,7 @@ function renderGallery() {
     .map(
       (item) => `
         <article class="list-card-horizontal">
-          <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || "")}" class="media-thumb w-24 h-16 object-cover rounded shadow-sm border border-gray-200" loading="lazy" />
+          <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" class="media-thumb w-24 h-16 object-cover rounded shadow-sm border border-gray-200" loading="lazy" />
           <div class="list-card-horizontal-content">
             <div class="flex items-center gap-2 mb-1">
               <span class="chip text-xs">Posição ${escapeHtml(String(item.order || "-"))}</span>
@@ -282,8 +350,8 @@ function renderGallery() {
             <p class="mt-1 text-xs text-gray-500 font-mono">${escapeHtml(item.src || "")}</p>
           </div>
           <div class="list-card-horizontal-actions flex-col">
-             <button type="button" class="btn-secondary px-3 py-1.5 text-xs" data-edit-media="${item.id}">Editar</button>
-             <button type="button" class="btn-danger px-3 py-1.5 text-xs" data-delete-media="${item.id}">Remover</button>
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" data-edit-media="${item.id}">Editar</button>
+            <button type="button" class="btn-danger px-3 py-1.5 text-xs" data-delete-media="${item.id}">Remover</button>
           </div>
         </article>
       `
@@ -301,9 +369,12 @@ function renderGallery() {
 
   mediaItems.querySelectorAll("[data-delete-media]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem será retirada da galeria configurada para a home.", () => {
+      openConfirmModal("Essa imagem será retirada do carrossel público da home.", () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
-        saveState("Imagem removida da galeria local.");
+        saveState(
+          "Imagem removida da galeria local.",
+          `Remove gallery item ${button.dataset.deleteMedia} from site content`
+        );
       });
     });
   });
@@ -320,10 +391,6 @@ function renderDashboard() {
   dashboardUpdatedAt.textContent = adminState.updatedAt
     ? new Date(adminState.updatedAt).toLocaleString("pt-BR")
     : "-";
-  if (publishNoticeCount) publishNoticeCount.textContent = publishedNotices;
-  if (publishLinkCount) publishLinkCount.textContent = publishedLinks;
-  if (publishGalleryCount) publishGalleryCount.textContent = publishedGallery;
-  jsonPreview.textContent = JSON.stringify(adminState, null, 2);
 }
 
 function renderAll() {
@@ -337,20 +404,20 @@ panelButtons.forEach((button) => {
   button.addEventListener("click", () => showPanel(button.dataset.panel));
 });
 
-cancelConfirmButton.addEventListener("click", closeConfirmModal);
-confirmModal.addEventListener("click", (event) => {
+cancelConfirmButton?.addEventListener("click", closeConfirmModal);
+confirmModal?.addEventListener("click", (event) => {
   if (event.target === confirmModal) {
     closeConfirmModal();
   }
 });
-confirmActionButton.addEventListener("click", () => {
+confirmActionButton?.addEventListener("click", () => {
   if (typeof pendingConfirmation === "function") {
     pendingConfirmation();
   }
   closeConfirmModal();
 });
 
-noticeForm.addEventListener("submit", (event) => {
+noticeForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const payload = {
     id: noticeId.value || `notice-${Date.now()}`,
@@ -361,17 +428,19 @@ noticeForm.addEventListener("submit", (event) => {
     featured: noticeFeatured.checked,
     published: noticePublished.checked
   };
+
   const existingIndex = adminState.notices.findIndex((item) => item.id === payload.id);
   if (existingIndex >= 0) {
     adminState.notices[existingIndex] = payload;
   } else {
     adminState.notices.unshift(payload);
   }
+
   fillNoticeForm();
-  saveState("Aviso salvo no rascunho local.");
+  saveState("Aviso salvo no painel.", `Update notices in site content`);
 });
 
-linkForm.addEventListener("submit", (event) => {
+linkForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const payload = {
     id: linkId.value || `link-${Date.now()}`,
@@ -379,17 +448,19 @@ linkForm.addEventListener("submit", (event) => {
     url: linkUrl.value.trim(),
     published: linkPublished.checked
   };
+
   const existingIndex = adminState.quickLinks.findIndex((item) => item.id === payload.id);
   if (existingIndex >= 0) {
     adminState.quickLinks[existingIndex] = payload;
   } else {
     adminState.quickLinks.unshift(payload);
   }
+
   fillLinkForm();
-  saveState("Link rápido salvo no rascunho local.");
+  saveState("Link salvo no painel.", `Update quick links in site content`);
 });
 
-mediaForm.addEventListener("submit", (event) => {
+mediaForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const payload = {
     id: mediaId.value || `media-${Date.now()}`,
@@ -399,91 +470,104 @@ mediaForm.addEventListener("submit", (event) => {
     order: Number(mediaOrder.value) || adminState.gallery.length + 1,
     published: mediaPublished.checked
   };
+
   const existingIndex = adminState.gallery.findIndex((item) => item.id === payload.id);
   if (existingIndex >= 0) {
     adminState.gallery[existingIndex] = payload;
   } else {
     adminState.gallery.push(payload);
   }
+
   fillMediaForm();
-  saveState("Imagem salva na galeria local.");
+  saveState("Imagem salva no painel.", `Update gallery in site content`);
 });
 
-clearNoticeFormButton.addEventListener("click", () => fillNoticeForm());
-clearLinkFormButton.addEventListener("click", () => fillLinkForm());
-clearMediaFormButton.addEventListener("click", () => fillMediaForm());
-
-downloadJsonButton.addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(adminState, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "site-content.json";
-  anchor.click();
-  URL.revokeObjectURL(url);
-  setStatus("Arquivo JSON baixado. Ele já pode substituir data/site-content.json no projeto.");
-});
-
-copyJsonButton.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(JSON.stringify(adminState, null, 2));
-    setStatus("JSON copiado para a área de transferência.");
-  } catch (error) {
-    setStatus("Não foi possível copiar automaticamente. Use o bloco de JSON para copiar manualmente.");
-  }
-});
-
-importJsonInput.addEventListener("change", async (event) => {
-  const file = event.target.files?.[0];
-  if (!file) {
+githubTokenForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const token = githubTokenInput.value.trim();
+  if (!token) {
+    setStatus("Informe um token do GitHub com permissão de escrita no repositório.", "warning");
     return;
   }
 
   try {
-    adminState = normalizeSiteContent(JSON.parse(await file.text()));
-    saveState("Arquivo importado para o rascunho local.");
+    setStatus("Validando token e conectando ao GitHub...", "info");
+    await fetchPublishedSiteContentMeta(token);
+    setGitHubPublishToken(token);
+    githubTokenInput.value = "";
+    updateGitHubTokenStatus();
+    setStatus(
+      "Conexão com o GitHub validada. As próximas alterações serão publicadas automaticamente para todos.",
+      "success"
+    );
   } catch (error) {
-    console.warn("Falha ao importar JSON.", error);
-    setStatus("O arquivo informado não pôde ser importado.");
-  } finally {
-    event.target.value = "";
+    console.error(error);
+    setStatus(
+      "Não foi possível validar o token. Verifique se ele tem permissão de Contents: write neste repositório.",
+      "danger"
+    );
   }
 });
 
-resetDraftButton.addEventListener("click", () => {
-  openConfirmModal("O rascunho salvo neste navegador será descartado e a base pública será restaurada.", async () => {
-    clearDraftSiteContent();
-    await bootstrap();
-    setStatus("Base restaurada a partir do conteúdo público do projeto.");
-  });
+clearGitHubTokenButton?.addEventListener("click", () => {
+  clearGitHubPublishToken();
+  updateGitHubTokenStatus();
+  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning");
 });
 
-logoutAdminButton.addEventListener("click", () => {
+usePublishedContentButton?.addEventListener("click", async () => {
+  openConfirmModal(
+    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteúdo publicado atualmente no GitHub.",
+    async () => {
+      try {
+        clearDraftSiteContent();
+        adminState = normalizeSiteContent(await fetchPublishedSiteContent());
+        renderAll();
+        fillNoticeForm();
+        fillLinkForm();
+        fillMediaForm();
+        setStatus("Conteúdo publicado recarregado com sucesso.", "success");
+      } catch (error) {
+        console.error(error);
+        setStatus("Não foi possível recarregar o conteúdo publicado agora.", "danger");
+      }
+    }
+  );
+});
+
+clearNoticeFormButton?.addEventListener("click", () => fillNoticeForm());
+clearLinkFormButton?.addEventListener("click", () => fillLinkForm());
+clearMediaFormButton?.addEventListener("click", () => fillMediaForm());
+
+logoutAdminButton?.addEventListener("click", () => {
   clearAdminAuth();
-  window.location.href = "index.html?home=1";
+  window.location.replace("index.html?home=1");
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && confirmModal.classList.contains("active")) {
+  if (event.key === "Escape" && confirmModal?.classList.contains("active")) {
     closeConfirmModal();
   }
 });
 
 async function bootstrap() {
   try {
-    adminState = await loadSiteContent();
+    adminState = normalizeSiteContent(await loadEditorSiteContent());
   } catch (error) {
     console.warn("Falha ao carregar conteúdo base.", error);
     adminState = structuredClone(defaultContent);
   }
 
-  adminState = normalizeSiteContent(adminState);
   fillNoticeForm();
   fillLinkForm();
   fillMediaForm();
   renderAll();
   showPanel("dashboardPanel");
-  setStatus("Painel carregado. As alterações feitas aqui ficam visíveis na home deste navegador.");
+  updateGitHubTokenStatus();
+  setStatus(
+    "Painel carregado. Você pode editar o conteúdo e, se conectar o GitHub, as alterações serão publicadas para todos automaticamente.",
+    getGitHubPublishToken() ? "success" : "warning"
+  );
 }
 
 bootstrap();

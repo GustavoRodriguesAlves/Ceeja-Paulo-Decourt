@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -38,32 +38,29 @@
           <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           Galeria da Home
         </button>
-        <button class="sidebar-link" data-panel="publishPanel">
-          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-          Salvar e Publicar
-        </button>
       </nav>
     </aside>
 
     <main class="content-area">
       <div class="content-wrap">
-        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-8">
+        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-6">
           <div>
             <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Gestão de Conteúdo</h2>
-            <p class="helper-text mt-1">Ambiente de edição do site oficial CEEJA Paulo Decourt</p>
+            <p class="helper-text mt-1">Ambiente de edição do site oficial do CEEJA Paulo Decourt</p>
           </div>
           <div class="flex gap-3">
-            <a href="index.html?home=1" class="btn-secondary text-sm" target="_blank">
+            <a href="index.html?home=1" class="btn-secondary text-sm">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-              Ver Site Público
+              Ver site público
             </a>
-            <button id="logoutAdminButton" type="button" class="btn-danger text-sm">
-              Sair
-            </button>
+            <button id="logoutAdminButton" type="button" class="btn-danger text-sm">Sair</button>
           </div>
         </header>
 
-        <!-- DASHBOARD PANEL -->
+        <div id="adminStatus" class="status-banner text-blue-800 bg-blue-50 border-blue-100">
+          Carregando painel...
+        </div>
+
         <section id="dashboardPanel" class="content-panel active">
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <article class="metric-card border-l-4 border-l-blue-500">
@@ -88,7 +85,7 @@
               </div>
             </article>
             <article class="metric-card border-l-4 border-l-yellow-500">
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última edição local</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última edição</p>
               <div class="mt-2 text-sm font-medium text-gray-600">
                 <p id="dashboardUpdatedAt" class="text-lg font-bold text-[var(--brand-primary)]">-</p>
               </div>
@@ -97,40 +94,44 @@
 
           <div class="grid gap-6 lg:grid-cols-2">
             <div class="panel p-6">
-              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4 flex items-center gap-2">
-                <svg class="h-5 w-5 text-[var(--brand-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                Ações Rápidas
-              </h3>
+              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Ações rápidas</h3>
               <div class="space-y-3">
                 <button type="button" onclick="document.querySelector('[data-panel=noticesPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
                   <div>
-                    <span class="block font-semibold text-gray-800">Publicar Novo Aviso</span>
-                    <span class="block text-sm text-gray-500">Adicione recados ao mural do Portal do Aluno</span>
+                    <span class="block font-semibold text-gray-800">Criar novo aviso</span>
+                    <span class="block text-sm text-gray-500">Atualize o mural do Portal do Aluno</span>
                   </div>
                   <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
-                <button type="button" onclick="document.querySelector('[data-panel=publishPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors flex items-center justify-between">
+                <button type="button" onclick="document.querySelector('[data-panel=mediaPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
                   <div>
-                    <span class="block font-semibold text-gray-800">Salvar Modificações em JSON</span>
-                    <span class="block text-sm text-gray-500">Exporte seu trabalho no formato pedido para a atualização oficial</span>
+                    <span class="block font-semibold text-gray-800">Atualizar galeria da home</span>
+                    <span class="block text-sm text-gray-500">Organize as imagens do carrossel principal</span>
                   </div>
                   <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
             </div>
+
             <div class="panel-soft p-6">
-              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Como publicar conteúdos?</h3>
-              <ol class="list-decimal space-y-3 pl-5 text-sm leading-6 text-gray-600">
-                <li>Navegue pelas abas ao lado para <strong>editar avisos, alterar links ou imagens</strong>.</li>
-                <li>Tudo que você edita fica salvo <strong>automaticamente no seu navegador</strong>.</li>
-                <li>Quando finalizar a revisão do conteúdo, vá na aba <strong>Publicação</strong> e baixe o arquivo <code class="bg-gray-200 text-gray-800 px-1 rounded">site-content.json</code> finalizado.</li>
-                <li>Substitua esse arquivo na pasta <code class="bg-gray-200 text-gray-800 px-1 rounded">data/</code> do projeto no GitHub para a alteração refletir oficialmente para todos.</li>
-              </ol>
+              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Publicação automática no GitHub</h3>
+              <p class="helper-text mb-4">Para que os comunicados apareçam para todos, o painel precisa enviar o arquivo <code class="bg-gray-200 text-gray-800 px-1 rounded">data/site-content.json</code> para o repositório. Sem isso, a alteração fica apenas nesta máquina.</p>
+              <form id="githubTokenForm" class="space-y-4">
+                <div>
+                  <label for="githubTokenInput" class="mb-1 block text-sm font-semibold">Token fino do GitHub</label>
+                  <input id="githubTokenInput" type="password" class="field" placeholder="Cole aqui um token com Contents: write" />
+                </div>
+                <div class="flex flex-wrap gap-3">
+                  <button type="submit" class="btn-primary text-sm">Conectar GitHub</button>
+                  <button id="clearGitHubTokenButton" type="button" class="btn-secondary text-sm">Desconectar</button>
+                  <button id="usePublishedContentButton" type="button" class="btn-secondary text-sm">Recarregar conteúdo publicado</button>
+                </div>
+              </form>
+              <p id="githubTokenStatus" class="mt-4 text-sm text-yellow-700">Nenhum token conectado.</p>
             </div>
           </div>
         </section>
 
-        <!-- NOTICES PANEL (SPLIT VIEW) -->
         <section id="noticesPanel" class="content-panel">
           <div class="section-grid">
             <div class="form-sticky">
@@ -139,15 +140,15 @@
                 <p class="helper-text mt-2 mb-5">Adicione ou edite recados operacionais para o Portal do Aluno.</p>
                 <form id="noticeForm" class="space-y-4">
                   <input id="noticeId" type="hidden" />
-                  <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">TÍTULO PRINCIPAL</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
-                  <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">MENSAGEM CURTA</label><textarea id="noticeSummary" class="field min-h-[100px]" placeholder="Informação rápida e direta" required></textarea></div>
+                  <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">Título principal</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
+                  <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">Mensagem curta</label><textarea id="noticeSummary" class="field min-h-[100px]" placeholder="Informação rápida e direta" required></textarea></div>
                   <div class="grid grid-cols-2 gap-4">
-                    <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">TAG</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
-                    <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">DATA VISÍVEL</label><input id="noticeDate" type="date" class="field" required /></div>
+                    <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">Tag</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
+                    <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">Data visível</label><input id="noticeDate" type="date" class="field" required /></div>
                   </div>
                   <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded border border-gray-100 mt-2">
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticeFeatured" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />Destacar aviso no topo da lista</label>
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticePublished" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />Exibir aviso aos alunos (Ativo)</label>
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticePublished" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />Exibir aviso aos alunos</label>
                   </div>
                   <div class="flex gap-2 pt-2">
                     <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
@@ -166,7 +167,6 @@
           </div>
         </section>
 
-        <!-- LINKS PANEL (SPLIT VIEW) -->
         <section id="linksPanel" class="content-panel">
           <div class="section-grid">
             <div class="form-sticky">
@@ -175,13 +175,13 @@
                 <p class="helper-text mt-2 mb-5">Crie botões de acesso externo para o Portal do Aluno.</p>
                 <form id="linkForm" class="space-y-4">
                   <input id="linkId" type="hidden" />
-                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">NOME DO BOTÃO</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
-                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">URL DO DESTINO</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
+                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Nome do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
+                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">URL do destino</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
                   <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Ativo para uso dos alunos</label>
                   </div>
                   <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar Link</button>
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar link</button>
                     <button id="clearLinkForm" type="button" class="btn-secondary px-3" title="Novo">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
@@ -197,7 +197,6 @@
           </div>
         </section>
 
-        <!-- MEDIA PANEL (SPLIT VIEW) -->
         <section id="mediaPanel" class="content-panel">
           <div class="section-grid">
             <div class="form-sticky">
@@ -206,18 +205,18 @@
                 <p class="helper-text mt-2 mb-5">Adicione fotos existentes no projeto ao carrossel da home.</p>
                 <form id="mediaForm" class="space-y-4">
                   <input id="mediaId" type="hidden" />
-                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">TÍTULO (CONTROLE INTERNO)</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
-                  <div><label for="mediaPath" class="mb-1 block text-sm font-semibold">CAMINHO DO ARQUIVO</label><input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="assets/images/foto.jpg" required /></div>
-                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">TEXTO ALTERNATIVO (ACESSIBILIDADE)</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
+                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
+                  <div><label for="mediaPath" class="mb-1 block text-sm font-semibold">Caminho do arquivo</label><input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="assets/images/foto.jpg" required /></div>
+                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">Texto alternativo</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
                   <div class="grid grid-cols-2 gap-4">
-                    <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">ORDEM NO CARROSSEL</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
+                    <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">Ordem no carrossel</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
                   </div>
                   <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="mediaPublished" type="checkbox" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" checked />Exibir no site</label>
                   </div>
                   <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar Mídia</button>
-                    <button id="clearMediaForm" type="button" class="btn-secondary px-3" title="Nova Imagem">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar imagem</button>
+                    <button id="clearMediaForm" type="button" class="btn-secondary px-3" title="Nova imagem">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
                   </div>
@@ -231,64 +230,10 @@
             </div>
           </div>
         </section>
-
-        <!-- PUBLISH PANEL -->
-        <section id="publishPanel" class="content-panel">
-          <div class="max-w-4xl mx-auto text-center mb-8">
-            <h3 class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">Publicação e Finalização</h3>
-            <p class="helper-text mt-3 text-base">O painel gera o arquivo mestre de dados <code class="bg-gray-200 px-1 rounded text-gray-800">site-content.json</code> com base nos rascunhos feitos na etapa anterior. Extraia ele e repasse ao responsável para atualização no servidor (Github Pages).</p>
-          </div>
-
-          <div class="panel p-0 overflow-hidden shadow-lg border border-gray-200 max-w-4xl mx-auto rounded-xl">
-            <div id="adminStatus" class="bg-blue-50 border-b border-blue-100 p-4 text-sm font-medium text-blue-800 flex items-center justify-center gap-2">
-              <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span>Painel Carregado. Pronto para operar.</span>
-            </div>
-            
-            <div class="p-8 bg-white grid gap-6 sm:grid-cols-2 items-center">
-              <div class="space-y-4">
-                <button id="downloadJsonButton" type="button" class="btn-primary w-full justify-center h-14 text-lg">
-                  <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                  Finalizar: Baixar JSON
-                </button>
-                <button id="copyJsonButton" type="button" class="btn-secondary w-full justify-center">
-                  <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  Copiar em Texto Embutido (Área de transferência)
-                </button>
-              </div>
-              
-              <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm h-full">
-                <h4 class="font-bold text-gray-800 mb-2">Opção: Restaurar um JSON Prévio</h4>
-                <p class="text-gray-600 mb-4">Caso possua um backup do site ou um JSON de outra máquina, você pode importá-lo aqui antes de alterar.</p>
-                <label class="btn-secondary w-full justify-center cursor-pointer bg-white text-gray-700 border-dashed border-2 hover:bg-gray-50 hover:border-blue-400">
-                  <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                  Fazer Upload JSON
-                  <input id="importJsonInput" type="file" accept="application/json" class="hidden" />
-                </label>
-              </div>
-            </div>
-
-            <div class="bg-slate-900 text-slate-300 p-6 border-t border-slate-800">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-semibold text-white">Console Técnico de JSON Gerado</span>
-                <div class="flex gap-2">
-                  <span class="text-xs bg-slate-800 px-2 py-1 rounded">Read-Only</span>
-                </div>
-              </div>
-              <pre id="jsonPreview" class="text-xs font-mono max-h-64 overflow-y-auto leading-relaxed custom-scrollbar bg-black p-4 rounded"></pre>
-            </div>
-          </div>
-          
-          <div class="mt-8 text-center text-sm text-gray-500">
-             Recomendado testar na home o resultado antes da extração. <a href="index.html?home=1" class="text-blue-600 underline font-medium ml-1" target="_blank">Revisar Home Rascunho</a>
-          </div>
-        </section>
-
       </div>
     </main>
   </div>
 
-  <!-- CONFIRMATION MODAL -->
   <div id="confirmModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-card">
       <div class="flex items-center gap-3 mb-2 flex-col text-center">
@@ -298,7 +243,7 @@
         <p class="text-xs font-bold uppercase tracking-widest text-[var(--danger)]">Confirmar exclusão</p>
         <h3 class="text-xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
       </div>
-      <p id="confirmMessage" class="text-sm mt-3 text-center text-gray-500 px-4">Essa ação vai retirar o item do rascunho atual. Esta operação não pode ser desfeita na memória até você restaurar a base original.</p>
+      <p id="confirmMessage" class="text-sm mt-3 text-center text-gray-500 px-4">Essa ação vai retirar o item do painel e da publicação pública.</p>
       <div class="mt-8 flex gap-3">
         <button id="cancelConfirmButton" type="button" class="btn-secondary w-full justify-center">Cancelar</button>
         <button id="confirmActionButton" type="button" class="btn-danger w-full bg-red-600 text-white justify-center hover:bg-red-700">Sim, excluir</button>

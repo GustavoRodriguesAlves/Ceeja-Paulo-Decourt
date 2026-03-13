@@ -202,6 +202,14 @@ textarea.field {
   text-decoration: none;
 }
 
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
 .btn-primary {
   background-color: var(--brand-primary);
   color: #fff;
@@ -290,13 +298,27 @@ textarea.field {
   line-height: 1.5;
 }
 
+.status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 52px;
+  margin-bottom: 1.5rem;
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 /* ==========================================================================
    Specific Layouts
    ========================================================================== */
 
 .section-grid {
   display: grid;
-  grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  align-items: start;
   gap: 1.5rem;
 }
 
