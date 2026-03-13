@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -14,7 +14,7 @@
   <div class="admin-shell">
     <aside class="sidebar p-5 lg:p-6">
       <div class="flex items-center gap-3">
-        <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded-xl bg-white p-1 shadow-sm" />
+        <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded bg-white p-0.5 rounded shadow-sm" />
         <div>
           <p class="text-sm uppercase tracking-[0.22em] text-blue-200">Secretaria</p>
           <h1 class="serif text-2xl font-bold text-white">Painel editorial</h1>
@@ -30,7 +30,7 @@
         <button class="sidebar-link" data-panel="publishPanel">Publicação</button>
       </div>
 
-      <div class="mt-10 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm leading-7 text-blue-100">
+      <div class="mt-10 rounded border border-[var(--brand-accent)] bg-[rgba(255,255,255,0.05)] p-4 text-sm text-blue-100">
         <p class="font-semibold text-white">Como este painel foi pensado</p>
         <p class="mt-2">
           O objetivo é dar para a secretaria um fluxo claro: cadastrar aviso, atualizar links, cuidar das imagens e revisar a saída final sem abrir o código do site.
@@ -208,10 +208,10 @@
             <div class="panel p-6">
               <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Prévia</p>
               <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Como o destaque será apresentado</h3>
-              <div class="mt-5 rounded-[22px] bg-[var(--brand-primary)] p-6 text-white shadow-lg">
-                <span class="inline-flex rounded-full bg-[var(--brand-accent)] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-950">Ensino com autonomia</span>
+              <div class="mt-5 rounded border border-[#CBD5E0] bg-[#F8FAFC] p-6 text-[var(--text-main)] shadow-sm">
+                <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-800 border border-blue-200">Ensino com autonomia</span>
                 <h4 id="homepagePreviewTitle" class="serif mt-5 text-3xl leading-tight"></h4>
-                <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-blue-100"></p>
+                <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-gray-600"></p>
               </div>
             </div>
           </div>
@@ -229,7 +229,7 @@
                   <button id="downloadJsonButton" type="button" class="btn-primary">Baixar JSON</button>
                   <button id="copyJsonButton" type="button" class="btn-secondary">Copiar JSON</button>
                   <a href="index.html?home=1" class="btn-secondary">Abrir home com rascunho</a>
-                  <label class="btn-secondary cursor-pointer">Importar JSON<input id="importJsonInput" type="file" accept="application/json" class="hidden" /></label>
+                  <label class="btn-secondary">Importar JSON<input id="importJsonInput" type="file" accept="application/json" class="hidden" /></label>
                 </div>
               </div>
 
