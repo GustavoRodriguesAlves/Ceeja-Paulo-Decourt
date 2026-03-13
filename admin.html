@@ -8,272 +8,340 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/pages/admin.css">
+  <link rel="stylesheet" href="assets/css/pages/admin.css">
 </head>
 <body>
   <div class="admin-shell">
-    <aside class="sidebar p-5 lg:p-6">
-      <div class="flex items-center gap-3">
-        <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-12 w-12 rounded bg-white p-0.5 rounded shadow-sm" />
+    <aside class="sidebar">
+      <div class="flex items-center gap-3 mb-8">
+        <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-10 w-10 bg-white p-0.5 rounded shadow-sm" />
         <div>
-          <p class="text-sm uppercase tracking-[0.22em] text-blue-200">Secretaria</p>
-          <h1 class="serif text-2xl font-bold text-white">Painel editorial</h1>
+          <p class="text-[0.65rem] uppercase tracking-[0.2em] text-blue-200">Secretaria</p>
+          <h1 class="serif text-xl font-bold text-white">Painel Editorial</h1>
         </div>
       </div>
 
-      <div class="mt-8 space-y-2">
-        <button class="sidebar-link active" data-panel="dashboardPanel">Visão geral</button>
-        <button class="sidebar-link" data-panel="noticesPanel">Avisos do dia</button>
-        <button class="sidebar-link" data-panel="linksPanel">Links rápidos</button>
-        <button class="sidebar-link" data-panel="mediaPanel">Imagens da home</button>
-        <button class="sidebar-link" data-panel="homepagePanel">Texto da home</button>
-        <button class="sidebar-link" data-panel="publishPanel">Publicação</button>
-      </div>
-
-      <div class="mt-10 rounded border border-[var(--brand-accent)] bg-[rgba(255,255,255,0.05)] p-4 text-sm text-blue-100">
-        <p class="font-semibold text-white">Como este painel foi pensado</p>
-        <p class="mt-2">
-          O objetivo é dar para a secretaria um fluxo claro: cadastrar aviso, atualizar links, cuidar das imagens e revisar a saída final sem abrir o código do site.
-        </p>
-      </div>
+      <nav class="space-y-1">
+        <button class="sidebar-link active" data-panel="dashboardPanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+          Visão Geral
+        </button>
+        <button class="sidebar-link" data-panel="noticesPanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+          Avisos do dia
+        </button>
+        <button class="sidebar-link" data-panel="linksPanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+          Links Rápidos
+        </button>
+        <button class="sidebar-link" data-panel="mediaPanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          Galeria da Home
+        </button>
+        <button class="sidebar-link" data-panel="homepagePanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+          Texto da Home
+        </button>
+        <button class="sidebar-link" data-panel="publishPanel">
+          <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+          Salvar e Publicar
+        </button>
+      </nav>
     </aside>
 
-    <main class="content-area p-4 sm:p-6 lg:p-8">
+    <main class="content-area">
       <div class="content-wrap">
-        <header class="flex flex-wrap items-start justify-between gap-4">
+        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-8">
           <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-secondary)]">Painel administrativo</p>
-            <h2 class="serif mt-2 text-3xl font-bold text-[var(--brand-primary)] sm:text-4xl">Secretaria em modo de edição</h2>
-            <p class="helper-text mt-3 max-w-2xl">
-              Tudo aqui foi organizado para deixar a manutenção diária mais prática. O foco é registrar o que precisa ir para o site sem espalhar informação em vários lugares.
-            </p>
+            <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Gestão de Conteúdo</h2>
+            <p class="helper-text mt-1">Ambiente de edição do site oficial CEEJA Paulo Decourt</p>
           </div>
-          <div class="flex flex-wrap gap-3">
-            <a href="index.html?home=1" class="btn-secondary">Ver site público</a>
-            <button id="logoutAdminButton" type="button" class="btn-secondary">Encerrar acesso</button>
-            <button id="resetDraftButton" type="button" class="btn-danger">Restaurar base</button>
+          <div class="flex gap-3">
+            <a href="index.html?home=1" class="btn-secondary text-sm" target="_blank">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              Ver Site Público
+            </a>
+            <button id="logoutAdminButton" type="button" class="btn-danger text-sm">
+              Sair
+            </button>
           </div>
         </header>
 
-        <section id="dashboardPanel" class="content-panel active mt-8">
-          <div class="grid gap-4 lg:grid-cols-4">
-            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos publicados</p><p id="dashboardNoticeCount" class="metric-number mt-3">0</p></article>
-            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links ativos</p><p id="dashboardLinkCount" class="metric-number mt-3">0</p></article>
-            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Imagens ativas</p><p id="dashboardGalleryCount" class="metric-number mt-3">0</p></article>
-            <article class="metric-card"><p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Última atualização</p><p id="dashboardUpdatedAt" class="mt-3 text-lg font-bold text-[var(--brand-primary)]">-</p></article>
+        <!-- DASHBOARD PANEL -->
+        <section id="dashboardPanel" class="content-panel active">
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <article class="metric-card border-l-4 border-l-blue-500">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Avisos</p>
+              <div class="mt-2 flex items-baseline gap-2">
+                <p id="dashboardNoticeCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
+                <span class="text-sm font-medium text-gray-400">ativos</span>
+              </div>
+            </article>
+            <article class="metric-card border-l-4 border-l-green-500">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Atalhos</p>
+              <div class="mt-2 flex items-baseline gap-2">
+                <p id="dashboardLinkCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
+                <span class="text-sm font-medium text-gray-400">ativos</span>
+              </div>
+            </article>
+            <article class="metric-card border-l-4 border-l-purple-500">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Galeria</p>
+              <div class="mt-2 flex items-baseline gap-2">
+                <p id="dashboardGalleryCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
+                <span class="text-sm font-medium text-gray-400">fotos</span>
+              </div>
+            </article>
+            <article class="metric-card border-l-4 border-l-yellow-500">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última edição local</p>
+              <div class="mt-2 text-sm font-medium text-gray-600">
+                <p id="dashboardUpdatedAt" class="text-lg font-bold text-[var(--brand-primary)]">-</p>
+              </div>
+            </article>
           </div>
 
-          <div class="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <div class="grid gap-6 lg:grid-cols-2">
             <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo operacional</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">O que a secretaria consegue fazer aqui</h3>
-              <div class="mt-5 grid gap-4 md:grid-cols-2">
-                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Comunicação diária</p><p class="helper-text mt-2">Cadastrar avisos, deixar recados em destaque e manter informações que não podem se perder no site.</p></div>
-                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Acesso rápido</p><p class="helper-text mt-2">Organizar links úteis da escola e deixar os atalhos mais importantes sempre visíveis na home.</p></div>
-                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Mídia</p><p class="helper-text mt-2">Cadastrar imagens do projeto e montar uma galeria limpa para a home.</p></div>
-                <div class="summary-card"><p class="font-semibold text-[var(--brand-primary)]">Publicação</p><p class="helper-text mt-2">Revisar a estrutura final do conteúdo antes de gerar o arquivo que alimenta o site público.</p></div>
+              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4 flex items-center gap-2">
+                <svg class="h-5 w-5 text-[var(--brand-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Ações Rápidas
+              </h3>
+              <div class="space-y-3">
+                <button type="button" onclick="document.querySelector('[data-panel=noticesPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
+                  <div>
+                    <span class="block font-semibold text-gray-800">Publicar Novo Aviso</span>
+                    <span class="block text-sm text-gray-500">Adicione recados recentes à página inicial</span>
+                  </div>
+                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+                <button type="button" onclick="document.querySelector('[data-panel=publishPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors flex items-center justify-between">
+                  <div>
+                    <span class="block font-semibold text-gray-800">Salvar Modificações em JSON</span>
+                    <span class="block text-sm text-gray-500">Exporte seu trabalho no formato pedido para a atualização oficial</span>
+                  </div>
+                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
             </div>
             <div class="panel-soft p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Fluxo recomendado</p>
-              <ol class="mt-4 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--text-muted)]">
-                <li>Cadastre primeiro o aviso ou link que precisa entrar na home.</li>
-                <li>Depois revise as imagens que vão para a galeria.</li>
-                <li>Confira a prévia do texto principal da home.</li>
-                <li>Por fim, abra a aba de publicação e revise o conteúdo gerado.</li>
+              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Como publicar conteúdos?</h3>
+              <ol class="list-decimal space-y-3 pl-5 text-sm leading-6 text-gray-600">
+                <li>Navegue pelas abas ao lado para <strong>editar avisos, alterar links ou imagens</strong>.</li>
+                <li>Tudo que você edita fica salvo <strong>automaticamente no seu navegador</strong>.</li>
+                <li>Quando finalizar a revisão do conteúdo, vá na aba <strong>Publicação</strong> e baixe o arquivo <code class="bg-gray-200 text-gray-800 px-1 rounded">site-content.json</code> finalizado.</li>
+                <li>Substitua esse arquivo na pasta <code class="bg-gray-200 text-gray-800 px-1 rounded">data/</code> do projeto no GitHub para a alteração refletir oficialmente para todos.</li>
               </ol>
             </div>
           </div>
         </section>
 
-        <section id="noticesPanel" class="content-panel mt-8">
+        <!-- NOTICES PANEL (SPLIT VIEW) -->
+        <section id="noticesPanel" class="content-panel">
           <div class="section-grid">
-            <div class="panel p-6">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Avisos do dia</p>
-                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Cadastrar ou editar aviso</h3>
-                </div>
-                <span class="chip">Home pública</span>
+            <div class="form-sticky">
+              <div class="panel p-6 shadow-md border-t-4 border-t-[var(--brand-secondary)]">
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Formulário de Aviso</h3>
+                <p class="helper-text mt-2 mb-5">Adicione ou edite recados operacionais para a capa do site.</p>
+                <form id="noticeForm" class="space-y-4">
+                  <input id="noticeId" type="hidden" />
+                  <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">TÍTULO PRINCIPAL</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
+                  <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">MENSAGEM CURTA</label><textarea id="noticeSummary" class="field min-h-[100px]" placeholder="Informação rápida e direta" required></textarea></div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">TAG</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
+                    <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">DATA VISÍVEL</label><input id="noticeDate" type="date" class="field" required /></div>
+                  </div>
+                  <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded border border-gray-100 mt-2">
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticeFeatured" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />Destacar aviso na home</label>
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticePublished" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />Exibir aviso ao público (Ativo)</label>
+                  </div>
+                  <div class="flex gap-2 pt-2">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
+                    <button id="clearNoticeForm" type="button" class="btn-secondary px-3" title="Limpar formulário">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    </button>
+                  </div>
+                </form>
               </div>
-              <p class="helper-text mt-3">Use este espaço para registrar orientações, horários e comunicados que precisam continuar visíveis no site.</p>
+            </div>
 
-              <form id="noticeForm" class="mt-6 space-y-4">
-                <input id="noticeId" type="hidden" />
-                <div><label for="noticeTitle" class="mb-2 block text-sm font-semibold">Título</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Orientação geral para novos alunos" required /></div>
-                <div><label for="noticeSummary" class="mb-2 block text-sm font-semibold">Resumo</label><textarea id="noticeSummary" class="field min-h-[130px]" placeholder="Texto curto para aparecer na home" required></textarea></div>
-                <div class="grid gap-4 md:grid-cols-2">
-                  <div><label for="noticeCategory" class="mb-2 block text-sm font-semibold">Categoria</label><input id="noticeCategory" type="text" class="field" placeholder="Matrículas, Secretaria, Serviços..." required /></div>
-                  <div><label for="noticeDate" class="mb-2 block text-sm font-semibold">Data</label><input id="noticeDate" type="date" class="field" required /></div>
+            <div>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Recados Cadastrados</h3>
+              <div id="noticeItems" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- LINKS PANEL (SPLIT VIEW) -->
+        <section id="linksPanel" class="content-panel">
+          <div class="section-grid">
+            <div class="form-sticky">
+              <div class="panel p-6 shadow-md border-t-4 border-t-green-500">
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Formulário de Link</h3>
+                <p class="helper-text mt-2 mb-5">Crie botões de acesso externo para a home.</p>
+                <form id="linkForm" class="space-y-4">
+                  <input id="linkId" type="hidden" />
+                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">NOME DO BOTÃO</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
+                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">URL DO DESTINO</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
+                  <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Ativo para uso publico</label>
+                  </div>
+                  <div class="flex gap-2 pt-2">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar Link</button>
+                    <button id="clearLinkForm" type="button" class="btn-secondary px-3" title="Novo">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links Rápidos Gerenciados</h3>
+              <div id="linkItems" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MEDIA PANEL (SPLIT VIEW) -->
+        <section id="mediaPanel" class="content-panel">
+          <div class="section-grid">
+            <div class="form-sticky">
+              <div class="panel p-6 shadow-md border-t-4 border-t-purple-500">
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Cadastrar Imagem</h3>
+                <p class="helper-text mt-2 mb-5">Adicione fotos existentes no projeto ao carrossel da home.</p>
+                <form id="mediaForm" class="space-y-4">
+                  <input id="mediaId" type="hidden" />
+                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">TÍTULO (CONTROLE INTERNO)</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
+                  <div><label for="mediaPath" class="mb-1 block text-sm font-semibold">CAMINHO DO ARQUIVO</label><input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="assets/images/foto.jpg" required /></div>
+                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">TEXTO ALTERNATIVO (ACESSIBILIDADE)</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">ORDEM NO CARROSSEL</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="mediaPublished" type="checkbox" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" checked />Exibir no site</label>
+                  </div>
+                  <div class="flex gap-2 pt-2">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar Mídia</button>
+                    <button id="clearMediaForm" type="button" class="btn-secondary px-3" title="Nova Imagem">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Galeria Ativa</h3>
+              <div id="mediaItems" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- HOMEPAGE TEXT PANEL (SPLIT VIEW) -->
+        <section id="homepagePanel" class="content-panel">
+          <div class="grid gap-6 lg:grid-cols-2">
+            <div class="panel p-6 border-t-4 border-t-orange-500 shadow-md">
+              <h3 class="text-xl font-bold text-[var(--brand-primary)]">Mensagem Institucional Principal</h3>
+              <p class="helper-text mt-2 mb-6">Altere os textos de introdução da página inicial do CEEJA em tempo real.</p>
+              <form id="homepageForm" class="space-y-5">
+                <div>
+                  <label for="homepageTitle" class="mb-1 block text-sm font-semibold">TÍTULO (H1)</label>
+                  <textarea id="homepageTitle" class="field serif font-bold text-xl min-h-[90px]" required></textarea>
                 </div>
-                <div class="flex flex-wrap gap-4">
-                  <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="noticeFeatured" type="checkbox" class="rounded border-gray-300" />Marcar como destaque</label>
-                  <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="noticePublished" type="checkbox" class="rounded border-gray-300" checked />Publicado</label>
+                <div>
+                  <label for="homepageText" class="mb-1 block text-sm font-semibold">TEXTO DESCRITIVO</label>
+                  <textarea id="homepageText" class="field min-h-[160px]" required></textarea>
                 </div>
-                <div class="flex flex-wrap gap-3 pt-2">
-                  <button type="submit" class="btn-primary">Salvar aviso</button>
-                  <button id="clearNoticeForm" type="button" class="btn-secondary">Limpar formulário</button>
+                <div class="pt-2">
+                  <button type="submit" class="btn-primary w-full justify-center">Atualizar Mensagem no Rascunho</button>
                 </div>
               </form>
             </div>
 
-            <div class="panel p-6">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lista de avisos</p>
-                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Conteúdo já cadastrado</h3>
-                </div>
-              </div>
-              <div id="noticeItems" class="mt-6 grid gap-4"></div>
-            </div>
-          </div>
-        </section>
-        <section id="linksPanel" class="content-panel mt-8">
-          <div class="section-grid">
-            <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links rápidos</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Cadastrar atalho útil</h3>
-              <p class="helper-text mt-3">Aqui ficam os links que a secretaria quer deixar em evidência na home para acesso rápido.</p>
-
-              <form id="linkForm" class="mt-6 space-y-4">
-                <input id="linkId" type="hidden" />
-                <div><label for="linkLabel" class="mb-2 block text-sm font-semibold">Título do link</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: WhatsApp da direção" required /></div>
-                <div><label for="linkUrl" class="mb-2 block text-sm font-semibold">URL</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
-                <label class="inline-flex items-center gap-2 text-sm font-medium"><input id="linkPublished" type="checkbox" class="rounded border-gray-300" checked />Publicado</label>
-                <div class="flex flex-wrap gap-3 pt-2">
-                  <button type="submit" class="btn-primary">Salvar link</button>
-                  <button id="clearLinkForm" type="button" class="btn-secondary">Limpar formulário</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Links cadastrados</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Atalhos ativos e ocultos</h3>
-              <div id="linkItems" class="mt-6 grid gap-4"></div>
-            </div>
-          </div>
-        </section>
-
-        <section id="mediaPanel" class="content-panel mt-8">
-          <div class="section-grid">
-            <div class="panel p-6">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Imagens da home</p>
-                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Organizar galeria</h3>
-                </div>
-                <span class="chip">Carrossel</span>
-              </div>
-              <p class="helper-text mt-3">Cadastre o caminho da imagem já existente dentro do projeto, defina o texto alternativo e deixe a ordem da galeria mais coerente.</p>
-
-              <form id="mediaForm" class="mt-6 space-y-4">
-                <input id="mediaId" type="hidden" />
-                <div><label for="mediaTitle" class="mb-2 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Fachada do CEEJA" required /></div>
-                <div><label for="mediaPath" class="mb-2 block text-sm font-semibold">Caminho da imagem</label><input id="mediaPath" type="text" class="field" placeholder="assets/images/DSC06864.JPG" required /></div>
-                <div><label for="mediaAlt" class="mb-2 block text-sm font-semibold">Texto alternativo</label><input id="mediaAlt" type="text" class="field" placeholder="Descrição breve da foto" required /></div>
-                <div class="grid gap-4 md:grid-cols-2">
-                  <div><label for="mediaOrder" class="mb-2 block text-sm font-semibold">Ordem</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
-                  <div class="flex items-end"><label class="inline-flex items-center gap-2 text-sm font-medium"><input id="mediaPublished" type="checkbox" class="rounded border-gray-300" checked />Exibir na galeria</label></div>
-                </div>
-                <div class="flex flex-wrap gap-3 pt-2">
-                  <button type="submit" class="btn-primary">Salvar imagem</button>
-                  <button id="clearMediaForm" type="button" class="btn-secondary">Limpar formulário</button>
-                </div>
-              </form>
-            </div>
-
-            <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Galeria cadastrada</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Imagens prontas para a home</h3>
-              <div id="mediaItems" class="mt-6 grid gap-4"></div>
-            </div>
-          </div>
-        </section>
-
-        <section id="homepagePanel" class="content-panel mt-8">
-          <div class="section-grid">
-            <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Texto da home</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Mensagem institucional</h3>
-              <p class="helper-text mt-3">Ajuste o texto de abertura do site para refletir a prioridade do momento, sem perder o tom institucional.</p>
-
-              <form id="homepageForm" class="mt-6 space-y-4">
-                <div><label for="homepageTitle" class="mb-2 block text-sm font-semibold">Título de destaque</label><textarea id="homepageTitle" class="field min-h-[110px]" required></textarea></div>
-                <div><label for="homepageText" class="mb-2 block text-sm font-semibold">Texto de apoio</label><textarea id="homepageText" class="field min-h-[150px]" required></textarea></div>
-                <button type="submit" class="btn-primary">Salvar texto da home</button>
-              </form>
-            </div>
-
-            <div class="panel p-6">
-              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Prévia</p>
-              <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Como o destaque será apresentado</h3>
-              <div class="mt-5 rounded border border-[#CBD5E0] bg-[#F8FAFC] p-6 text-[var(--text-main)] shadow-sm">
-                <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-800 border border-blue-200">Ensino com autonomia</span>
-                <h4 id="homepagePreviewTitle" class="serif mt-5 text-3xl leading-tight"></h4>
-                <p id="homepagePreviewText" class="mt-4 text-sm leading-7 text-gray-600"></p>
+            <div class="panel-soft p-8 flex flex-col items-center justify-center bg-gray-100">
+              <p class="text-xs font-bold uppercase tracking-widest text-gray-400 w-full mb-3 text-center">PRÉVIA QUASE REAL</p>
+              <div class="w-full max-w-sm rounded border border-gray-200 bg-white p-6 shadow-sm">
+                <span class="inline-flex rounded-full bg-blue-100 border border-blue-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-800">Página Inicial</span>
+                <h4 id="homepagePreviewTitle" class="serif mt-4 text-2xl font-bold leading-tight text-[var(--brand-primary)]" style="word-break: break-word;"></h4>
+                <p id="homepagePreviewText" class="mt-3 text-sm leading-relaxed text-gray-600 border-l-2 border-gray-200 pl-3"></p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="publishPanel" class="content-panel mt-8">
-          <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <div class="space-y-6">
-              <div class="panel p-6">
-                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Publicação</p>
-                <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Saída do conteúdo editorial</h3>
-                <p class="helper-text mt-4">Este painel salva o rascunho no navegador da secretaria e usa o mesmo formato que abastece o site. Antes de publicar no GitHub Pages, vale revisar tudo por aqui.</p>
-                <div id="adminStatus" class="panel-soft mt-5 p-4 text-sm leading-7 text-[var(--brand-primary)]">Painel carregado.</div>
-                <div class="mt-6 flex flex-wrap gap-3">
-                  <button id="downloadJsonButton" type="button" class="btn-primary">Baixar JSON</button>
-                  <button id="copyJsonButton" type="button" class="btn-secondary">Copiar JSON</button>
-                  <a href="index.html?home=1" class="btn-secondary">Abrir home com rascunho</a>
-                  <label class="btn-secondary">Importar JSON<input id="importJsonInput" type="file" accept="application/json" class="hidden" /></label>
-                </div>
-              </div>
+        <!-- PUBLISH PANEL -->
+        <section id="publishPanel" class="content-panel">
+          <div class="max-w-4xl mx-auto text-center mb-8">
+            <h3 class="mt-2 text-3xl font-bold text-[var(--brand-primary)]">Publicação e Finalização</h3>
+            <p class="helper-text mt-3 text-base">O painel gera o arquivo mestre de dados <code class="bg-gray-200 px-1 rounded text-gray-800">site-content.json</code> com base nos rascunhos feitos na etapa anterior. Extraia ele e repasse ao responsável para atualização no servidor (Github Pages).</p>
+          </div>
 
-              <div class="panel p-6">
-                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Resumo final</p>
-                <div class="preview-grid mt-5">
-                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Avisos ativos</p><p id="publishNoticeCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
-                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Links ativos</p><p id="publishLinkCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
-                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Imagens ativas</p><p id="publishGalleryCount" class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">0</p></div>
-                  <div class="summary-card"><p class="text-sm font-semibold text-[var(--brand-primary)]">Título da home</p><p id="publishHomepageState" class="mt-2 text-sm leading-6 text-[var(--text-muted)]">-</p></div>
-                </div>
+          <div class="panel p-0 overflow-hidden shadow-lg border border-gray-200 max-w-4xl mx-auto rounded-xl">
+            <div id="adminStatus" class="bg-blue-50 border-b border-blue-100 p-4 text-sm font-medium text-blue-800 flex items-center justify-center gap-2">
+              <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>Painel Carregado. Pronto para operar.</span>
+            </div>
+            
+            <div class="p-8 bg-white grid gap-6 sm:grid-cols-2 items-center">
+              <div class="space-y-4">
+                <button id="downloadJsonButton" type="button" class="btn-primary w-full justify-center h-14 text-lg">
+                  <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  Finalizar: Baixar JSON
+                </button>
+                <button id="copyJsonButton" type="button" class="btn-secondary w-full justify-center">
+                  <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  Copiar em Texto Embutido (Área de transferência)
+                </button>
+              </div>
+              
+              <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm h-full">
+                <h4 class="font-bold text-gray-800 mb-2">Opção: Restaurar um JSON Prévio</h4>
+                <p class="text-gray-600 mb-4">Caso possua um backup do site ou um JSON de outra máquina, você pode importá-lo aqui antes de alterar.</p>
+                <label class="btn-secondary w-full justify-center cursor-pointer bg-white text-gray-700 border-dashed border-2 hover:bg-gray-50 hover:border-blue-400">
+                  <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                  Fazer Upload JSON
+                  <input id="importJsonInput" type="file" accept="application/json" class="hidden" />
+                </label>
               </div>
             </div>
 
-            <div class="panel p-6">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">JSON atual</p>
-                  <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Estrutura pronta para publicação</h3>
+            <div class="bg-slate-900 text-slate-300 p-6 border-t border-slate-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-semibold text-white">Console Técnico de JSON Gerado</span>
+                <div class="flex gap-2">
+                  <span class="text-xs bg-slate-800 px-2 py-1 rounded">Read-Only</span>
                 </div>
               </div>
-              <div class="json-shell mt-5">
-                <div class="json-toolbar"><span class="text-sm font-semibold">Visualização formatada do arquivo</span><span class="text-xs uppercase tracking-[0.2em] text-slate-400">site-content.json</span></div>
-                <pre id="jsonPreview" class="json-preview"></pre>
-              </div>
+              <pre id="jsonPreview" class="text-xs font-mono max-h-64 overflow-y-auto leading-relaxed custom-scrollbar bg-black p-4 rounded"></pre>
             </div>
           </div>
+          
+          <div class="mt-8 text-center text-sm text-gray-500">
+             Recomendado testar na home o resultado antes da extração. <a href="index.html?home=1" class="text-blue-600 underline font-medium ml-1" target="_blank">Revisar Home Rascunho</a>
+          </div>
         </section>
+
       </div>
     </main>
   </div>
 
+  <!-- CONFIRMATION MODAL -->
   <div id="confirmModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-card">
-      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--danger)]">Confirmar exclusão</p>
-      <h3 class="mt-2 text-2xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
-      <p id="confirmMessage" class="helper-text mt-4">Essa ação vai retirar o item do rascunho atual.</p>
-      <div class="mt-6 flex flex-wrap justify-end gap-3">
-        <button id="cancelConfirmButton" type="button" class="btn-secondary">Cancelar</button>
-        <button id="confirmActionButton" type="button" class="btn-danger">Excluir</button>
+      <div class="flex items-center gap-3 mb-2 flex-col text-center">
+        <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-2">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        </div>
+        <p class="text-xs font-bold uppercase tracking-widest text-[var(--danger)]">Confirmar exclusão</p>
+        <h3 class="text-xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
+      </div>
+      <p id="confirmMessage" class="text-sm mt-3 text-center text-gray-500 px-4">Essa ação vai retirar o item do rascunho atual. Esta operação não pode ser desfeita na memória até você restaurar a base original.</p>
+      <div class="mt-8 flex gap-3">
+        <button id="cancelConfirmButton" type="button" class="btn-secondary w-full justify-center">Cancelar</button>
+        <button id="confirmActionButton" type="button" class="btn-danger w-full bg-red-600 text-white justify-center hover:bg-red-700">Sim, excluir</button>
       </div>
     </div>
   </div>
 
-    <script type="module" src="assets/js/pages/admin-page.js"></script>
+  <script type="module" src="assets/js/pages/admin-page.js"></script>
 </body>
 </html>

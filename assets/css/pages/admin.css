@@ -296,7 +296,7 @@ textarea.field {
 
 .section-grid {
   display: grid;
-  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start;
   gap: 1.5rem;
 }
 
@@ -431,4 +431,40 @@ textarea.field {
   .content-area {
     padding: 1rem;
   }
+}
+
+.form-sticky {
+  position: sticky;
+  top: 1.5rem;
+  z-index: 10;
+}
+
+/* Horizontal card for lists */
+.list-card-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.list-card-horizontal:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border-color: #CBD5E1;
+}
+
+.list-card-horizontal-content {
+  flex: 1;
+  min-width: 250px;
+}
+
+.list-card-horizontal-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }

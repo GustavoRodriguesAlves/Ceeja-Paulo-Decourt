@@ -1,4 +1,4 @@
-import {
+﻿import {
   TEST_LOGIN_EMAIL,
   clearAdminAuth,
   getAdminSessionEmail,
@@ -109,7 +109,9 @@ const formatDate = (value) => {
 };
 
 function setStatus(message) {
-  adminStatus.textContent = message;
+  if (adminStatus) {
+    adminStatus.innerHTML = <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>  + message;
+  }
 }
 
 function showPanel(panelId) {
@@ -181,17 +183,19 @@ function renderNotices() {
   noticeItems.innerHTML = notices
     .map(
       (item) => `
-        <article class="list-card">
-          <div class="flex flex-wrap items-center gap-3">
-            <span class="chip">${escapeHtml(item.category || "Aviso")}</span>
-            <span class="text-xs text-slate-500">${escapeHtml(formatDate(item.date))}</span>
-            <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Rascunho"}</span>
+        <article class="list-card-horizontal">
+          <div class="list-card-horizontal-content">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="chip">${escapeHtml(item.category || "Aviso")}</span>
+              <span class="text-xs font-semibold text-gray-500">${escapeHtml(formatDate(item.date))}</span>
+              <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Rascunho"}</span>
+            </div>
+            <h4 class="text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
+            <p class="helper-text mt-1 text-sm">${escapeHtml(item.summary || "")}</p>
           </div>
-          <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
-          <p class="helper-text mt-3">${escapeHtml(item.summary || "")}</p>
-          <div class="mt-5 flex flex-wrap gap-3">
-            <button type="button" class="btn-secondary" data-edit-notice="${item.id}">Editar</button>
-            <button type="button" class="btn-danger" data-delete-notice="${item.id}">Excluir</button>
+          <div class="list-card-horizontal-actions flex-col sm:flex-row">
+            <button type="button" class="btn-secondary px-4 py-2 text-sm" data-edit-notice="${item.id}">Editar</button>
+            <button type="button" class="btn-danger px-4 py-2 text-sm" data-delete-notice="${item.id}">Excluir</button>
           </div>
         </article>
       `
@@ -227,15 +231,17 @@ function renderLinks() {
   linkItems.innerHTML = links
     .map(
       (item) => `
-        <article class="list-card">
-          <div class="flex flex-wrap items-center gap-3">
-            <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Oculto"}</span>
+        <article class="list-card-horizontal">
+          <div class="list-card-horizontal-content">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Publicado" : "Oculto"}</span>
+            </div>
+            <h4 class="text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(item.label || "")}</h4>
+            <p class="mt-1 break-all text-sm text-gray-500">${escapeHtml(item.url || "")}</p>
           </div>
-          <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.label || "")}</h4>
-          <p class="mt-3 break-all text-sm text-[var(--text-muted)]">${escapeHtml(item.url || "")}</p>
-          <div class="mt-5 flex flex-wrap gap-3">
-            <button type="button" class="btn-secondary" data-edit-link="${item.id}">Editar</button>
-            <button type="button" class="btn-danger" data-delete-link="${item.id}">Excluir</button>
+          <div class="list-card-horizontal-actions flex-col sm:flex-row">
+            <button type="button" class="btn-secondary px-4 py-2 text-sm" data-edit-link="${item.id}">Editar</button>
+            <button type="button" class="btn-danger px-4 py-2 text-sm" data-delete-link="${item.id}">Excluir</button>
           </div>
         </article>
       `
@@ -271,22 +277,19 @@ function renderGallery() {
   mediaItems.innerHTML = gallery
     .map(
       (item) => `
-        <article class="list-card">
-          <div class="flex flex-col gap-4 md:flex-row md:items-start">
-            <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" class="media-thumb" loading="lazy" />
-            <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="chip">Imagem ${escapeHtml(String(item.order || "-"))}</span>
-                <span class="status-badge ${item.published ? "status-live" : "status-draft"}">${item.published ? "Na home" : "Oculta"}</span>
-              </div>
-              <h4 class="mt-4 text-xl font-bold text-[var(--brand-primary)]">${escapeHtml(item.title || "")}</h4>
-              <p class="mt-2 text-sm text-[var(--text-muted)]"><strong>Caminho:</strong> ${escapeHtml(item.src || "")}</p>
-              <p class="mt-1 text-sm text-[var(--text-muted)]"><strong>Texto alternativo:</strong> ${escapeHtml(item.alt || "")}</p>
-              <div class="mt-5 flex flex-wrap gap-3">
-                <button type="button" class="btn-secondary" data-edit-media="${item.id}">Editar</button>
-                <button type="button" class="btn-danger" data-delete-media="${item.id}">Excluir</button>
-              </div>
+        <article class="list-card-horizontal">
+          <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || "")}" class="media-thumb w-24 h-16 object-cover rounded shadow-sm border border-gray-200" loading="lazy" />
+          <div class="list-card-horizontal-content">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="chip text-xs">Posição ${escapeHtml(String(item.order || "-"))}</span>
+              <span class="status-badge ${item.published ? "status-live" : "status-draft"} text-xs">${item.published ? "Ativa" : "Oculta"}</span>
             </div>
+            <h4 class="text-base font-bold text-[var(--brand-primary)] leading-tight mt-1">${escapeHtml(item.title || "")}</h4>
+            <p class="mt-1 text-xs text-gray-500 font-mono">${escapeHtml(item.src || "")}</p>
+          </div>
+          <div class="list-card-horizontal-actions flex-col">
+             <button type="button" class="btn-secondary px-3 py-1.5 text-xs" data-edit-media="${item.id}">Editar</button>
+             <button type="button" class="btn-danger px-3 py-1.5 text-xs" data-delete-media="${item.id}">Remover</button>
           </div>
         </article>
       `
@@ -331,10 +334,10 @@ function renderDashboard() {
   dashboardUpdatedAt.textContent = adminState.updatedAt
     ? new Date(adminState.updatedAt).toLocaleString("pt-BR")
     : "-";
-  publishNoticeCount.textContent = publishedNotices;
-  publishLinkCount.textContent = publishedLinks;
-  publishGalleryCount.textContent = publishedGallery;
-  publishHomepageState.textContent =
+  if (publishNoticeCount) publishNoticeCount.textContent = publishedNotices;
+  if (publishLinkCount) publishLinkCount.textContent = publishedLinks;
+  if (publishGalleryCount) publishGalleryCount.textContent = publishedGallery;
+  if (publishHomepageState) publishHomepageState.textContent =
     adminState.homepage.highlightTitle || "Título principal ainda não preenchido.";
   jsonPreview.textContent = JSON.stringify(adminState, null, 2);
 }
