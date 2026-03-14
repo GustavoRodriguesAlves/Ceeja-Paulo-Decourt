@@ -39,6 +39,9 @@ alter table public.gallery_items enable row level security;
 drop policy if exists "Public can read published notices" on public.notices;
 drop policy if exists "Public can read published quick links" on public.quick_links;
 drop policy if exists "Public can read published gallery items" on public.gallery_items;
+drop policy if exists "Authenticated users can manage notices" on public.notices;
+drop policy if exists "Authenticated users can manage quick links" on public.quick_links;
+drop policy if exists "Authenticated users can manage gallery items" on public.gallery_items;
 
 create policy "Public can read published notices"
 on public.notices
@@ -57,3 +60,24 @@ on public.gallery_items
 for select
 to anon
 using (published = true);
+
+create policy "Authenticated users can manage notices"
+on public.notices
+for all
+to authenticated
+using (true)
+with check (true);
+
+create policy "Authenticated users can manage quick links"
+on public.quick_links
+for all
+to authenticated
+using (true)
+with check (true);
+
+create policy "Authenticated users can manage gallery items"
+on public.gallery_items
+for all
+to authenticated
+using (true)
+with check (true);

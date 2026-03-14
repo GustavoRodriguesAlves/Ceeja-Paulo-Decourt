@@ -117,7 +117,34 @@
               </div>
             </div>
 
-            <div class="panel-soft p-6">
+            <div class="space-y-6">
+              <div class="panel-soft p-6">
+                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Conexão editorial com Supabase</h3>
+                <p class="helper-text mb-4">O Supabase passa a ser a fonte principal de avisos e links rápidos do portal. A secretaria conecta uma conta administrativa aqui e salva as alterações diretamente no banco.</p>
+                <form id="supabaseAuthForm" class="space-y-4">
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="supabaseEmailInput" class="mb-1 block text-sm font-semibold">E-mail administrativo</label>
+                      <input id="supabaseEmailInput" type="email" class="field" placeholder="chief@gmail.com" autocomplete="username" />
+                    </div>
+                    <div>
+                      <label for="supabasePasswordInput" class="mb-1 block text-sm font-semibold">Senha do Supabase</label>
+                      <input id="supabasePasswordInput" type="password" class="field" placeholder="Informe a senha da conta" autocomplete="current-password" />
+                    </div>
+                  </div>
+                  <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                    <input id="supabaseRememberSession" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />
+                    Manter esta conexão ativa neste navegador
+                  </label>
+                  <div class="flex flex-wrap gap-3">
+                    <button type="submit" class="btn-primary text-sm">Conectar Supabase</button>
+                    <button id="clearSupabaseSessionButton" type="button" class="btn-secondary text-sm">Desconectar</button>
+                  </div>
+                </form>
+                <p id="supabaseAuthStatus" class="mt-4 text-sm text-yellow-700">Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.</p>
+              </div>
+
+              <div class="panel-soft p-6">
               <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Publicação automática no GitHub</h3>
               <p class="helper-text mb-4">Para que os comunicados apareçam para todos, o painel precisa enviar o arquivo <code class="bg-gray-200 text-gray-800 px-1 rounded">data/site-content.json</code> e as imagens da galeria para o repositório. Sem isso, a alteração fica apenas nesta máquina.</p>
               <form id="githubTokenForm" class="space-y-4">

@@ -95,17 +95,43 @@ export async function fetchPublishedSiteContent(): Promise<SiteContent> {
   const supabaseConfig = getSupabasePublicConfig();
 
   if (supabaseConfig.enabled) {
-    try {
-      const supabaseContent = await fetchSupabasePublishedSiteContent();
+    const [supabaseResult, jsonResult] = await Promise.allSettled([
+      fetchSupabasePublishedSiteContent(),
+      fetchPublishedSiteContentFromJson()
+    ]);
+
+    if (supabaseResult.status === "fulfilled") {
+      const supabaseContent = supabaseResult.value;
+      const fallbackContent =
+        jsonResult.status === "fulfilled"
+          ? jsonResult.value
+          : normalizeSiteContent();
+
       if (hasRenderableSiteContent(supabaseContent)) {
-        return supabaseContent;
+        return normalizeSiteContent({
+          updatedAt: supabaseContent.updatedAt || fallbackContent.updatedAt,
+          notices:
+            supabaseContent.notices.length > 0
+              ? supabaseContent.notices
+              : fallbackContent.notices,
+          quickLinks:
+            supabaseContent.quickLinks.length > 0
+              ? supabaseContent.quickLinks
+              : fallbackContent.quickLinks,
+          gallery:
+            supabaseContent.gallery.length > 0
+              ? supabaseContent.gallery
+              : fallbackContent.gallery
+        });
       }
 
-      console.info(
-        "Supabase respondeu sem conteúdo publicado. Mantendo fallback para o JSON local."
-      );
-    } catch (error) {
-      console.warn("Falha ao carregar conteúdo público via Supabase. Usando fallback local.", error);
+      console.info("Supabase respondeu sem conteúdo suficiente. Mantendo fallback para o JSON local.");
+    } else {
+      console.warn("Falha ao carregar conteúdo público via Supabase. Usando fallback local.", supabaseResult.reason);
+    }
+
+    if (jsonResult.status === "fulfilled") {
+      return jsonResult.value;
     }
   }
 

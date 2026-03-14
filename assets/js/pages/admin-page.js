@@ -1,5 +1,6 @@
 import { clearAdminAuth, getAdminSessionEmail, isAllowedAdminUser, syncRememberedAdminSession } from "../core/auth.js";
-import { clearDraftSiteContent, clearGitHubPublishToken, createPortalImagePath, fetchPublishedSiteContent, fetchPublishedSiteContentMeta, getGitHubPublishToken, isAllowedPortalImageFileName, listPortalImageLibrary, loadEditorSiteContent, normalizePortalImageLibraryEntries, normalizeSiteContent, publishSiteContentToGitHub, saveDraftSiteContent, setGitHubPublishToken, uploadPortalImageToGitHub } from "../core/site-content.js";
+import { clearDraftSiteContent, clearGitHubPublishToken, createPortalImagePath, fetchPublishedSiteContent, fetchPublishedSiteContentMeta, getGitHubPublishToken, isAllowedPortalImageFileName, listPortalImageLibrary, readDraftSiteContent, loadEditorSiteContent, normalizePortalImageLibraryEntries, normalizeSiteContent, publishSiteContentToGitHub, saveDraftSiteContent, setGitHubPublishToken, uploadPortalImageToGitHub } from "../core/site-content.js";
+import { clearSupabaseAdminSession, fetchSupabaseEditorSiteContent, getSupabaseAdminSession, getSupabasePublicConfig, signInSupabaseAdmin, syncRememberedSupabaseAdminSession, syncSupabaseNotices, syncSupabaseQuickLinks } from "../core/supabase.js";
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 /**
  * @param {string} id
@@ -78,6 +79,7 @@ function queryButton(root, selector) {
 }
 const rememberedAdminEmail = syncRememberedAdminSession();
 const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
+syncRememberedSupabaseAdminSession();
 if (!adminEmail || !isAllowedAdminUser(adminEmail)) {
     window.location.replace("index.html?admin=1");
 }
@@ -134,6 +136,12 @@ const dashboardUpdatedAt = mustElement("dashboardUpdatedAt");
 const adminStatus = mustElement("adminStatus");
 const adminStatusMessage = mustElement("adminStatusMessage");
 const adminSyncIndicator = mustElement("adminSyncIndicator");
+const supabaseAuthForm = mustForm("supabaseAuthForm");
+const supabaseEmailInput = mustInput("supabaseEmailInput");
+const supabasePasswordInput = mustInput("supabasePasswordInput");
+const supabaseRememberSession = mustInput("supabaseRememberSession");
+const supabaseAuthStatus = mustElement("supabaseAuthStatus");
+const clearSupabaseSessionButton = mustButton("clearSupabaseSessionButton");
 const githubTokenForm = mustForm("githubTokenForm");
 const githubTokenInput = mustInput("githubTokenInput");
 const githubTokenStatus = mustElement("githubTokenStatus");
@@ -153,11 +161,14 @@ const goToMediaButton = mustButton("goToMediaButton");
 const saveNoticeButton = queryButton(noticeForm, 'button[type="submit"]');
 const saveLinkButton = queryButton(linkForm, 'button[type="submit"]');
 const saveMediaButton = queryButton(mediaForm, 'button[type="submit"]');
+const connectSupabaseButton = queryButton(supabaseAuthForm, 'button[type="submit"]');
 const connectGitHubButton = queryButton(githubTokenForm, 'button[type="submit"]');
 const publishLockedControls = [
     saveNoticeButton,
     saveLinkButton,
     saveMediaButton,
+    connectSupabaseButton,
+    clearSupabaseSessionButton,
     connectGitHubButton,
     clearGitHubTokenButton,
     usePublishedContentButton,
@@ -356,6 +367,48 @@ function updateGitHubTokenStatus() {
         githubTokenInput.value = savedToken;
     }
     updateSyncIndicator();
+}
+function isSupabaseConfigured() {
+    return getSupabasePublicConfig().enabled;
+}
+function isSupabaseConnected() {
+    return Boolean(getSupabaseAdminSession());
+}
+function updateSupabaseAuthStatus() {
+    const configured = isSupabaseConfigured();
+    const session = getSupabaseAdminSession();
+    if (!configured) {
+        supabaseAuthStatus.textContent =
+            "Supabase ainda não está habilitado neste projeto. O painel continuará usando apenas o fluxo legado.";
+        supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
+        clearSupabaseSessionButton.disabled = true;
+        return;
+    }
+    if (session) {
+        supabaseAuthStatus.textContent = `Sessão do Supabase conectada como ${session.email}. Avisos e links rápidos já podem ser salvos no banco.`;
+        supabaseAuthStatus.className = "mt-4 text-sm text-green-700";
+        supabaseEmailInput.value = session.email;
+        supabasePasswordInput.value = "";
+        clearSupabaseSessionButton.disabled = isPublishing;
+        return;
+    }
+    supabaseAuthStatus.textContent =
+        "Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.";
+    supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
+    clearSupabaseSessionButton.disabled = true;
+}
+function buildSupabasePublishErrorMessage(error, sectionLabel) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("Invalid login credentials")) {
+        return `Não foi possível autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
+    }
+    if (message.includes("JWT") || message.includes("refresh")) {
+        return `A sessão do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
+    }
+    if (message.includes("new row violates row-level security") || message.includes("permission denied")) {
+        return `O Supabase recusou a gravação de ${sectionLabel}. Verifique se as políticas de escrita para usuários autenticados já foram aplicadas.`;
+    }
+    return `Não foi possível salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
 }
 /**
  * @param {boolean} nextState
@@ -627,6 +680,76 @@ function saveState(localMessage, publishMessage) {
     setStatus(`${localMessage} Enviando atualização para o GitHub...`, "info", "publishing");
     publishStateToGitHub(publishMessage);
 }
+async function saveNoticesToPrimaryStore(localMessage) {
+    adminState.updatedAt = new Date().toISOString();
+    saveDraftSiteContent(adminState);
+    renderAll();
+    if (!isSupabaseConfigured()) {
+        setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+        return;
+    }
+    if (!isSupabaseConnected()) {
+        setStatus(`${localMessage} Conecte o Supabase para publicar os avisos no portal.`, "warning", "local");
+        return;
+    }
+    try {
+        setPublishingState(true);
+        setStatus("Salvando avisos no Supabase...", "info", "publishing");
+        const persistedNotices = await syncSupabaseNotices(adminState.notices);
+        adminState.notices = persistedNotices;
+        adminState.updatedAt = new Date().toISOString();
+        publishedSnapshot = cloneContent({
+            ...publishedSnapshot,
+            updatedAt: adminState.updatedAt,
+            notices: persistedNotices
+        });
+        saveDraftSiteContent(adminState);
+        renderAll();
+        setStatus("Avisos salvos no Supabase com sucesso.", "success", "synced");
+    }
+    catch (error) {
+        console.error(error);
+        setStatus(buildSupabasePublishErrorMessage(error, "os avisos"), "danger", "local");
+    }
+    finally {
+        setPublishingState(false);
+    }
+}
+async function saveQuickLinksToPrimaryStore(localMessage) {
+    adminState.updatedAt = new Date().toISOString();
+    saveDraftSiteContent(adminState);
+    renderAll();
+    if (!isSupabaseConfigured()) {
+        setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+        return;
+    }
+    if (!isSupabaseConnected()) {
+        setStatus(`${localMessage} Conecte o Supabase para publicar os links rápidos no portal.`, "warning", "local");
+        return;
+    }
+    try {
+        setPublishingState(true);
+        setStatus("Salvando links rápidos no Supabase...", "info", "publishing");
+        const persistedLinks = await syncSupabaseQuickLinks(adminState.quickLinks);
+        adminState.quickLinks = persistedLinks;
+        adminState.updatedAt = new Date().toISOString();
+        publishedSnapshot = cloneContent({
+            ...publishedSnapshot,
+            updatedAt: adminState.updatedAt,
+            quickLinks: persistedLinks
+        });
+        saveDraftSiteContent(adminState);
+        renderAll();
+        setStatus("Links rápidos salvos no Supabase com sucesso.", "success", "synced");
+    }
+    catch (error) {
+        console.error(error);
+        setStatus(buildSupabasePublishErrorMessage(error, "os links rápidos"), "danger", "local");
+    }
+    finally {
+        setPublishingState(false);
+    }
+}
 async function saveMediaWithUpload() {
     const selectedFile = mediaFile?.files?.[0] || null;
     const selectedPath = mediaPath.value.trim();
@@ -808,9 +931,9 @@ function renderNotices() {
     });
     Array.from(noticeItems.querySelectorAll("[data-delete-notice]")).forEach((button) => {
         button.addEventListener("click", () => {
-            openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", () => {
+            openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", async () => {
                 adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
-                saveState("Aviso removido do rascunho local.", `Remove notice ${button.dataset.deleteNotice} from site content`);
+                await saveNoticesToPrimaryStore("Aviso removido do painel.");
             });
         });
     });
@@ -847,9 +970,9 @@ function renderLinks() {
     });
     Array.from(linkItems.querySelectorAll("[data-delete-link]")).forEach((button) => {
         button.addEventListener("click", () => {
-            openConfirmModal("Esse link deixará de aparecer para os alunos.", () => {
+            openConfirmModal("Esse link deixará de aparecer para os alunos.", async () => {
                 adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
-                saveState("Link removido do rascunho local.", `Remove quick link ${button.dataset.deleteLink} from site content`);
+                await saveQuickLinksToPrimaryStore("Link removido do painel.");
             });
         });
     });
@@ -940,7 +1063,7 @@ confirmActionButton?.addEventListener("click", async () => {
         closeConfirmModal();
     }
 });
-noticeForm?.addEventListener("submit", (event) => {
+noticeForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (isPublishing) {
         return;
@@ -962,9 +1085,9 @@ noticeForm?.addEventListener("submit", (event) => {
         adminState.notices.unshift(payload);
     }
     fillNoticeForm();
-    saveState("Aviso salvo no painel.", "Update notices in site content");
+    await saveNoticesToPrimaryStore("Aviso salvo no painel.");
 });
-linkForm?.addEventListener("submit", (event) => {
+linkForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (isPublishing) {
         return;
@@ -983,7 +1106,7 @@ linkForm?.addEventListener("submit", (event) => {
         adminState.quickLinks.unshift(payload);
     }
     fillLinkForm();
-    saveState("Link salvo no painel.", "Update quick links in site content");
+    await saveQuickLinksToPrimaryStore("Link salvo no painel.");
 });
 mediaForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -991,6 +1114,42 @@ mediaForm?.addEventListener("submit", async (event) => {
         return;
     }
     await saveMediaWithUpload();
+});
+supabaseAuthForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (isPublishing) {
+        return;
+    }
+    const email = supabaseEmailInput.value.trim().toLowerCase();
+    const password = supabasePasswordInput.value;
+    if (!email || !password) {
+        setStatus("Informe o e-mail e a senha da conta administrativa do Supabase.", "warning");
+        return;
+    }
+    try {
+        setPublishingState(true);
+        setStatus("Conectando a conta administrativa ao Supabase...", "info");
+        await signInSupabaseAdmin(email, password, supabaseRememberSession.checked);
+        updateSupabaseAuthStatus();
+        const localDraft = readDraftSiteContent();
+        if (localDraft) {
+            adminState = cloneContent(localDraft);
+            renderAll();
+        }
+        setStatus("Conta do Supabase conectada. A partir de agora, avisos e links rápidos podem ser publicados direto no banco.", "success", isPublishedSnapshotInSync() ? "synced" : "local");
+    }
+    catch (error) {
+        console.error(error);
+        setStatus(buildSupabasePublishErrorMessage(error, "a conexão editorial"), "danger");
+    }
+    finally {
+        setPublishingState(false);
+    }
+});
+clearSupabaseSessionButton?.addEventListener("click", () => {
+    clearSupabaseAdminSession();
+    updateSupabaseAuthStatus();
+    setStatus("Sessão administrativa do Supabase removida deste navegador.", "warning", "local");
 });
 githubTokenForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1072,23 +1231,38 @@ mediaAlt?.addEventListener("input", () => {
     }
 });
 logoutAdminButton?.addEventListener("click", () => {
+    clearSupabaseAdminSession();
     clearAdminAuth();
     window.location.replace("index.html?home=1");
 });
 async function bootstrap() {
     let publishedContent = null;
     let draftOrPublishedContent = null;
+    const localDraft = readDraftSiteContent();
     try {
         publishedContent = await fetchPublishedSiteContent();
     }
     catch (error) {
         console.warn("Falha ao carregar conteúdo publicado.", error);
     }
-    try {
-        draftOrPublishedContent = await loadEditorSiteContent();
+    if (localDraft) {
+        draftOrPublishedContent = localDraft;
     }
-    catch (error) {
-        console.warn("Falha ao carregar conteúdo base do editor.", error);
+    else if (isSupabaseConfigured() && isSupabaseConnected()) {
+        try {
+            draftOrPublishedContent = await fetchSupabaseEditorSiteContent();
+        }
+        catch (error) {
+            console.warn("Falha ao carregar conteúdo editorial do Supabase.", error);
+        }
+    }
+    if (!draftOrPublishedContent) {
+        try {
+            draftOrPublishedContent = await loadEditorSiteContent();
+        }
+        catch (error) {
+            console.warn("Falha ao carregar conteúdo base do editor.", error);
+        }
     }
     publishedSnapshot = cloneContent(publishedContent || defaultContent);
     adminState = cloneContent(draftOrPublishedContent || publishedContent || defaultContent);
@@ -1097,6 +1271,7 @@ async function bootstrap() {
     fillMediaForm();
     renderAll();
     showPanel("dashboardPanel");
+    updateSupabaseAuthStatus();
     updateGitHubTokenStatus();
     await refreshImageLibrary({ silent: true });
     if (!publishedContent) {

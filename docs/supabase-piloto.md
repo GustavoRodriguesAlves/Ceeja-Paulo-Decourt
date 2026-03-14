@@ -18,6 +18,24 @@ Esta base deixa o projeto pronto para testar leitura pública do Supabase sem qu
 3. Rodar `supabase/setup.sql` no `SQL Editor`.
 4. Opcionalmente rodar `supabase/seed.sql`.
 5. Criar o bucket público `portal-media`.
+6. Criar um usuário administrativo em `Authentication > Users`.
+7. Rodar novamente `supabase/setup.sql` sempre que as policies forem atualizadas no projeto.
+
+## Conta administrativa do painel
+
+Para que o painel da secretaria consiga gravar avisos e links no Supabase, crie um usuário em:
+
+- `Authentication`
+- `Users`
+- `Add user`
+
+Sugestão para o piloto:
+
+- e-mail: `chief@gmail.com`
+- senha: a senha que você quiser usar no painel
+- marque a conta como confirmada, se o Supabase pedir essa opção
+
+Depois disso, a própria tela `admin.html` passa a ter uma seção `Conexão editorial com Supabase` para autenticar essa conta no navegador da secretaria.
 
 ## Como preencher a configuração local
 
