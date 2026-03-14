@@ -1,38 +1,16 @@
 {
-  "updatedAt": "2026-03-14T00:57:30.482Z",
+  "updatedAt": "2026-03-14T01:07:07.110Z",
   "notices": [
     {
-      "id": "notice-1773449850482",
-      "title": "Punheta Guiada",
-      "summary": "Site para aprender a bater punheta com professores",
-      "category": "dadada",
+      "id": "notice-1773450427109",
+      "title": "Oficina",
+      "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "category": "Oficina",
       "date": "2026-03-13",
-      "featured": false,
-      "published": true
-    },
-    {
-      "id": "notice-1773449315580",
-      "title": "Punheta Guiada",
-      "summary": "Site para aprender a bater punheta com professores",
-      "category": "IMPORTANTE",
-      "date": "2026-03-13",
-      "featured": false,
+      "featured": true,
       "published": true
     }
   ],
-  "quickLinks": [
-    {
-      "id": "link-1773449396779",
-      "label": "daereaeadadadadadad",
-      "url": "https://mamengole.com1232131321",
-      "published": true
-    },
-    {
-      "id": "link-1773449188703",
-      "label": "Punheta Guiada",
-      "url": "https://mamengole.com",
-      "published": true
-    }
-  ],
+  "quickLinks": [],
   "gallery": []
 }
