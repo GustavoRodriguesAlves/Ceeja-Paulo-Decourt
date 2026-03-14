@@ -5,3 +5,5 @@ appscript_output.html
 ceejapd_index.html
 *.bak
 node_modules/
+.env
+.env.*

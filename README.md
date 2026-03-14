@@ -39,6 +39,18 @@ Scripts disponíveis:
 - `npm run typecheck:watch`: mantém a checagem de tipos em modo observação.
 - `npm run build:watch`: recompila automaticamente enquanto os arquivos `.ts` mudam.
 
+## Piloto com Supabase
+
+O projeto já tem uma base pronta para testar Supabase sem desmontar o fluxo atual.
+
+- configuração pública: `src/ts/core/supabase-config.ts`
+- leitura pública: `src/ts/core/supabase.ts`
+- SQL inicial: `supabase/setup.sql`
+- seed de teste: `supabase/seed.sql`
+- guia curto: `docs/supabase-piloto.md`
+
+Enquanto `enabled` estiver `false` em `supabase-config.ts`, o site continua usando apenas o fluxo atual.
+
 Para publicar:
 
 1. envie o repositório para a branch `main`;
