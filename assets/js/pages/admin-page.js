@@ -7,15 +7,22 @@ import {
 import {
   clearDraftSiteContent,
   clearGitHubPublishToken,
+  createPortalImagePath,
   fetchPublishedSiteContent,
   fetchPublishedSiteContentMeta,
   getGitHubPublishToken,
+  isAllowedPortalImageFileName,
+  listPortalImageLibrary,
   loadEditorSiteContent,
+  normalizePortalImageLibraryEntries,
   normalizeSiteContent,
   publishSiteContentToGitHub,
   saveDraftSiteContent,
-  setGitHubPublishToken
+  setGitHubPublishToken,
+  uploadPortalImageToGitHub
 } from "../core/site-content.js";
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 const rememberedAdminEmail = syncRememberedAdminSession();
 const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
@@ -37,6 +44,9 @@ let pendingConfirmation = null;
 let publishQueue = Promise.resolve();
 let isPublishing = false;
 let lastFocusedElement = null;
+let selectedLibraryImagePath = "";
+let imageLibraryEntries = [];
+let mediaPreviewObjectUrl = "";
 
 const panelButtons = [...document.querySelectorAll("[data-panel]")];
 const panels = [...document.querySelectorAll(".content-panel")];
@@ -66,6 +76,12 @@ const mediaPath = document.getElementById("mediaPath");
 const mediaAlt = document.getElementById("mediaAlt");
 const mediaOrder = document.getElementById("mediaOrder");
 const mediaPublished = document.getElementById("mediaPublished");
+const mediaFile = document.getElementById("mediaFile");
+const mediaPreviewImage = document.getElementById("mediaPreviewImage");
+const mediaPreviewEmpty = document.getElementById("mediaPreviewEmpty");
+const mediaPreviewLabel = document.getElementById("mediaPreviewLabel");
+const imageLibrary = document.getElementById("imageLibrary");
+const refreshImageLibraryButton = document.getElementById("refreshImageLibraryButton");
 
 const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
 const dashboardLinkCount = document.getElementById("dashboardLinkCount");
@@ -105,7 +121,8 @@ const publishLockedControls = [
   connectGitHubButton,
   clearGitHubTokenButton,
   usePublishedContentButton,
-  confirmActionButton
+  confirmActionButton,
+  refreshImageLibraryButton
 ].filter(Boolean);
 
 const escapeHtml = (value = "") =>
@@ -167,30 +184,12 @@ function updateSyncIndicator(forcedState = "") {
   }
 
   const config = {
-    synced: {
-      text: "Conteúdo sincronizado",
-      className: "sync-indicator sync-indicator-success"
-    },
-    local: {
-      text: "Rascunho local",
-      className: "sync-indicator sync-indicator-warning"
-    },
-    pending: {
-      text: "Pendência de publicação",
-      className: "sync-indicator sync-indicator-warning"
-    },
-    publishing: {
-      text: "Publicando...",
-      className: "sync-indicator sync-indicator-info"
-    },
-    offline: {
-      text: "Conteúdo base indisponível",
-      className: "sync-indicator sync-indicator-danger"
-    }
-  }[state] || {
-    text: "Sincronizando",
-    className: "sync-indicator sync-indicator-info"
-  };
+    synced: { text: "Conteúdo sincronizado", className: "sync-indicator sync-indicator-success" },
+    local: { text: "Rascunho local", className: "sync-indicator sync-indicator-warning" },
+    pending: { text: "Pendência de publicação", className: "sync-indicator sync-indicator-warning" },
+    publishing: { text: "Publicando...", className: "sync-indicator sync-indicator-info" },
+    offline: { text: "Conteúdo base indisponível", className: "sync-indicator sync-indicator-danger" }
+  }[state] || { text: "Sincronizando", className: "sync-indicator sync-indicator-info" };
 
   adminSyncIndicator.textContent = config.text;
   adminSyncIndicator.className = config.className;
@@ -252,9 +251,7 @@ function updateGitHubTokenStatus() {
   githubTokenStatus.textContent = hasToken
     ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
     : "Nenhum token conectado. As alterações ficarão apenas neste navegador até você conectar o GitHub.";
-  githubTokenStatus.className = hasToken
-    ? "text-sm text-green-700"
-    : "text-sm text-yellow-700";
+  githubTokenStatus.className = hasToken ? "text-sm text-green-700" : "text-sm text-yellow-700";
 
   if (clearGitHubTokenButton) {
     clearGitHubTokenButton.disabled = !hasToken || isPublishing;
@@ -272,6 +269,9 @@ function setPublishingState(nextState) {
   publishLockedControls.forEach((control) => {
     control.disabled = nextState;
   });
+  if (mediaFile) {
+    mediaFile.disabled = nextState;
+  }
   updateSyncIndicator(nextState ? "publishing" : "");
 }
 
@@ -348,6 +348,138 @@ function closeConfirmModal() {
   lastFocusedElement = null;
 }
 
+function revokeMediaPreviewObjectUrl() {
+  if (mediaPreviewObjectUrl) {
+    URL.revokeObjectURL(mediaPreviewObjectUrl);
+    mediaPreviewObjectUrl = "";
+  }
+}
+
+function setMediaPreview(src = "", label = "", alt = "") {
+  if (!mediaPreviewImage || !mediaPreviewEmpty || !mediaPreviewLabel) {
+    return;
+  }
+
+  if (!src) {
+    mediaPreviewImage.hidden = true;
+    mediaPreviewImage.removeAttribute("src");
+    mediaPreviewImage.alt = "";
+    mediaPreviewEmpty.hidden = false;
+    mediaPreviewLabel.textContent = label || "Selecione uma imagem da biblioteca ou envie um arquivo do computador.";
+    return;
+  }
+
+  mediaPreviewImage.src = src;
+  mediaPreviewImage.alt = alt || label || "Pré-visualização da imagem";
+  mediaPreviewImage.hidden = false;
+  mediaPreviewEmpty.hidden = true;
+  mediaPreviewLabel.textContent = label || "Imagem pronta para publicação.";
+}
+
+function setMediaPreviewFromFile(file) {
+  revokeMediaPreviewObjectUrl();
+  mediaPreviewObjectUrl = URL.createObjectURL(file);
+  setMediaPreview(mediaPreviewObjectUrl, `Arquivo selecionado: ${file.name}`, mediaAlt.value.trim() || mediaTitle.value.trim());
+}
+
+function buildGalleryLibraryEntries() {
+  return normalizePortalImageLibraryEntries(
+    adminState.gallery.map((item) => ({
+      path: item.src,
+      name: item.title || item.src.split("/").pop() || "imagem",
+      previewSrc: item.src,
+      source: "gallery"
+    }))
+  );
+}
+
+function mergeImageLibraryEntries(repositoryEntries = []) {
+  imageLibraryEntries = normalizePortalImageLibraryEntries([
+    ...buildGalleryLibraryEntries(),
+    ...repositoryEntries
+  ]);
+}
+
+function renderImageLibrary() {
+  if (!imageLibrary) {
+    return;
+  }
+
+  if (!imageLibraryEntries.length) {
+    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Conecte o GitHub para carregar o repositório ou envie a primeira imagem.</div>';
+    return;
+  }
+
+  const activeGalleryPaths = new Set(adminState.gallery.map((item) => item.src));
+
+  imageLibrary.innerHTML = imageLibraryEntries
+    .map((item) => {
+      const selected = item.path === selectedLibraryImagePath;
+      const isInGallery = activeGalleryPaths.has(item.path);
+      return `
+        <article class="image-library-card ${selected ? "is-selected" : ""}">
+          <img class="image-library-thumb" src="${escapeHtml(item.previewSrc || item.path)}" alt="${escapeHtml(item.name)}" loading="lazy" />
+          <div class="image-library-body">
+            <p class="image-library-name">${escapeHtml(item.name)}</p>
+            <p class="image-library-path">${escapeHtml(item.path)}</p>
+            <div class="image-library-actions">
+              <span class="image-library-badge">${isInGallery ? "Na galeria" : "Disponível"}</span>
+              <button type="button" class="btn-secondary text-xs px-3 py-1.5" data-use-library-image="${escapeHtml(item.path)}">Usar</button>
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  imageLibrary.querySelectorAll("[data-use-library-image]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const path = button.getAttribute("data-use-library-image") || "";
+      const entry = imageLibraryEntries.find((item) => item.path === path);
+      selectLibraryImage(entry);
+    });
+  });
+}
+
+function selectLibraryImage(entry) {
+  if (!entry) {
+    return;
+  }
+
+  revokeMediaPreviewObjectUrl();
+  selectedLibraryImagePath = entry.path;
+  if (mediaFile) {
+    mediaFile.value = "";
+  }
+  mediaPath.value = entry.path;
+  if (!mediaTitle.value.trim()) {
+    mediaTitle.value = entry.name.replace(/\.[^.]+$/, "");
+  }
+  setMediaPreview(entry.previewSrc || entry.path, `Imagem escolhida: ${entry.name}`, mediaAlt.value.trim() || entry.name);
+  renderImageLibrary();
+}
+
+async function refreshImageLibrary(options = {}) {
+  const { silent = false } = options;
+  const token = getGitHubPublishToken();
+
+  try {
+    const repositoryEntries = token ? await listPortalImageLibrary(token) : [];
+    mergeImageLibraryEntries(repositoryEntries);
+    renderImageLibrary();
+    if (!silent && token) {
+      setStatus("Biblioteca de imagens atualizada a partir do repositório.", "success");
+    }
+  } catch (error) {
+    console.error(error);
+    mergeImageLibraryEntries([]);
+    renderImageLibrary();
+    if (!silent) {
+      setStatus("Não foi possível atualizar a biblioteca do repositório agora.", "warning");
+    }
+  }
+}
+
 async function publishStateToGitHub(reason) {
   const token = getGitHubPublishToken();
   if (!token) {
@@ -400,6 +532,122 @@ function saveState(localMessage, publishMessage) {
   publishStateToGitHub(publishMessage);
 }
 
+async function saveMediaWithUpload() {
+  const selectedFile = mediaFile?.files?.[0] || null;
+  const selectedPath = mediaPath.value.trim();
+  const token = getGitHubPublishToken();
+
+  if (!selectedFile && !selectedPath) {
+    setStatus("Escolha uma imagem existente ou envie um arquivo do computador antes de salvar.", "warning");
+    return;
+  }
+
+  if (selectedFile) {
+    if (!isAllowedPortalImageFileName(selectedFile.name)) {
+      setStatus("Formato de imagem não suportado. Use JPG, JPEG, PNG ou WEBP.", "warning");
+      return;
+    }
+
+    if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
+      setStatus("A imagem excede o limite de 5 MB. Reduza o arquivo antes de enviar.", "warning");
+      return;
+    }
+
+    if (!token) {
+      setStatus("Conecte um token do GitHub antes de enviar uma nova imagem do computador.", "warning", "local");
+      return;
+    }
+  }
+
+  let uploadedImagePath = selectedPath;
+  let uploadSucceeded = false;
+
+  try {
+    if (selectedFile) {
+      setPublishingState(true);
+      setStatus("Enviando imagem para o repositório do GitHub...", "info", "publishing");
+      const generatedPath = createPortalImagePath(mediaTitle.value.trim(), selectedFile.name);
+      const uploadResult = await uploadPortalImageToGitHub(
+        selectedFile,
+        token,
+        generatedPath,
+        `Upload portal image ${mediaTitle.value.trim() || selectedFile.name}`
+      );
+      uploadedImagePath = uploadResult.path;
+      uploadSucceeded = true;
+      mediaPath.value = uploadedImagePath;
+      mergeImageLibraryEntries([
+        ...imageLibraryEntries,
+        {
+          path: uploadedImagePath,
+          name: uploadedImagePath.split("/").pop() || selectedFile.name,
+          previewSrc: uploadedImagePath,
+          source: "repository"
+        }
+      ]);
+      renderImageLibrary();
+      setStatus("Imagem enviada. Atualizando a galeria publicada...", "info", "publishing");
+    }
+
+    const payload = {
+      id: mediaId.value || `media-${Date.now()}`,
+      title: mediaTitle.value.trim(),
+      src: uploadedImagePath,
+      alt: mediaAlt.value.trim(),
+      order: Number(mediaOrder.value) || adminState.gallery.length + 1,
+      published: mediaPublished.checked
+    };
+
+    const existingIndex = adminState.gallery.findIndex((item) => item.id === payload.id);
+    if (existingIndex >= 0) {
+      adminState.gallery[existingIndex] = payload;
+    } else {
+      adminState.gallery.push(payload);
+    }
+
+    selectedLibraryImagePath = payload.src;
+    adminState.updatedAt = new Date().toISOString();
+    saveDraftSiteContent(adminState);
+    renderAll();
+
+    if (!token) {
+      setStatus("Imagem salva apenas no rascunho local deste navegador.", "warning", "local");
+      fillMediaForm();
+      return;
+    }
+
+    if (!isPublishing) {
+      setPublishingState(true);
+      setStatus("Publicando atualização da galeria no GitHub...", "info", "publishing");
+    }
+
+    await publishSiteContentToGitHub(adminState, token, "Update gallery in site content");
+    publishedSnapshot = cloneContent(adminState);
+    fillMediaForm();
+    await refreshImageLibrary({ silent: true });
+    setStatus(
+      uploadSucceeded
+        ? "Imagem enviada e galeria publicada com sucesso."
+        : "Imagem da biblioteca aplicada e galeria publicada com sucesso.",
+      "success",
+      "synced"
+    );
+  } catch (error) {
+    console.error(error);
+    if (uploadSucceeded) {
+      setStatus(
+        "A imagem foi enviada ao repositório, mas a atualização da galeria falhou. Tente salvar novamente para concluir a publicação.",
+        "danger",
+        "pending"
+      );
+    } else {
+      setStatus(buildPublishErrorMessage(error), "danger", token ? "pending" : "local");
+    }
+  } finally {
+    setPublishingState(false);
+  }
+}
+
 function fillNoticeForm(item = null) {
   noticeId.value = item?.id || "";
   noticeTitle.value = item?.title || "";
@@ -418,12 +666,26 @@ function fillLinkForm(item = null) {
 }
 
 function fillMediaForm(item = null) {
+  revokeMediaPreviewObjectUrl();
   mediaId.value = item?.id || "";
   mediaTitle.value = item?.title || "";
   mediaPath.value = item?.src || "";
   mediaAlt.value = item?.alt || "";
   mediaOrder.value = item?.order || adminState.gallery.length + 1;
   mediaPublished.checked = item?.published !== false;
+  if (mediaFile) {
+    mediaFile.value = "";
+  }
+
+  selectedLibraryImagePath = item?.src || "";
+  if (item?.src) {
+    const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === item.src);
+    setMediaPreview(item.src, `Imagem escolhida: ${entry?.name || item.title || item.src}`, item.alt || item.title);
+  } else {
+    setMediaPreview("", "Selecione uma imagem da biblioteca ou envie um arquivo do computador.");
+  }
+
+  renderImageLibrary();
 }
 
 function renderNotices() {
@@ -598,6 +860,7 @@ function renderAll() {
   renderLinks();
   renderGallery();
   renderDashboard();
+  renderImageLibrary();
   updateSyncIndicator();
 }
 
@@ -607,6 +870,7 @@ panelButtons.forEach((button) => {
 
 goToNoticesButton?.addEventListener("click", () => jumpToPanel("noticesPanel"));
 goToMediaButton?.addEventListener("click", () => jumpToPanel("mediaPanel"));
+refreshImageLibraryButton?.addEventListener("click", () => refreshImageLibrary());
 
 cancelConfirmButton?.addEventListener("click", closeConfirmModal);
 confirmModal?.addEventListener("click", (event) => {
@@ -681,30 +945,12 @@ linkForm?.addEventListener("submit", (event) => {
   saveState("Link salvo no painel.", "Update quick links in site content");
 });
 
-mediaForm?.addEventListener("submit", (event) => {
+mediaForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (isPublishing) {
     return;
   }
-
-  const payload = {
-    id: mediaId.value || `media-${Date.now()}`,
-    title: mediaTitle.value.trim(),
-    src: mediaPath.value.trim(),
-    alt: mediaAlt.value.trim(),
-    order: Number(mediaOrder.value) || adminState.gallery.length + 1,
-    published: mediaPublished.checked
-  };
-
-  const existingIndex = adminState.gallery.findIndex((item) => item.id === payload.id);
-  if (existingIndex >= 0) {
-    adminState.gallery[existingIndex] = payload;
-  } else {
-    adminState.gallery.push(payload);
-  }
-
-  fillMediaForm();
-  saveState("Imagem salva no painel.", "Update gallery in site content");
+  await saveMediaWithUpload();
 });
 
 githubTokenForm?.addEventListener("submit", async (event) => {
@@ -724,6 +970,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     await fetchPublishedSiteContentMeta(token);
     setGitHubPublishToken(token);
     updateGitHubTokenStatus();
+    await refreshImageLibrary({ silent: true });
 
     if (!isPublishedSnapshotInSync()) {
       setStatus("Token validado. Publicando o rascunho atual para sincronizar o site.", "info", "publishing");
@@ -748,6 +995,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
 clearGitHubTokenButton?.addEventListener("click", () => {
   clearGitHubPublishToken();
   updateGitHubTokenStatus();
+  refreshImageLibrary({ silent: true });
   setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning", "local");
 });
 
@@ -764,6 +1012,7 @@ usePublishedContentButton?.addEventListener("click", async () => {
         fillNoticeForm();
         fillLinkForm();
         fillMediaForm();
+        await refreshImageLibrary({ silent: true });
         setStatus("Conteúdo publicado recarregado com sucesso.", "success", "synced");
       } catch (error) {
         console.error(error);
@@ -776,6 +1025,33 @@ usePublishedContentButton?.addEventListener("click", async () => {
 clearNoticeFormButton?.addEventListener("click", () => fillNoticeForm());
 clearLinkFormButton?.addEventListener("click", () => fillLinkForm());
 clearMediaFormButton?.addEventListener("click", () => fillMediaForm());
+
+mediaFile?.addEventListener("change", () => {
+  const selectedFile = mediaFile.files?.[0];
+  selectedLibraryImagePath = "";
+  mediaPath.value = "";
+  renderImageLibrary();
+
+  if (!selectedFile) {
+    revokeMediaPreviewObjectUrl();
+    setMediaPreview("", "Selecione uma imagem da biblioteca ou envie um arquivo do computador.");
+    return;
+  }
+
+  setMediaPreviewFromFile(selectedFile);
+});
+
+mediaTitle?.addEventListener("input", () => {
+  if (!mediaPreviewImage?.hidden) {
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
+  }
+});
+
+mediaAlt?.addEventListener("input", () => {
+  if (!mediaPreviewImage?.hidden) {
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
+  }
+});
 
 logoutAdminButton?.addEventListener("click", () => {
   clearAdminAuth();
@@ -807,6 +1083,7 @@ async function bootstrap() {
   renderAll();
   showPanel("dashboardPanel");
   updateGitHubTokenStatus();
+  await refreshImageLibrary({ silent: true });
 
   if (!publishedContent) {
     setStatus(

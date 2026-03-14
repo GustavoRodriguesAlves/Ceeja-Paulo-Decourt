@@ -380,6 +380,127 @@ textarea.field {
   object-fit: cover;
 }
 
+.media-file-input {
+  padding: 0.55rem 0.75rem;
+}
+
+.media-file-input::file-selector-button {
+  margin-right: 0.75rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  background: #F8FAFC;
+  padding: 0.45rem 0.8rem;
+  color: var(--brand-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.media-preview-panel {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #F8FAFC;
+  padding: 1rem;
+}
+
+.media-preview-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+  border: 1px dashed #CBD5E1;
+  border-radius: 6px;
+  background: #EEF2F7;
+}
+
+.media-preview-frame img {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.media-preview-empty {
+  padding: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.image-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.image-library-card {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.image-library-card.is-selected {
+  border-color: var(--brand-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 80, 158, 0.12);
+}
+
+.image-library-card:hover {
+  border-color: #94A3B8;
+  transform: translateY(-1px);
+}
+
+.image-library-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #E2E8F0;
+  object-fit: cover;
+}
+
+.image-library-body {
+  padding: 0.9rem;
+}
+
+.image-library-name {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--brand-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.image-library-path {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.image-library-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.image-library-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #F1F5F9;
+  padding: 0.2rem 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* JSON Output Shell */
 .json-shell {
   min-width: 0;
