@@ -1,26 +1,23 @@
 {
-  "updatedAt": "2026-03-14T00:48:05.804Z",
+  "updatedAt": "2026-03-14T00:49:56.779Z",
   "notices": [
     {
-      "id": "notice-1773449285804",
-      "title": "Mama engole",
-      "summary": "dadadadadadada",
-      "category": "adadada",
-      "date": "2026-03-13",
-      "featured": false,
-      "published": true
-    },
-    {
-      "id": "notice-1773449225059",
+      "id": "notice-1773449315580",
       "title": "Punheta Guiada",
       "summary": "Site para aprender a bater punheta com professores",
       "category": "IMPORTANTE",
       "date": "2026-03-13",
-      "featured": true,
+      "featured": false,
       "published": true
     }
   ],
   "quickLinks": [
+    {
+      "id": "link-1773449396779",
+      "label": "daereaeadadadadadad",
+      "url": "https://mamengole.com1232131321",
+      "published": true
+    },
     {
       "id": "link-1773449188703",
       "label": "Punheta Guiada",
