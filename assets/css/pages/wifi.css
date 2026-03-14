@@ -37,3 +37,8 @@
   background-color: var(--brand-secondary);
   transform: translateY(-1px);
 }
+
+.card:hover {
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
