@@ -410,6 +410,40 @@ function buildPublishErrorMessage(error) {
   return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique o token e as permissões de escrita no repositório.";
 }
 
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+function buildLibraryRefreshErrorMessage(error) {
+  if (!error) {
+    return "Não foi possível atualizar a biblioteca de imagens agora.";
+  }
+
+  const repositoryError = /** @type {{ status?: number }} */ (error);
+
+  if (repositoryError.status === 401 || repositoryError.status === 403) {
+    return "A biblioteca de imagens não pôde ser atualizada porque o GitHub recusou o token. Verifique se ele ainda é válido e se tem acesso ao repositório.";
+  }
+
+  if (repositoryError.status === 404) {
+    return "A biblioteca de imagens não pôde ser atualizada porque a pasta de imagens ou o repositório não foi encontrado no GitHub.";
+  }
+
+  if (repositoryError.status === 409 || repositoryError.status === 422) {
+    return "A biblioteca de imagens encontrou um conflito temporário ao consultar o GitHub. Tente novamente em alguns segundos.";
+  }
+
+  if (repositoryError.status === 429) {
+    return "O GitHub limitou temporariamente as consultas da biblioteca de imagens. Aguarde um pouco e tente novamente.";
+  }
+
+  if (repositoryError.status === 503) {
+    return "O GitHub estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
+  }
+
+  return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão, o token e o acesso ao repositório.";
+}
+
 function updateGitHubTokenStatus() {
   const savedToken = getGitHubPublishToken();
   const hasToken = Boolean(savedToken);
@@ -682,7 +716,7 @@ async function refreshImageLibrary(options = {}) {
     mergeImageLibraryEntries([]);
     renderImageLibrary();
     if (!silent) {
-      setStatus("Não foi possível atualizar a biblioteca do repositório agora.", "warning");
+      setStatus(buildLibraryRefreshErrorMessage(error), "warning");
     }
   }
 }
