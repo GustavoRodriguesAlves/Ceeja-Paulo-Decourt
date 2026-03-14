@@ -1,3 +1,5 @@
+// @ts-check
+
 import {
   clearPortalAuth,
   getPortalSessionEmail,
@@ -6,9 +8,47 @@ import {
 } from "../core/auth.js";
 import { fetchPublishedSiteContent } from "../core/site-content.js";
 
+/** @typedef {import("../types/core").SiteContent} SiteContent */
+
 const NOTES_BASE_URL =
   "https://script.google.com/macros/s/AKfycbyVf3T34dxhgWYWebvuPE8o2JHQIhzLrIqOfDCK1UvdC_vGz6gLj20A30FS5EwTGZXdxw/exec";
 const RA_STORAGE_KEY = "ceeja_prepared_ra";
+
+/**
+ * @param {string} id
+ * @returns {HTMLElement | null}
+ */
+function getElement(id) {
+  const element = document.getElementById(id);
+  return element instanceof HTMLElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLAnchorElement | null}
+ */
+function getAnchor(id) {
+  const element = getElement(id);
+  return element instanceof HTMLAnchorElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLButtonElement | null}
+ */
+function getButton(id) {
+  const element = getElement(id);
+  return element instanceof HTMLButtonElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLInputElement | null}
+ */
+function getInput(id) {
+  const element = getElement(id);
+  return element instanceof HTMLInputElement ? element : null;
+}
 
 const rememberedEmail = syncRememberedPortalSession();
 const userEmail = getPortalSessionEmail() || rememberedEmail;
@@ -17,28 +57,34 @@ if (!userEmail || !isAllowedTestUser(userEmail)) {
   window.location.replace("index.html");
 }
 
-const userEmailElement = document.getElementById("userEmail");
-const userEmailMobileElement = document.getElementById("userEmailMobile");
-const logoutButton = document.getElementById("logoutBtn");
-const openNotasModalButton = document.getElementById("openNotasModalBtn");
-const notasModal = document.getElementById("notasModal");
-const popupBlockedMessage = document.getElementById("popupBlockedMessage");
-const notasDirectLink = document.getElementById("notasDirectLink");
-const launchNotasPopup = document.getElementById("launchNotasPopup");
-const closeNotasModalButton = document.getElementById("closeNotasModal");
-const raWithUfInput = document.getElementById("raWithUfInput");
-const raValidationMessage = document.getElementById("raValidationMessage");
-const raPreparedMessage = document.getElementById("raPreparedMessage");
-const noticeList = document.getElementById("noticeList");
-const quickLinksList = document.getElementById("quickLinksList");
-const portalGallery = document.getElementById("portalGallery");
+const userEmailElement = getElement("userEmail");
+const userEmailMobileElement = getElement("userEmailMobile");
+const logoutButton = getButton("logoutBtn");
+const openNotasModalButton = getButton("openNotasModalBtn");
+const notasModal = getElement("notasModal");
+const popupBlockedMessage = getElement("popupBlockedMessage");
+const notasDirectLink = getAnchor("notasDirectLink");
+const launchNotasPopup = getButton("launchNotasPopup");
+const closeNotasModalButton = getButton("closeNotasModal");
+const raWithUfInput = getInput("raWithUfInput");
+const raValidationMessage = getElement("raValidationMessage");
+const raPreparedMessage = getElement("raPreparedMessage");
+const noticeList = getElement("noticeList");
+const quickLinksList = getElement("quickLinksList");
+const portalGallery = getElement("portalGallery");
 
+/** @type {number | null} */
 let portalRefreshTimer = null;
 let lastPortalRefreshAt = 0;
 let isPortalContentLoading = false;
 let shouldReloadPortalContent = false;
+/** @type {HTMLElement | null} */
 let lastFocusedElement = null;
 
+/**
+ * @param {string | number | null | undefined} [value=""]
+ * @returns {string}
+ */
 const escapeHtml = (value = "") =>
   String(value)
     .replaceAll("&", "&amp;")
@@ -47,45 +93,75 @@ const escapeHtml = (value = "") =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
+/**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
 const formatDisplayDate = (value) => {
   if (!value) {
     return "";
   }
+
   const parsed = new Date(`${value}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
+
   return parsed.toLocaleDateString("pt-BR");
 };
 
 if (userEmailElement) {
   userEmailElement.textContent = userEmail || "-";
 }
+
 if (userEmailMobileElement) {
   userEmailMobileElement.textContent = userEmail || "-";
 }
 
+/**
+ * @returns {string}
+ */
 function buildNotasUrl() {
   return NOTES_BASE_URL;
 }
 
+/**
+ * @param {HTMLElement | null} container
+ * @returns {HTMLElement[]}
+ */
 function getFocusableElements(container) {
-  return [...container.querySelectorAll(
-    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-  )].filter((element) => element.offsetParent !== null);
+  if (!container) {
+    return [];
+  }
+
+  return /** @type {HTMLElement[]} */ (
+    Array.from(
+      container.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    )
+  ).filter((element) => element.offsetParent !== null);
 }
 
+/**
+ * @returns {void}
+ */
 function openNotasModal() {
-  lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  lastFocusedElement =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
   popupBlockedMessage?.classList.add("hidden");
   raValidationMessage?.classList.add("hidden");
   raPreparedMessage?.classList.add("hidden");
+
   if (notasDirectLink) {
     notasDirectLink.href = buildNotasUrl();
   }
+
   if (raWithUfInput) {
     raWithUfInput.value = sessionStorage.getItem(RA_STORAGE_KEY) || "";
   }
+
   notasModal?.classList.remove("hidden");
   notasModal?.classList.add("flex");
   notasModal?.setAttribute("aria-hidden", "false");
@@ -93,6 +169,9 @@ function openNotasModal() {
   window.setTimeout(() => raWithUfInput?.focus(), 0);
 }
 
+/**
+ * @returns {void}
+ */
 function closeNotasModal() {
   notasModal?.classList.add("hidden");
   notasModal?.classList.remove("flex");
@@ -101,8 +180,11 @@ function closeNotasModal() {
   lastFocusedElement?.focus();
 }
 
+/**
+ * @returns {Promise<void>}
+ */
 async function openNotasPopup() {
-  const raValue = raWithUfInput?.value.trim().toUpperCase();
+  const raValue = raWithUfInput?.value.trim().toUpperCase() || "";
   if (!raValue) {
     raValidationMessage?.classList.remove("hidden");
     raPreparedMessage?.classList.add("hidden");
@@ -112,6 +194,7 @@ async function openNotasPopup() {
 
   sessionStorage.setItem(RA_STORAGE_KEY, raValue);
   const targetUrl = buildNotasUrl();
+
   if (notasDirectLink) {
     notasDirectLink.href = targetUrl;
   }
@@ -143,6 +226,10 @@ async function openNotasPopup() {
   closeNotasModal();
 }
 
+/**
+ * @param {SiteContent | null | undefined} content
+ * @returns {void}
+ */
 function renderPortalContent(content) {
   const notices = Array.isArray(content?.notices)
     ? content.notices
@@ -151,6 +238,7 @@ function renderPortalContent(content) {
           if (Boolean(a.featured) !== Boolean(b.featured)) {
             return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
           }
+
           return String(b.date).localeCompare(String(a.date));
         })
     : [];
@@ -158,6 +246,7 @@ function renderPortalContent(content) {
   const quickLinks = Array.isArray(content?.quickLinks)
     ? content.quickLinks.filter((item) => item.published)
     : [];
+
   const gallery = Array.isArray(content?.gallery)
     ? content.gallery
         .filter((item) => item.published)
@@ -218,10 +307,14 @@ function renderPortalContent(content) {
           .map(
             (item) => `
               <article class="portal-gallery-card">
-                <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" loading="lazy" />
+                <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(
+                  item.alt || item.title || ""
+                )}" loading="lazy" />
                 <div class="portal-gallery-card-body">
                   <h3 class="portal-gallery-card-title">${escapeHtml(item.title || "Imagem do portal")}</h3>
-                  <p class="portal-gallery-card-text">${escapeHtml(item.alt || "Registro visual publicado pela secretaria.")}</p>
+                  <p class="portal-gallery-card-text">${escapeHtml(
+                    item.alt || "Registro visual publicado pela secretaria."
+                  )}</p>
                 </div>
               </article>
             `
@@ -231,6 +324,9 @@ function renderPortalContent(content) {
   }
 }
 
+/**
+ * @returns {Promise<void>}
+ */
 async function loadPortalContent() {
   if (isPortalContentLoading) {
     shouldReloadPortalContent = true;
@@ -244,38 +340,49 @@ async function loadPortalContent() {
     lastPortalRefreshAt = Date.now();
   } catch (error) {
     console.warn("Falha ao carregar conteúdo do portal.", error);
+
     if (noticeList) {
       noticeList.innerHTML =
         '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar os avisos agora.</div>';
     }
+
     if (quickLinksList) {
       quickLinksList.innerHTML =
         '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar os links agora.</div>';
     }
+
     if (portalGallery) {
       portalGallery.innerHTML =
         '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar a galeria agora.</div>';
     }
   } finally {
     isPortalContentLoading = false;
+
     if (shouldReloadPortalContent) {
       shouldReloadPortalContent = false;
-      loadPortalContent();
+      void loadPortalContent();
     }
   }
 }
 
+/**
+ * @param {boolean} [force=false]
+ * @returns {void}
+ */
 function refreshPortalContentIfNeeded(force = false) {
   const elapsed = Date.now() - lastPortalRefreshAt;
   if (!force && elapsed < 15000) {
     return;
   }
 
-  loadPortalContent();
+  void loadPortalContent();
 }
 
+/**
+ * @returns {void}
+ */
 function startPortalRefreshLoop() {
-  if (portalRefreshTimer) {
+  if (portalRefreshTimer !== null) {
     window.clearInterval(portalRefreshTimer);
   }
 
@@ -292,8 +399,11 @@ logoutButton?.addEventListener("click", () => {
 });
 
 openNotasModalButton?.addEventListener("click", openNotasModal);
-launchNotasPopup?.addEventListener("click", openNotasPopup);
+launchNotasPopup?.addEventListener("click", () => {
+  void openNotasPopup();
+});
 closeNotasModalButton?.addEventListener("click", closeNotasModal);
+
 raWithUfInput?.addEventListener("input", () => {
   raValidationMessage?.classList.add("hidden");
   raPreparedMessage?.classList.add("hidden");
@@ -341,5 +451,5 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-loadPortalContent();
+void loadPortalContent();
 startPortalRefreshLoop();
