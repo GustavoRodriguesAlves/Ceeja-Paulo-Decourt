@@ -22,20 +22,20 @@
         </div>
       </div>
 
-      <nav class="space-y-1">
-        <button class="sidebar-link active" data-panel="dashboardPanel">
+      <nav class="space-y-1" aria-label="Seções do painel">
+        <button type="button" class="sidebar-link active" data-panel="dashboardPanel" aria-pressed="true">
           <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
           Visão Geral
         </button>
-        <button class="sidebar-link" data-panel="noticesPanel">
+        <button type="button" class="sidebar-link" data-panel="noticesPanel" aria-pressed="false">
           <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
           Avisos do dia
         </button>
-        <button class="sidebar-link" data-panel="linksPanel">
+        <button type="button" class="sidebar-link" data-panel="linksPanel" aria-pressed="false">
           <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
           Links Rápidos
         </button>
-        <button class="sidebar-link" data-panel="mediaPanel">
+        <button type="button" class="sidebar-link" data-panel="mediaPanel" aria-pressed="false">
           <svg class="h-5 w-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           Galeria do Portal
         </button>
@@ -59,7 +59,10 @@
         </header>
 
         <div id="adminStatus" class="status-banner text-blue-800 bg-blue-50 border-blue-100" role="status" aria-live="polite">
-          Carregando painel...
+          <div class="status-banner-copy">
+            <span id="adminStatusMessage">Carregando painel...</span>
+          </div>
+          <span id="adminSyncIndicator" class="sync-indicator sync-indicator-info">Sincronizando</span>
         </div>
 
         <section id="dashboardPanel" class="content-panel active">
@@ -97,14 +100,14 @@
             <div class="panel p-6">
               <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Ações rápidas</h3>
               <div class="space-y-3">
-                <button type="button" onclick="document.querySelector('[data-panel=noticesPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
+                <button id="goToNoticesButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
                   <div>
                     <span class="block font-semibold text-gray-800">Criar novo aviso</span>
                     <span class="block text-sm text-gray-500">Atualize o mural do Portal do Aluno</span>
                   </div>
                   <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
-                <button type="button" onclick="document.querySelector('[data-panel=mediaPanel]').click()" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
+                <button id="goToMediaButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
                   <div>
                     <span class="block font-semibold text-gray-800">Atualizar galeria do portal</span>
                     <span class="block text-sm text-gray-500">Organize as imagens exibidas abaixo dos avisos e links</span>
@@ -120,7 +123,7 @@
               <form id="githubTokenForm" class="space-y-4">
                 <div>
                   <label for="githubTokenInput" class="mb-1 block text-sm font-semibold">Token fino do GitHub</label>
-                  <input id="githubTokenInput" type="password" class="field" placeholder="Cole aqui um token com Contents: write" />
+                  <input id="githubTokenInput" type="password" class="field" placeholder="Cole aqui um token com Contents: write" autocomplete="off" />
                 </div>
                 <div class="flex flex-wrap gap-3">
                   <button type="submit" class="btn-primary text-sm">Conectar GitHub</button>
@@ -133,7 +136,7 @@
           </div>
         </section>
 
-        <section id="noticesPanel" class="content-panel">
+        <section id="noticesPanel" class="content-panel" hidden>
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-[var(--brand-secondary)]">
@@ -168,7 +171,7 @@
           </div>
         </section>
 
-        <section id="linksPanel" class="content-panel">
+        <section id="linksPanel" class="content-panel" hidden>
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-green-500">
@@ -198,7 +201,7 @@
           </div>
         </section>
 
-        <section id="mediaPanel" class="content-panel">
+        <section id="mediaPanel" class="content-panel" hidden>
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-purple-500">
@@ -236,13 +239,13 @@
   </div>
 
   <div id="confirmModal" class="modal-overlay" aria-hidden="true">
-    <div class="modal-card">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage" tabindex="-1">
       <div class="flex items-center gap-3 mb-2 flex-col text-center">
-        <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-2">
+        <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-2" aria-hidden="true">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
         </div>
         <p class="text-xs font-bold uppercase tracking-widest text-[var(--danger)]">Confirmar exclusão</p>
-        <h3 class="text-xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
+        <h3 id="confirmTitle" class="text-xl font-bold text-[var(--brand-primary)]">Deseja remover este conteúdo?</h3>
       </div>
       <p id="confirmMessage" class="text-sm mt-3 text-center text-gray-500 px-4">Essa ação vai retirar o item do painel e da publicação pública.</p>
       <div class="mt-8 flex gap-3">

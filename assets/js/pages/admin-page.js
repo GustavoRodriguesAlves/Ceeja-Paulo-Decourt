@@ -7,8 +7,8 @@ import {
 import {
   clearDraftSiteContent,
   clearGitHubPublishToken,
-  fetchPublishedSiteContentMeta,
   fetchPublishedSiteContent,
+  fetchPublishedSiteContentMeta,
   getGitHubPublishToken,
   loadEditorSiteContent,
   normalizeSiteContent,
@@ -32,8 +32,11 @@ const defaultContent = {
 };
 
 let adminState = structuredClone(defaultContent);
+let publishedSnapshot = structuredClone(defaultContent);
 let pendingConfirmation = null;
 let publishQueue = Promise.resolve();
+let isPublishing = false;
+let lastFocusedElement = null;
 
 const panelButtons = [...document.querySelectorAll("[data-panel]")];
 const panels = [...document.querySelectorAll(".content-panel")];
@@ -69,6 +72,8 @@ const dashboardLinkCount = document.getElementById("dashboardLinkCount");
 const dashboardGalleryCount = document.getElementById("dashboardGalleryCount");
 const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
 const adminStatus = document.getElementById("adminStatus");
+const adminStatusMessage = document.getElementById("adminStatusMessage");
+const adminSyncIndicator = document.getElementById("adminSyncIndicator");
 const githubTokenForm = document.getElementById("githubTokenForm");
 const githubTokenInput = document.getElementById("githubTokenInput");
 const githubTokenStatus = document.getElementById("githubTokenStatus");
@@ -76,6 +81,7 @@ const clearGitHubTokenButton = document.getElementById("clearGitHubTokenButton")
 const usePublishedContentButton = document.getElementById("usePublishedContentButton");
 
 const confirmModal = document.getElementById("confirmModal");
+const confirmModalCard = confirmModal?.querySelector(".modal-card") || null;
 const confirmMessage = document.getElementById("confirmMessage");
 const cancelConfirmButton = document.getElementById("cancelConfirmButton");
 const confirmActionButton = document.getElementById("confirmActionButton");
@@ -84,6 +90,23 @@ const clearNoticeFormButton = document.getElementById("clearNoticeForm");
 const clearLinkFormButton = document.getElementById("clearLinkForm");
 const clearMediaFormButton = document.getElementById("clearMediaForm");
 const logoutAdminButton = document.getElementById("logoutAdminButton");
+const goToNoticesButton = document.getElementById("goToNoticesButton");
+const goToMediaButton = document.getElementById("goToMediaButton");
+
+const saveNoticeButton = noticeForm?.querySelector('button[type="submit"]') || null;
+const saveLinkButton = linkForm?.querySelector('button[type="submit"]') || null;
+const saveMediaButton = mediaForm?.querySelector('button[type="submit"]') || null;
+const connectGitHubButton = githubTokenForm?.querySelector('button[type="submit"]') || null;
+
+const publishLockedControls = [
+  saveNoticeButton,
+  saveLinkButton,
+  saveMediaButton,
+  connectGitHubButton,
+  clearGitHubTokenButton,
+  usePublishedContentButton,
+  confirmActionButton
+].filter(Boolean);
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -97,15 +120,84 @@ const formatDate = (value) => {
   if (!value) {
     return "-";
   }
+
   const parsed = new Date(`${value}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
+
   return parsed.toLocaleDateString("pt-BR");
 };
 
-function setStatus(message, tone = "info") {
-  if (!adminStatus) {
+const cloneContent = (content) => structuredClone(normalizeSiteContent(content));
+const contentFingerprint = (content) => JSON.stringify(normalizeSiteContent(content));
+
+function isPublishedSnapshotInSync() {
+  return contentFingerprint(adminState) === contentFingerprint(publishedSnapshot);
+}
+
+function getFocusableElements(container) {
+  if (!container) {
+    return [];
+  }
+
+  return [...container.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hasAttribute("hidden") && element.getAttribute("aria-hidden") !== "true");
+}
+
+function updateSyncIndicator(forcedState = "") {
+  if (!adminSyncIndicator) {
+    return;
+  }
+
+  const hasToken = Boolean(getGitHubPublishToken());
+  let state = forcedState;
+
+  if (!state) {
+    if (isPublishing) {
+      state = "publishing";
+    } else if (isPublishedSnapshotInSync()) {
+      state = "synced";
+    } else if (hasToken) {
+      state = "pending";
+    } else {
+      state = "local";
+    }
+  }
+
+  const config = {
+    synced: {
+      text: "Conteúdo sincronizado",
+      className: "sync-indicator sync-indicator-success"
+    },
+    local: {
+      text: "Rascunho local",
+      className: "sync-indicator sync-indicator-warning"
+    },
+    pending: {
+      text: "Pendência de publicação",
+      className: "sync-indicator sync-indicator-warning"
+    },
+    publishing: {
+      text: "Publicando...",
+      className: "sync-indicator sync-indicator-info"
+    },
+    offline: {
+      text: "Conteúdo base indisponível",
+      className: "sync-indicator sync-indicator-danger"
+    }
+  }[state] || {
+    text: "Sincronizando",
+    className: "sync-indicator sync-indicator-info"
+  };
+
+  adminSyncIndicator.textContent = config.text;
+  adminSyncIndicator.className = config.className;
+}
+
+function setStatus(message, tone = "info", syncState = "") {
+  if (!adminStatus || !adminStatusMessage) {
     return;
   }
 
@@ -117,7 +209,8 @@ function setStatus(message, tone = "info") {
   }[tone] || "text-blue-800 bg-blue-50 border-blue-100";
 
   adminStatus.className = `status-banner ${toneClass}`;
-  adminStatus.textContent = message;
+  adminStatusMessage.textContent = message;
+  updateSyncIndicator(syncState);
 }
 
 function buildPublishErrorMessage(error) {
@@ -151,6 +244,7 @@ function buildPublishErrorMessage(error) {
 function updateGitHubTokenStatus() {
   const savedToken = getGitHubPublishToken();
   const hasToken = Boolean(savedToken);
+
   if (!githubTokenStatus) {
     return;
   }
@@ -163,30 +257,95 @@ function updateGitHubTokenStatus() {
     : "text-sm text-yellow-700";
 
   if (clearGitHubTokenButton) {
-    clearGitHubTokenButton.disabled = !hasToken;
+    clearGitHubTokenButton.disabled = !hasToken || isPublishing;
   }
 
   if (githubTokenInput) {
     githubTokenInput.value = savedToken;
   }
+
+  updateSyncIndicator();
+}
+
+function setPublishingState(nextState) {
+  isPublishing = nextState;
+  publishLockedControls.forEach((control) => {
+    control.disabled = nextState;
+  });
+  updateSyncIndicator(nextState ? "publishing" : "");
 }
 
 function showPanel(panelId) {
-  panels.forEach((panel) => panel.classList.toggle("active", panel.id === panelId));
-  panelButtons.forEach((button) => button.classList.toggle("active", button.dataset.panel === panelId));
+  panels.forEach((panel) => {
+    const isActive = panel.id === panelId;
+    panel.classList.toggle("active", isActive);
+    panel.hidden = !isActive;
+  });
+
+  panelButtons.forEach((button) => {
+    const isActive = button.dataset.panel === panelId;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function jumpToPanel(panelId) {
+  showPanel(panelId);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function handleConfirmModalKeydown(event) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeConfirmModal();
+    return;
+  }
+
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  const focusable = getFocusableElements(confirmModalCard);
+  if (!focusable.length) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const activeElement = document.activeElement;
+
+  if (event.shiftKey && activeElement === first) {
+    event.preventDefault();
+    last.focus();
+    return;
+  }
+
+  if (!event.shiftKey && activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function openConfirmModal(message, onConfirm) {
   pendingConfirmation = onConfirm;
+  lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   confirmMessage.textContent = message;
   confirmModal.classList.add("active");
+  confirmModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+  window.addEventListener("keydown", handleConfirmModalKeydown);
+  (cancelConfirmButton || confirmActionButton || confirmModalCard)?.focus();
 }
 
 function closeConfirmModal() {
   pendingConfirmation = null;
   confirmModal.classList.remove("active");
+  confirmModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  window.removeEventListener("keydown", handleConfirmModalKeydown);
+  lastFocusedElement?.focus?.();
+  lastFocusedElement = null;
 }
 
 async function publishStateToGitHub(reason) {
@@ -194,24 +353,33 @@ async function publishStateToGitHub(reason) {
   if (!token) {
     setStatus(
       "Alteração salva apenas neste navegador. Conecte um token fino do GitHub para publicar automaticamente para todos.",
-      "warning"
+      "warning",
+      "local"
     );
-    return;
+    return false;
   }
 
   publishQueue = publishQueue
     .catch(() => null)
     .then(async () => {
-      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info");
+      setPublishingState(true);
+      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info", "publishing");
+
       try {
         await publishSiteContentToGitHub(adminState, token, reason);
+        publishedSnapshot = cloneContent(adminState);
         setStatus(
           "Alterações publicadas com sucesso. O GitHub Pages pode levar alguns segundos para refletir o novo conteúdo.",
-          "success"
+          "success",
+          "synced"
         );
+        return true;
       } catch (error) {
         console.error(error);
-        setStatus(buildPublishErrorMessage(error), "danger");
+        setStatus(buildPublishErrorMessage(error), "danger", "pending");
+        return false;
+      } finally {
+        setPublishingState(false);
       }
     });
 
@@ -222,7 +390,13 @@ function saveState(localMessage, publishMessage) {
   adminState.updatedAt = new Date().toISOString();
   saveDraftSiteContent(adminState);
   renderAll();
-  setStatus(localMessage, getGitHubPublishToken() ? "info" : "warning");
+
+  if (!getGitHubPublishToken()) {
+    setStatus(`${localMessage} O conteúdo segue salvo localmente neste navegador.`, "warning", "local");
+    return;
+  }
+
+  setStatus(`${localMessage} Enviando atualização para o GitHub...`, "info", "publishing");
   publishStateToGitHub(publishMessage);
 }
 
@@ -291,8 +465,7 @@ function renderNotices() {
     button.addEventListener("click", () => {
       const item = adminState.notices.find((entry) => entry.id === button.dataset.editNotice);
       fillNoticeForm(item);
-      showPanel("noticesPanel");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      jumpToPanel("noticesPanel");
     });
   });
 
@@ -340,8 +513,7 @@ function renderLinks() {
     button.addEventListener("click", () => {
       const item = adminState.quickLinks.find((entry) => entry.id === button.dataset.editLink);
       fillLinkForm(item);
-      showPanel("linksPanel");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      jumpToPanel("linksPanel");
     });
   });
 
@@ -391,8 +563,7 @@ function renderGallery() {
     button.addEventListener("click", () => {
       const item = adminState.gallery.find((entry) => entry.id === button.dataset.editMedia);
       fillMediaForm(item);
-      showPanel("mediaPanel");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      jumpToPanel("mediaPanel");
     });
   });
 
@@ -427,11 +598,15 @@ function renderAll() {
   renderLinks();
   renderGallery();
   renderDashboard();
+  updateSyncIndicator();
 }
 
 panelButtons.forEach((button) => {
   button.addEventListener("click", () => showPanel(button.dataset.panel));
 });
+
+goToNoticesButton?.addEventListener("click", () => jumpToPanel("noticesPanel"));
+goToMediaButton?.addEventListener("click", () => jumpToPanel("mediaPanel"));
 
 cancelConfirmButton?.addEventListener("click", closeConfirmModal);
 confirmModal?.addEventListener("click", (event) => {
@@ -439,15 +614,28 @@ confirmModal?.addEventListener("click", (event) => {
     closeConfirmModal();
   }
 });
-confirmActionButton?.addEventListener("click", () => {
-  if (typeof pendingConfirmation === "function") {
-    pendingConfirmation();
+
+confirmActionButton?.addEventListener("click", async () => {
+  if (typeof pendingConfirmation !== "function") {
+    closeConfirmModal();
+    return;
   }
-  closeConfirmModal();
+
+  confirmActionButton.disabled = true;
+  try {
+    await pendingConfirmation();
+  } finally {
+    confirmActionButton.disabled = false;
+    closeConfirmModal();
+  }
 });
 
 noticeForm?.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isPublishing) {
+    return;
+  }
+
   const payload = {
     id: noticeId.value || `notice-${Date.now()}`,
     title: noticeTitle.value.trim(),
@@ -466,11 +654,15 @@ noticeForm?.addEventListener("submit", (event) => {
   }
 
   fillNoticeForm();
-  saveState("Aviso salvo no painel.", `Update notices in site content`);
+  saveState("Aviso salvo no painel.", "Update notices in site content");
 });
 
 linkForm?.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isPublishing) {
+    return;
+  }
+
   const payload = {
     id: linkId.value || `link-${Date.now()}`,
     label: linkLabel.value.trim(),
@@ -486,11 +678,15 @@ linkForm?.addEventListener("submit", (event) => {
   }
 
   fillLinkForm();
-  saveState("Link salvo no painel.", `Update quick links in site content`);
+  saveState("Link salvo no painel.", "Update quick links in site content");
 });
 
 mediaForm?.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isPublishing) {
+    return;
+  }
+
   const payload = {
     id: mediaId.value || `media-${Date.now()}`,
     title: mediaTitle.value.trim(),
@@ -508,11 +704,15 @@ mediaForm?.addEventListener("submit", (event) => {
   }
 
   fillMediaForm();
-  saveState("Imagem salva no painel.", `Update gallery in site content`);
+  saveState("Imagem salva no painel.", "Update gallery in site content");
 });
 
 githubTokenForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (isPublishing) {
+    return;
+  }
+
   const token = githubTokenInput.value.trim();
   if (!token) {
     setStatus("Informe um token do GitHub com permissão de escrita no repositório.", "warning");
@@ -524,9 +724,17 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     await fetchPublishedSiteContentMeta(token);
     setGitHubPublishToken(token);
     updateGitHubTokenStatus();
+
+    if (!isPublishedSnapshotInSync()) {
+      setStatus("Token validado. Publicando o rascunho atual para sincronizar o site.", "info", "publishing");
+      await publishStateToGitHub("Publish current site content after GitHub token connect");
+      return;
+    }
+
     setStatus(
       "Conexão com o GitHub validada. As próximas alterações serão publicadas automaticamente para todos.",
-      "success"
+      "success",
+      "synced"
     );
   } catch (error) {
     console.error(error);
@@ -540,7 +748,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
 clearGitHubTokenButton?.addEventListener("click", () => {
   clearGitHubPublishToken();
   updateGitHubTokenStatus();
-  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning");
+  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning", "local");
 });
 
 usePublishedContentButton?.addEventListener("click", async () => {
@@ -549,12 +757,14 @@ usePublishedContentButton?.addEventListener("click", async () => {
     async () => {
       try {
         clearDraftSiteContent();
-        adminState = normalizeSiteContent(await fetchPublishedSiteContent());
+        const publishedContent = normalizeSiteContent(await fetchPublishedSiteContent());
+        adminState = cloneContent(publishedContent);
+        publishedSnapshot = cloneContent(publishedContent);
         renderAll();
         fillNoticeForm();
         fillLinkForm();
         fillMediaForm();
-        setStatus("Conteúdo publicado recarregado com sucesso.", "success");
+        setStatus("Conteúdo publicado recarregado com sucesso.", "success", "synced");
       } catch (error) {
         console.error(error);
         setStatus("Não foi possível recarregar o conteúdo publicado agora.", "danger");
@@ -572,19 +782,24 @@ logoutAdminButton?.addEventListener("click", () => {
   window.location.replace("index.html?home=1");
 });
 
-window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && confirmModal?.classList.contains("active")) {
-    closeConfirmModal();
-  }
-});
-
 async function bootstrap() {
+  let publishedContent = null;
+  let draftOrPublishedContent = null;
+
   try {
-    adminState = normalizeSiteContent(await loadEditorSiteContent());
+    publishedContent = await fetchPublishedSiteContent();
   } catch (error) {
-    console.warn("Falha ao carregar conteúdo base.", error);
-    adminState = structuredClone(defaultContent);
+    console.warn("Falha ao carregar conteúdo publicado.", error);
   }
+
+  try {
+    draftOrPublishedContent = await loadEditorSiteContent();
+  } catch (error) {
+    console.warn("Falha ao carregar conteúdo base do editor.", error);
+  }
+
+  publishedSnapshot = cloneContent(publishedContent || defaultContent);
+  adminState = cloneContent(draftOrPublishedContent || publishedContent || defaultContent);
 
   fillNoticeForm();
   fillLinkForm();
@@ -592,9 +807,31 @@ async function bootstrap() {
   renderAll();
   showPanel("dashboardPanel");
   updateGitHubTokenStatus();
+
+  if (!publishedContent) {
+    setStatus(
+      "Painel carregado com rascunho local. O conteúdo publicado não pôde ser consultado agora.",
+      "warning",
+      "offline"
+    );
+    return;
+  }
+
+  if (isPublishedSnapshotInSync()) {
+    setStatus(
+      "Painel carregado. O conteúdo local está alinhado com o que já foi publicado.",
+      getGitHubPublishToken() ? "success" : "info",
+      "synced"
+    );
+    return;
+  }
+
   setStatus(
-    "Painel carregado. Você pode editar o conteúdo e, se conectar o GitHub, as alterações serão publicadas para todos automaticamente.",
-    getGitHubPublishToken() ? "success" : "warning"
+    getGitHubPublishToken()
+      ? "Painel carregado com alterações locais pendentes de publicação."
+      : "Painel carregado com rascunho local. Conecte o GitHub para publicar para todos.",
+    "warning",
+    getGitHubPublishToken() ? "pending" : "local"
   );
 }
 
