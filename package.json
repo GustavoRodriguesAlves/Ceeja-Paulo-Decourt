@@ -1,0 +1,25 @@
+{
+  "name": "teste",
+  "version": "1.0.0",
+  "description": "Site institucional estático do CEEJA Paulo Decourt, publicado via GitHub Pages.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GustavoRodriguesAlves/Ceeja-Paulo-Decourt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GustavoRodriguesAlves/Ceeja-Paulo-Decourt/issues"
+  },
+  "homepage": "https://github.com/GustavoRodriguesAlves/Ceeja-Paulo-Decourt#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

@@ -43,11 +43,16 @@ class GitHubApiError extends Error {
  * @returns {SiteContent}
  */
 export function normalizeSiteContent(raw = {}) {
+  const safeRaw = raw || {};
+
   return {
-    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date().toISOString(),
-    notices: Array.isArray(raw.notices) ? raw.notices : [],
-    quickLinks: Array.isArray(raw.quickLinks) ? raw.quickLinks : [],
-    gallery: Array.isArray(raw.gallery) ? raw.gallery : []
+    updatedAt:
+      typeof safeRaw.updatedAt === "string"
+        ? safeRaw.updatedAt
+        : new Date().toISOString(),
+    notices: Array.isArray(safeRaw.notices) ? safeRaw.notices : [],
+    quickLinks: Array.isArray(safeRaw.quickLinks) ? safeRaw.quickLinks : [],
+    gallery: Array.isArray(safeRaw.gallery) ? safeRaw.gallery : []
   };
 }
 
@@ -340,14 +345,15 @@ export function isAllowedPortalImageFileName(fileName = "") {
  * @returns {PortalImageLibraryEntry[]}
  */
 export function normalizePortalImageLibraryEntries(entries = []) {
+  const safeEntries = entries || [];
   const seen = new Set();
 
-  return entries
+  return safeEntries
     .filter((entry) => entry && entry.path && isAllowedPortalImageFileName(entry.path))
     .map((entry) => ({
       path: /** @type {string} */ (entry.path),
-      name: entry.name || entry.path.split("/").pop() || "imagem",
-      previewSrc: entry.previewSrc || entry.path,
+      name: entry.name || entry.path?.split("/").pop() || "imagem",
+      previewSrc: entry.previewSrc || entry.path || "",
       source: entry.source || "repository"
     }))
     .filter((entry) => {
