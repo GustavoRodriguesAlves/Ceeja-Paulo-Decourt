@@ -10,6 +10,15 @@ export const GITHUB_REPO_CONFIG = {
 
 const GITHUB_TOKEN_STORAGE_KEY = "ceeja_github_publish_token";
 
+class GitHubApiError extends Error {
+  constructor(message, status, headers = {}) {
+    super(message);
+    this.name = "GitHubApiError";
+    this.status = status;
+    this.headers = headers;
+  }
+}
+
 export function normalizeSiteContent(raw = {}) {
   return {
     updatedAt: raw.updatedAt || new Date().toISOString(),
@@ -93,10 +102,27 @@ async function githubRequest(url, token, options = {}) {
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(`GitHub API ${response.status}: ${message}`);
+    throw new GitHubApiError(`GitHub API ${response.status}: ${message}`, response.status, {
+      retryAfter: response.headers.get("retry-after"),
+      rateRemaining: response.headers.get("x-ratelimit-remaining"),
+      rateReset: response.headers.get("x-ratelimit-reset")
+    });
   }
 
   return response.json();
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function getRetryDelayMs(error, attempt) {
+  const retryAfterSeconds = Number(error?.headers?.retryAfter || 0);
+  if (retryAfterSeconds > 0) {
+    return retryAfterSeconds * 1000;
+  }
+
+  return Math.min(1500 * 2 ** attempt, 8000);
 }
 
 export async function fetchPublishedSiteContentMeta(token) {
@@ -104,22 +130,45 @@ export async function fetchPublishedSiteContentMeta(token) {
   return githubRequest(url, token, { method: "GET" });
 }
 
-export async function publishSiteContentToGitHub(content, token, commitMessage = "Update site content") {
+export async function publishSiteContentToGitHub(
+  content,
+  token,
+  commitMessage = "Update site content",
+  maxRetries = 2
+) {
   const normalized = normalizeSiteContent(content);
-  const currentFile = await fetchPublishedSiteContentMeta(token);
-  const body = {
-    message: commitMessage,
-    content: encodeUtf8ToBase64(`${JSON.stringify(normalized, null, 2)}\n`),
-    branch: GITHUB_REPO_CONFIG.branch,
-    sha: currentFile.sha
-  };
-
   const url = `https://api.github.com/repos/${GITHUB_REPO_CONFIG.owner}/${GITHUB_REPO_CONFIG.repo}/contents/${GITHUB_REPO_CONFIG.path}`;
-  return githubRequest(url, token, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const currentFile = await fetchPublishedSiteContentMeta(token);
+    const body = {
+      message: commitMessage,
+      content: encodeUtf8ToBase64(`${JSON.stringify(normalized, null, 2)}\n`),
+      branch: GITHUB_REPO_CONFIG.branch,
+      sha: currentFile.sha
+    };
+
+    try {
+      return await githubRequest(url, token, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (error) {
+      const shouldRetry =
+        error instanceof GitHubApiError &&
+        (error.status === 409 || error.status === 422 || error.status === 503) &&
+        attempt < maxRetries;
+
+      if (!shouldRetry) {
+        throw error;
+      }
+
+      await sleep(getRetryDelayMs(error, attempt));
+    }
+  }
+
+  throw new Error("Falha inesperada ao publicar conteúdo no GitHub.");
 }

@@ -299,6 +299,9 @@ textarea.field {
 }
 
 .status-banner {
+  position: sticky;
+  top: 1rem;
+  z-index: 25;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -309,6 +312,7 @@ textarea.field {
   padding: 0.9rem 1rem;
   font-size: 0.95rem;
   font-weight: 500;
+  backdrop-filter: blur(6px);
 }
 
 /* ==========================================================================
@@ -452,6 +456,10 @@ textarea.field {
   
   .content-area {
     padding: 1rem;
+  }
+
+  .status-banner {
+    top: 0.75rem;
   }
 }
 

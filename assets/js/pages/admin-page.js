@@ -120,8 +120,37 @@ function setStatus(message, tone = "info") {
   adminStatus.textContent = message;
 }
 
+function buildPublishErrorMessage(error) {
+  if (!error) {
+    return "Não foi possível publicar no GitHub. O rascunho continua salvo localmente.";
+  }
+
+  if (error.status === 401 || error.status === 403) {
+    return "O GitHub recusou a publicação. Verifique se o token ainda é válido e se possui permissão Contents: write.";
+  }
+
+  if (error.status === 404) {
+    return "O GitHub não encontrou o repositório ou o arquivo de conteúdo. Verifique o acesso da conta e do token.";
+  }
+
+  if (error.status === 409) {
+    return "Houve conflito ao atualizar o arquivo no GitHub. O painel tentou novamente, mas outra alteração chegou antes. Tente publicar de novo em alguns segundos.";
+  }
+
+  if (error.status === 422) {
+    return "O GitHub recusou a publicação por validação ou excesso de requisições em sequência. Aguarde alguns segundos e tente novamente.";
+  }
+
+  if (error.status === 503) {
+    return "O GitHub estava temporariamente indisponível no momento da publicação. Tente novamente em alguns instantes.";
+  }
+
+  return "Não foi possível publicar no GitHub. O rascunho continua salvo localmente. Verifique o token e as permissões de escrita no repositório.";
+}
+
 function updateGitHubTokenStatus() {
-  const hasToken = Boolean(getGitHubPublishToken());
+  const savedToken = getGitHubPublishToken();
+  const hasToken = Boolean(savedToken);
   if (!githubTokenStatus) {
     return;
   }
@@ -135,6 +164,10 @@ function updateGitHubTokenStatus() {
 
   if (clearGitHubTokenButton) {
     clearGitHubTokenButton.disabled = !hasToken;
+  }
+
+  if (githubTokenInput) {
+    githubTokenInput.value = savedToken;
   }
 }
 
@@ -178,10 +211,7 @@ async function publishStateToGitHub(reason) {
         );
       } catch (error) {
         console.error(error);
-        setStatus(
-          "Não foi possível publicar no GitHub. O rascunho continua salvo localmente. Verifique o token e as permissões de escrita no repositório.",
-          "danger"
-        );
+        setStatus(buildPublishErrorMessage(error), "danger");
       }
     });
 
@@ -493,7 +523,6 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     setStatus("Validando token e conectando ao GitHub...", "info");
     await fetchPublishedSiteContentMeta(token);
     setGitHubPublishToken(token);
-    githubTokenInput.value = "";
     updateGitHubTokenStatus();
     setStatus(
       "Conexão com o GitHub validada. As próximas alterações serão publicadas automaticamente para todos.",
