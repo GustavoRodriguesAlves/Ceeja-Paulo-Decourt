@@ -264,6 +264,23 @@ const formatDate = (value) => {
 };
 
 /**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
+const formatDateTime = (value) => {
+  if (!value) {
+    return "-";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toLocaleString("pt-BR");
+};
+
+/**
  * @param {Partial<SiteContent> | SiteContent | null | undefined} content
  * @returns {SiteContent}
  */
@@ -313,15 +330,27 @@ function updateSyncIndicator(forcedState = "") {
   }
 
   const config = {
-    synced: { text: "Conteúdo sincronizado", className: "sync-indicator sync-indicator-success" },
-    local: { text: "Rascunho local", className: "sync-indicator sync-indicator-warning" },
-    pending: { text: "Pendência de publicação", className: "sync-indicator sync-indicator-warning" },
-    publishing: { text: "Publicando...", className: "sync-indicator sync-indicator-info" },
-    offline: { text: "Conteúdo base indisponível", className: "sync-indicator sync-indicator-danger" }
+    synced: { text: "Publicado no site", className: "sync-indicator sync-indicator-success" },
+    local: { text: "Salvo só neste computador", className: "sync-indicator sync-indicator-warning" },
+    pending: { text: "Pronto para publicar", className: "sync-indicator sync-indicator-warning" },
+    publishing: { text: "Publicando no site...", className: "sync-indicator sync-indicator-info" },
+    offline: { text: "Site público indisponível", className: "sync-indicator sync-indicator-danger" }
   }[state] || { text: "Sincronizando", className: "sync-indicator sync-indicator-info" };
 
   adminSyncIndicator.textContent = config.text;
   adminSyncIndicator.className = config.className;
+  adminSyncIndicator.title =
+    state === "synced"
+      ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+      : state === "publishing"
+        ? "O painel está enviando as alterações para o repositório e atualizando o site."
+        : state === "pending"
+          ? `Existe um rascunho diferente do site público. Última versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+          : state === "local"
+            ? "Existe conteúdo salvo apenas neste computador."
+            : state === "offline"
+              ? "O painel não conseguiu consultar a versão publicada do site agora."
+              : "O painel está verificando o estado da publicação.";
 }
 
 /**
@@ -353,7 +382,7 @@ function setStatus(message, tone = "info", syncState = "") {
  */
 function buildPublishErrorMessage(error) {
   if (!error) {
-    return "Não foi possível publicar no GitHub. O rascunho continua salvo localmente.";
+    return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador.";
   }
 
   const publishError = /** @type {{ status?: number }} */ (error);
@@ -367,18 +396,18 @@ function buildPublishErrorMessage(error) {
   }
 
   if (publishError.status === 409) {
-    return "Houve conflito ao atualizar o arquivo no GitHub. O painel tentou novamente, mas outra alteração chegou antes. Tente publicar de novo em alguns segundos.";
+    return "Outra alteração chegou antes desta publicação. O conteúdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
   }
 
   if (publishError.status === 422) {
-    return "O GitHub recusou a publicação por validação ou excesso de requisições em sequência. Aguarde alguns segundos e tente novamente.";
+    return "O GitHub recusou esta publicação por validação ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
   }
 
   if (publishError.status === 503) {
-    return "O GitHub estava temporariamente indisponível no momento da publicação. Tente novamente em alguns instantes.";
+    return "O GitHub ficou indisponível no momento da publicação. Tente novamente em instantes.";
   }
 
-  return "Não foi possível publicar no GitHub. O rascunho continua salvo localmente. Verifique o token e as permissões de escrita no repositório.";
+  return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique o token e as permissões de escrita no repositório.";
 }
 
 function updateGitHubTokenStatus() {
@@ -666,7 +695,7 @@ async function publishStateToGitHub(reason) {
   const token = getGitHubPublishToken();
   if (!token) {
     setStatus(
-      "Alteração salva apenas neste navegador. Conecte um token fino do GitHub para publicar automaticamente para todos.",
+      "Alteração salva só neste computador. Conecte o GitHub para enviar isso ao site público.",
       "warning",
       "local"
     );
@@ -683,7 +712,7 @@ async function publishStateToGitHub(reason) {
         await publishSiteContentToGitHub(adminState, token, reason);
         publishedSnapshot = cloneContent(adminState);
         setStatus(
-          "Alterações publicadas com sucesso. O GitHub Pages pode levar alguns segundos para refletir o novo conteúdo.",
+          "Alterações publicadas com sucesso. O site público pode levar alguns segundos para mostrar a nova versão.",
           "success",
           "synced"
         );
@@ -796,7 +825,7 @@ async function saveMediaWithUpload() {
     renderAll();
 
     if (!token) {
-      setStatus("Imagem salva apenas no rascunho local deste navegador.", "warning", "local");
+      setStatus("Imagem salva só neste computador. Conecte o GitHub para publicá-la no portal.", "warning", "local");
       fillMediaForm();
       return;
     }
@@ -810,8 +839,8 @@ async function saveMediaWithUpload() {
     publishedSnapshot = cloneContent(adminState);
     fillMediaForm();
     await refreshImageLibrary({ silent: true });
-    setStatus(
-      uploadSucceeded
+      setStatus(
+        uploadSucceeded
         ? "Imagem enviada e galeria publicada com sucesso."
         : "Imagem da biblioteca aplicada e galeria publicada com sucesso.",
       "success",
@@ -821,7 +850,7 @@ async function saveMediaWithUpload() {
     console.error(error);
     if (uploadSucceeded) {
       setStatus(
-        "A imagem foi enviada ao repositório, mas a atualização da galeria falhou. Tente salvar novamente para concluir a publicação.",
+        "A imagem foi enviada ao repositório, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.",
         "danger",
         "pending"
       );
@@ -1182,7 +1211,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     }
 
     setStatus(
-      "Conexão com o GitHub validada. As próximas alterações serão publicadas automaticamente para todos.",
+      "Conexão com o GitHub validada. As próximas alterações poderão ser enviadas direto para o site.",
       "success",
       "synced"
     );
@@ -1290,7 +1319,7 @@ async function bootstrap() {
 
   if (!publishedContent) {
     setStatus(
-      "Painel carregado com rascunho local. O conteúdo publicado não pôde ser consultado agora.",
+      "Painel carregado com conteúdo salvo neste computador, mas a versão publicada do site não pôde ser consultada agora.",
       "warning",
       "offline"
     );
@@ -1299,7 +1328,7 @@ async function bootstrap() {
 
   if (isPublishedSnapshotInSync()) {
     setStatus(
-      "Painel carregado. O conteúdo local está alinhado com o que já foi publicado.",
+      `Painel carregado. O conteúdo abaixo já está igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
       getGitHubPublishToken() ? "success" : "info",
       "synced"
     );
@@ -1308,8 +1337,8 @@ async function bootstrap() {
 
   setStatus(
     getGitHubPublishToken()
-      ? "Painel carregado com alterações locais pendentes de publicação."
-      : "Painel carregado com rascunho local. Conecte o GitHub para publicar para todos.",
+      ? `Existe um rascunho salvo neste computador diferente do site publicado. Última versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
+      : "Existe um rascunho salvo só neste computador. Conecte o GitHub para publicar essa versão no site.",
     "warning",
     getGitHubPublishToken() ? "pending" : "local"
   );
