@@ -1,6 +1,15 @@
 {
-  "updatedAt": "2026-03-14T00:49:56.779Z",
+  "updatedAt": "2026-03-14T00:57:30.482Z",
   "notices": [
+    {
+      "id": "notice-1773449850482",
+      "title": "Punheta Guiada",
+      "summary": "Site para aprender a bater punheta com professores",
+      "category": "dadada",
+      "date": "2026-03-13",
+      "featured": false,
+      "published": true
+    },
     {
       "id": "notice-1773449315580",
       "title": "Punheta Guiada",
