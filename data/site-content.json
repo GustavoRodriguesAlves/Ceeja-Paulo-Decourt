@@ -1,6 +1,25 @@
 {
-  "updatedAt": "2026-03-14T00:47:04.080Z",
-  "notices": [],
+  "updatedAt": "2026-03-14T00:48:05.804Z",
+  "notices": [
+    {
+      "id": "notice-1773449285804",
+      "title": "Mama engole",
+      "summary": "dadadadadadada",
+      "category": "adadada",
+      "date": "2026-03-13",
+      "featured": false,
+      "published": true
+    },
+    {
+      "id": "notice-1773449225059",
+      "title": "Punheta Guiada",
+      "summary": "Site para aprender a bater punheta com professores",
+      "category": "IMPORTANTE",
+      "date": "2026-03-13",
+      "featured": true,
+      "published": true
+    }
+  ],
   "quickLinks": [
     {
       "id": "link-1773449188703",
