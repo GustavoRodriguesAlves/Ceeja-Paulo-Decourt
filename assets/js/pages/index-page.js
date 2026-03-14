@@ -1,3 +1,5 @@
+// @ts-check
+
 import {
   isAllowedAdminUser,
   clearPortalAuth,
@@ -11,51 +13,104 @@ import {
   setAdminSession,
   setPortalSession
 } from "../core/auth.js";
+
+/** @typedef {import("../types/core").GalleryItem} GalleryItem */
+
 const urlParams = new URLSearchParams(window.location.search);
 const logoutRequested = urlParams.get("logout") === "1";
 const adminRequested = urlParams.get("admin") === "1";
+
+/** @type {HTMLElement | null} */
 let activeModal = null;
+/** @type {HTMLElement | null} */
 let lastFocusedTrigger = null;
+let currentSlide = 0;
+/** @type {number | null} */
+let slideInterval = null;
 
 if (logoutRequested) {
   clearPortalAuth();
 }
 
-const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-const mobileMenu = document.getElementById("mobileMenu");
-const loginModal = document.getElementById("loginModal");
-const adminLoginModal = document.getElementById("adminLoginModal");
-const loginForm = document.getElementById("loginForm");
-const adminLoginForm = document.getElementById("adminLoginForm");
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const adminLoginEmail = document.getElementById("adminLoginEmail");
-const adminLoginPassword = document.getElementById("adminLoginPassword");
-const loginError = document.getElementById("loginError");
-const adminLoginError = document.getElementById("adminLoginError");
-const keepConnectedCheckbox = document.getElementById("keepConnected");
-const keepAdminConnectedCheckbox = document.getElementById("keepAdminConnected");
-const carouselTrack = document.getElementById("carouselTrack");
-const carouselIndicators = document.getElementById("carouselIndicators");
-const carouselPrevButton = document.getElementById("carouselPrevBtn");
-const carouselNextButton = document.getElementById("carouselNextBtn");
-const photoModal = document.getElementById("photoModal");
-const modalImage = document.getElementById("modalImage");
-const closePhotoModalButton = document.getElementById("closePhotoModalBtn");
-const closeLoginModalButton = document.getElementById("closeLoginModal");
-const closeAdminLoginModalButton = document.getElementById("closeAdminLoginModal");
+/**
+ * @param {string} id
+ * @returns {HTMLElement | null}
+ */
+function getElement(id) {
+  const element = document.getElementById(id);
+  return element instanceof HTMLElement ? element : null;
+}
 
+/**
+ * @param {string} id
+ * @returns {HTMLButtonElement | null}
+ */
+function getButton(id) {
+  const element = getElement(id);
+  return element instanceof HTMLButtonElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLFormElement | null}
+ */
+function getForm(id) {
+  const element = getElement(id);
+  return element instanceof HTMLFormElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLInputElement | null}
+ */
+function getInput(id) {
+  const element = getElement(id);
+  return element instanceof HTMLInputElement ? element : null;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLImageElement | null}
+ */
+function getImage(id) {
+  const element = getElement(id);
+  return element instanceof HTMLImageElement ? element : null;
+}
+
+const mobileMenuBtn = getButton("mobileMenuBtn");
+const mobileMenu = getElement("mobileMenu");
+const loginModal = getElement("loginModal");
+const adminLoginModal = getElement("adminLoginModal");
+const loginForm = getForm("loginForm");
+const adminLoginForm = getForm("adminLoginForm");
+const loginEmail = getInput("loginEmail");
+const loginPassword = getInput("loginPassword");
+const adminLoginEmail = getInput("adminLoginEmail");
+const adminLoginPassword = getInput("adminLoginPassword");
+const loginError = getElement("loginError");
+const adminLoginError = getElement("adminLoginError");
+const keepConnectedCheckbox = getInput("keepConnected");
+const keepAdminConnectedCheckbox = getInput("keepAdminConnected");
+const carouselTrack = getElement("carouselTrack");
+const carouselIndicators = getElement("carouselIndicators");
+const carouselPrevButton = getButton("carouselPrevBtn");
+const carouselNextButton = getButton("carouselNextBtn");
+const photoModal = getElement("photoModal");
+const modalImage = getImage("modalImage");
+const closePhotoModalButton = getButton("closePhotoModalBtn");
+const closeLoginModalButton = getButton("closeLoginModal");
+const closeAdminLoginModalButton = getButton("closeAdminLoginModal");
+
+/** @type {(HTMLButtonElement | null)[]} */
 const openLoginButtons = [
-  document.getElementById("openLoginBtn"),
-  document.getElementById("openLoginMobileBtn"),
-  document.getElementById("openLoginHero"),
-  document.getElementById("openLoginContact")
+  getButton("openLoginBtn"),
+  getButton("openLoginMobileBtn"),
+  getButton("openLoginHero"),
+  getButton("openLoginContact")
 ];
-const openAdminLoginButton = document.getElementById("openAdminLoginBtn");
+const openAdminLoginButton = getButton("openAdminLoginBtn");
 
-let currentSlide = 0;
-let slideInterval = null;
-
+/** @type {GalleryItem[]} */
 const DEFAULT_GALLERY = [
   {
     id: "default-media-001",
@@ -99,6 +154,10 @@ const DEFAULT_GALLERY = [
   }
 ];
 
+/**
+ * @param {string | number | null | undefined} [value=""]
+ * @returns {string}
+ */
 const escapeHtml = (value = "") =>
   String(value)
     .replaceAll("&", "&amp;")
@@ -107,16 +166,69 @@ const escapeHtml = (value = "") =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
+/**
+ * @param {string} email
+ * @returns {void}
+ */
 const redirectToPortal = (email) => {
   setPortalSession(email);
   window.location.href = "portal.html";
 };
 
+/**
+ * @param {string} email
+ * @returns {void}
+ */
 const redirectToAdmin = (email) => {
   setAdminSession(email);
   window.location.href = "admin.html";
 };
 
+/**
+ * @returns {void}
+ */
+function hideMobileMenu() {
+  mobileMenu?.classList.add("hidden");
+  mobileMenuBtn?.setAttribute("aria-expanded", "false");
+  mobileMenu?.setAttribute("aria-hidden", "true");
+}
+
+/**
+ * @param {HTMLElement | null} modal
+ * @returns {void}
+ */
+function showModal(modal) {
+  if (!modal) {
+    return;
+  }
+
+  activeModal = modal;
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+/**
+ * @param {HTMLElement | null} modal
+ * @returns {void}
+ */
+function hideModal(modal) {
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden", "true");
+  if (activeModal === modal) {
+    activeModal = null;
+    document.body.style.overflow = "";
+    lastFocusedTrigger?.focus();
+  }
+}
+
+/**
+ * @returns {void}
+ */
 function openLogin() {
   const rememberedEmail = getRememberedPortalEmail();
   if (rememberedEmail) {
@@ -126,23 +238,20 @@ function openLogin() {
 
   loginError?.classList.add("hidden");
   loginForm?.reset();
-  loginModal?.classList.add("active");
-  loginModal?.setAttribute("aria-hidden", "false");
-  activeModal = loginModal;
-  document.body.style.overflow = "hidden";
-  setTimeout(() => loginEmail?.focus(), 80);
+  showModal(loginModal);
+  window.setTimeout(() => loginEmail?.focus(), 80);
 }
 
+/**
+ * @returns {void}
+ */
 function closeLogin() {
-  loginModal?.classList.remove("active");
-  loginModal?.setAttribute("aria-hidden", "true");
-  if (activeModal === loginModal) {
-    activeModal = null;
-  }
-  document.body.style.overflow = "";
-  lastFocusedTrigger?.focus();
+  hideModal(loginModal);
 }
 
+/**
+ * @returns {void}
+ */
 function openAdminLogin() {
   const rememberedEmail = getRememberedAdminEmail();
   if (rememberedEmail && isAllowedAdminUser(rememberedEmail)) {
@@ -153,66 +262,71 @@ function openAdminLogin() {
   if (adminLoginError) {
     adminLoginError.textContent = "As credenciais fornecidas não conferem nos registros.";
   }
+
   adminLoginError?.classList.add("hidden");
   adminLoginForm?.reset();
-  adminLoginModal?.classList.add("active");
-  adminLoginModal?.setAttribute("aria-hidden", "false");
-  activeModal = adminLoginModal;
-  document.body.style.overflow = "hidden";
-  setTimeout(() => adminLoginEmail?.focus(), 80);
+  showModal(adminLoginModal);
+  window.setTimeout(() => adminLoginEmail?.focus(), 80);
 }
 
+/**
+ * @returns {void}
+ */
 function closeAdminLogin() {
-  adminLoginModal?.classList.remove("active");
-  adminLoginModal?.setAttribute("aria-hidden", "true");
-  if (activeModal === adminLoginModal) {
-    activeModal = null;
-  }
-  document.body.style.overflow = "";
-  lastFocusedTrigger?.focus();
+  hideModal(adminLoginModal);
 }
 
+/**
+ * @param {string} src
+ * @param {string} alt
+ * @returns {void}
+ */
 function openPhotoModal(src, alt) {
   if (!modalImage || !photoModal) {
     return;
   }
-  lastFocusedTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  lastFocusedTrigger =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
   modalImage.src = src;
   modalImage.alt = alt;
-  photoModal.classList.add("active");
-  photoModal?.setAttribute("aria-hidden", "false");
-  activeModal = photoModal;
-  document.body.style.overflow = "hidden";
+  showModal(photoModal);
 }
 
+/**
+ * @returns {void}
+ */
 function closePhotoModal() {
-  photoModal?.classList.remove("active");
-  photoModal?.setAttribute("aria-hidden", "true");
-  if (activeModal === photoModal) {
-    activeModal = null;
-  }
-  document.body.style.overflow = "";
-  lastFocusedTrigger?.focus();
+  hideModal(photoModal);
 }
 
+/**
+ * @param {number} index
+ * @returns {void}
+ */
 function showSlide(index) {
-  const slides = [...document.querySelectorAll(".carousel-slide")];
-  const dots = [...document.querySelectorAll(".indicator-dot")];
+  const slides = Array.from(document.querySelectorAll(".carousel-slide"));
+  const dots = Array.from(document.querySelectorAll(".indicator-dot"));
   if (!slides.length) {
     return;
   }
 
   currentSlide = (index + slides.length) % slides.length;
+
   slides.forEach((slide, slideIndex) => {
     slide.classList.toggle("active", slideIndex === currentSlide);
   });
+
   dots.forEach((dot, dotIndex) => {
     dot.classList.toggle("active", dotIndex === currentSlide);
   });
 }
 
+/**
+ * @returns {void}
+ */
 function resetSlideTimer() {
-  if (slideInterval) {
+  if (slideInterval !== null) {
     window.clearInterval(slideInterval);
   }
 
@@ -227,28 +341,62 @@ function resetSlideTimer() {
   }, 4000);
 }
 
+/**
+ * @returns {void}
+ */
 function nextSlide() {
   showSlide(currentSlide + 1);
   resetSlideTimer();
 }
 
+/**
+ * @returns {void}
+ */
 function prevSlide() {
   showSlide(currentSlide - 1);
   resetSlideTimer();
 }
 
+/**
+ * @param {number} index
+ * @returns {void}
+ */
 function goToSlide(index) {
   showSlide(index);
   resetSlideTimer();
 }
 
+/**
+ * @param {HTMLElement | null} container
+ * @returns {HTMLElement[]}
+ */
+function getFocusableElements(container) {
+  if (!container) {
+    return [];
+  }
+
+  return /** @type {HTMLElement[]} */ (
+    Array.from(
+      container.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    )
+  ).filter((element) => element.offsetParent !== null);
+}
+
+/**
+ * @returns {void}
+ */
 function applyHomepageContent() {
   const gallery = DEFAULT_GALLERY;
 
-  if (carouselTrack && carouselIndicators) {
-    carouselTrack.innerHTML = gallery
-      .map(
-        (item, index) => `
+  if (!carouselTrack || !carouselIndicators) {
+    return;
+  }
+
+  carouselTrack.innerHTML = gallery
+    .map(
+      (item, index) => `
           <div class="carousel-slide ${index === 0 ? "active" : ""}">
             <img
               src="${escapeHtml(item.src || "")}"
@@ -259,12 +407,12 @@ function applyHomepageContent() {
             >
           </div>
         `
-      )
-      .join("");
+    )
+    .join("");
 
-    carouselIndicators.innerHTML = gallery
-      .map(
-        (item, index) => `
+  carouselIndicators.innerHTML = gallery
+    .map(
+      (item, index) => `
           <button
             type="button"
             class="indicator-dot ${index === 0 ? "active" : ""}"
@@ -272,26 +420,31 @@ function applyHomepageContent() {
             aria-label="${escapeHtml(item.title || `Slide ${index + 1}`)}"
           ></button>
         `
-      )
-      .join("");
+    )
+    .join("");
 
-    currentSlide = 0;
-    showSlide(0);
-    resetSlideTimer();
+  currentSlide = 0;
+  showSlide(0);
+  resetSlideTimer();
 
-    carouselTrack.querySelectorAll("[data-carousel-image]").forEach((image) => {
-      image.addEventListener("click", (event) => {
-        lastFocusedTrigger = event.currentTarget;
-        openPhotoModal(event.currentTarget.src, event.currentTarget.alt);
-      });
+  Array.from(carouselTrack.querySelectorAll("[data-carousel-image]")).forEach((image) => {
+    image.addEventListener("click", (event) => {
+      const currentTarget = event.currentTarget;
+      if (!(currentTarget instanceof HTMLImageElement)) {
+        return;
+      }
+
+      lastFocusedTrigger = currentTarget;
+      openPhotoModal(currentTarget.src, currentTarget.alt);
     });
+  });
 
-    carouselIndicators.querySelectorAll("[data-slide-index]").forEach((button) => {
-      button.addEventListener("click", () => {
-        goToSlide(Number(button.dataset.slideIndex));
-      });
+  Array.from(carouselIndicators.querySelectorAll("[data-slide-index]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const slideButton = /** @type {HTMLButtonElement} */ (button);
+      goToSlide(Number(slideButton.dataset.slideIndex || "0"));
     });
-  }
+  });
 }
 
 mobileMenuBtn?.addEventListener("click", () => {
@@ -303,29 +456,28 @@ mobileMenuBtn?.addEventListener("click", () => {
 
 openLoginButtons.forEach((button) => {
   button?.addEventListener("click", (event) => {
-    lastFocusedTrigger = event.currentTarget;
-    mobileMenu?.classList.add("hidden");
-    mobileMenuBtn?.setAttribute("aria-expanded", "false");
-    mobileMenu?.setAttribute("aria-hidden", "true");
+    const currentTarget = event.currentTarget;
+    lastFocusedTrigger = currentTarget instanceof HTMLElement ? currentTarget : null;
+    hideMobileMenu();
     openLogin();
   });
 });
 
 openAdminLoginButton?.addEventListener("click", (event) => {
-  lastFocusedTrigger = event.currentTarget;
+  const currentTarget = event.currentTarget;
+  lastFocusedTrigger = currentTarget instanceof HTMLElement ? currentTarget : null;
   openAdminLogin();
 });
+
 closeLoginModalButton?.addEventListener("click", closeLogin);
 closeAdminLoginModalButton?.addEventListener("click", closeAdminLogin);
 closePhotoModalButton?.addEventListener("click", closePhotoModal);
 carouselPrevButton?.addEventListener("click", prevSlide);
 carouselNextButton?.addEventListener("click", nextSlide);
 
-[...document.querySelectorAll("#mobileMenu a")].forEach((link) => {
+Array.from(document.querySelectorAll("#mobileMenu a")).forEach((link) => {
   link.addEventListener("click", () => {
-    mobileMenu?.classList.add("hidden");
-    mobileMenuBtn?.setAttribute("aria-expanded", "false");
-    mobileMenu?.setAttribute("aria-hidden", "true");
+    hideMobileMenu();
   });
 });
 
@@ -349,8 +501,8 @@ photoModal?.addEventListener("click", (event) => {
 
 loginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const email = loginEmail.value.trim().toLowerCase();
-  const password = loginPassword.value;
+  const email = loginEmail?.value.trim().toLowerCase() || "";
+  const password = loginPassword?.value || "";
 
   if (!isValidTestCredential(email, password)) {
     loginError?.classList.remove("hidden");
@@ -368,8 +520,8 @@ loginForm?.addEventListener("submit", (event) => {
 
 adminLoginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const email = adminLoginEmail.value.trim().toLowerCase();
-  const password = adminLoginPassword.value;
+  const email = adminLoginEmail?.value.trim().toLowerCase() || "";
+  const password = adminLoginPassword?.value || "";
 
   if (!isValidTestCredential(email, password)) {
     adminLoginError?.classList.remove("hidden");
@@ -377,7 +529,10 @@ adminLoginForm?.addEventListener("submit", (event) => {
   }
 
   if (!isAllowedAdminUser(email)) {
-    adminLoginError.textContent = "Este acesso é restrito ao perfil administrativo autorizado.";
+    if (adminLoginError) {
+      adminLoginError.textContent =
+        "Este acesso é restrito ao perfil administrativo autorizado.";
+    }
     adminLoginError?.classList.remove("hidden");
     return;
   }
@@ -403,10 +558,7 @@ window.addEventListener("keydown", (event) => {
     return;
   }
 
-  const focusableElements = [...activeModal.querySelectorAll(
-    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-  )].filter((element) => element.offsetParent !== null);
-
+  const focusableElements = getFocusableElements(activeModal);
   if (!focusableElements.length) {
     return;
   }

@@ -13,6 +13,7 @@
   "include": [
     "assets/js/core/**/*.js",
     "assets/js/pages/admin-page.js",
+    "assets/js/pages/index-page.js",
     "assets/js/pages/portal-page.js",
     "assets/js/types/**/*.d.ts"
   ]
