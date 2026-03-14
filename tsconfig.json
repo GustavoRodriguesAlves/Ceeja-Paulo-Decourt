@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["DOM", "ES2022"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -12,6 +12,7 @@
   },
   "include": [
     "assets/js/core/**/*.js",
+    "assets/js/pages/admin-page.js",
     "assets/js/types/**/*.d.ts"
   ]
 }

@@ -1,3 +1,5 @@
+// @ts-check
+
 import {
   clearAdminAuth,
   getAdminSessionEmail,
@@ -22,7 +24,103 @@ import {
   uploadPortalImageToGitHub
 } from "../core/site-content.js";
 
+/** @typedef {import("../types/core").GalleryItem} GalleryItem */
+/** @typedef {import("../types/core").NoticeItem} NoticeItem */
+/** @typedef {import("../types/core").PortalImageLibraryEntry} PortalImageLibraryEntry */
+/** @typedef {import("../types/core").QuickLinkItem} QuickLinkItem */
+/** @typedef {import("../types/core").SiteContent} SiteContent */
+/** @typedef {"info" | "success" | "warning" | "danger"} StatusTone */
+/** @typedef {() => void | Promise<void>} ConfirmHandler */
+
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * @param {string} id
+ * @returns {HTMLElement}
+ */
+function mustElement(id) {
+  const element = document.getElementById(id);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`Elemento obrigatório não encontrado: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLFormElement}
+ */
+function mustForm(id) {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLFormElement)) {
+    throw new Error(`Formulário obrigatório inválido: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLInputElement}
+ */
+function mustInput(id) {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLInputElement)) {
+    throw new Error(`Campo obrigatório inválido: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLTextAreaElement}
+ */
+function mustTextArea(id) {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLTextAreaElement)) {
+    throw new Error(`Área de texto obrigatória inválida: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLButtonElement}
+ */
+function mustButton(id) {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLButtonElement)) {
+    throw new Error(`Botão obrigatório inválido: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLImageElement}
+ */
+function mustImage(id) {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLImageElement)) {
+    throw new Error(`Imagem obrigatória inválida: #${id}`);
+  }
+
+  return element;
+}
+
+/**
+ * @param {ParentNode} root
+ * @param {string} selector
+ * @returns {HTMLButtonElement | null}
+ */
+function queryButton(root, selector) {
+  const element = root.querySelector(selector);
+  return element instanceof HTMLButtonElement ? element : null;
+}
 
 const rememberedAdminEmail = syncRememberedAdminSession();
 const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
@@ -31,6 +129,7 @@ if (!adminEmail || !isAllowedAdminUser(adminEmail)) {
   window.location.replace("index.html?admin=1");
 }
 
+/** @type {SiteContent} */
 const defaultContent = {
   updatedAt: new Date().toISOString(),
   notices: [],
@@ -38,82 +137,92 @@ const defaultContent = {
   gallery: []
 };
 
+/** @type {SiteContent} */
 let adminState = structuredClone(defaultContent);
+/** @type {SiteContent} */
 let publishedSnapshot = structuredClone(defaultContent);
+/** @type {ConfirmHandler | null} */
 let pendingConfirmation = null;
+/** @type {Promise<void>} */
 let publishQueue = Promise.resolve();
 let isPublishing = false;
+/** @type {HTMLElement | null} */
 let lastFocusedElement = null;
 let selectedLibraryImagePath = "";
+/** @type {PortalImageLibraryEntry[]} */
 let imageLibraryEntries = [];
 let mediaPreviewObjectUrl = "";
 
-const panelButtons = [...document.querySelectorAll("[data-panel]")];
-const panels = [...document.querySelectorAll(".content-panel")];
+/** @type {HTMLElement[]} */
+const panelButtons = Array.from(document.querySelectorAll("[data-panel]"));
+/** @type {HTMLElement[]} */
+const panels = Array.from(document.querySelectorAll(".content-panel"));
 
-const noticeForm = document.getElementById("noticeForm");
-const noticeItems = document.getElementById("noticeItems");
-const noticeId = document.getElementById("noticeId");
-const noticeTitle = document.getElementById("noticeTitle");
-const noticeSummary = document.getElementById("noticeSummary");
-const noticeCategory = document.getElementById("noticeCategory");
-const noticeDate = document.getElementById("noticeDate");
-const noticeFeatured = document.getElementById("noticeFeatured");
-const noticePublished = document.getElementById("noticePublished");
+const noticeForm = mustForm("noticeForm");
+const noticeItems = mustElement("noticeItems");
+const noticeId = mustInput("noticeId");
+const noticeTitle = mustInput("noticeTitle");
+const noticeSummary = mustTextArea("noticeSummary");
+const noticeCategory = mustInput("noticeCategory");
+const noticeDate = mustInput("noticeDate");
+const noticeFeatured = mustInput("noticeFeatured");
+const noticePublished = mustInput("noticePublished");
 
-const linkForm = document.getElementById("linkForm");
-const linkItems = document.getElementById("linkItems");
-const linkId = document.getElementById("linkId");
-const linkLabel = document.getElementById("linkLabel");
-const linkUrl = document.getElementById("linkUrl");
-const linkPublished = document.getElementById("linkPublished");
+const linkForm = mustForm("linkForm");
+const linkItems = mustElement("linkItems");
+const linkId = mustInput("linkId");
+const linkLabel = mustInput("linkLabel");
+const linkUrl = mustInput("linkUrl");
+const linkPublished = mustInput("linkPublished");
 
-const mediaForm = document.getElementById("mediaForm");
-const mediaItems = document.getElementById("mediaItems");
-const mediaId = document.getElementById("mediaId");
-const mediaTitle = document.getElementById("mediaTitle");
-const mediaPath = document.getElementById("mediaPath");
-const mediaAlt = document.getElementById("mediaAlt");
-const mediaOrder = document.getElementById("mediaOrder");
-const mediaPublished = document.getElementById("mediaPublished");
-const mediaFile = document.getElementById("mediaFile");
-const mediaPreviewImage = document.getElementById("mediaPreviewImage");
-const mediaPreviewEmpty = document.getElementById("mediaPreviewEmpty");
-const mediaPreviewLabel = document.getElementById("mediaPreviewLabel");
-const imageLibrary = document.getElementById("imageLibrary");
-const refreshImageLibraryButton = document.getElementById("refreshImageLibraryButton");
+const mediaForm = mustForm("mediaForm");
+const mediaItems = mustElement("mediaItems");
+const mediaId = mustInput("mediaId");
+const mediaTitle = mustInput("mediaTitle");
+const mediaPath = mustInput("mediaPath");
+const mediaAlt = mustInput("mediaAlt");
+const mediaOrder = mustInput("mediaOrder");
+const mediaPublished = mustInput("mediaPublished");
+const mediaFile = mustInput("mediaFile");
+const mediaPreviewImage = mustImage("mediaPreviewImage");
+const mediaPreviewEmpty = mustElement("mediaPreviewEmpty");
+const mediaPreviewLabel = mustElement("mediaPreviewLabel");
+const imageLibrary = mustElement("imageLibrary");
+const refreshImageLibraryButton = mustButton("refreshImageLibraryButton");
 
-const dashboardNoticeCount = document.getElementById("dashboardNoticeCount");
-const dashboardLinkCount = document.getElementById("dashboardLinkCount");
-const dashboardGalleryCount = document.getElementById("dashboardGalleryCount");
-const dashboardUpdatedAt = document.getElementById("dashboardUpdatedAt");
-const adminStatus = document.getElementById("adminStatus");
-const adminStatusMessage = document.getElementById("adminStatusMessage");
-const adminSyncIndicator = document.getElementById("adminSyncIndicator");
-const githubTokenForm = document.getElementById("githubTokenForm");
-const githubTokenInput = document.getElementById("githubTokenInput");
-const githubTokenStatus = document.getElementById("githubTokenStatus");
-const clearGitHubTokenButton = document.getElementById("clearGitHubTokenButton");
-const usePublishedContentButton = document.getElementById("usePublishedContentButton");
+const dashboardNoticeCount = mustElement("dashboardNoticeCount");
+const dashboardLinkCount = mustElement("dashboardLinkCount");
+const dashboardGalleryCount = mustElement("dashboardGalleryCount");
+const dashboardUpdatedAt = mustElement("dashboardUpdatedAt");
+const adminStatus = mustElement("adminStatus");
+const adminStatusMessage = mustElement("adminStatusMessage");
+const adminSyncIndicator = mustElement("adminSyncIndicator");
+const githubTokenForm = mustForm("githubTokenForm");
+const githubTokenInput = mustInput("githubTokenInput");
+const githubTokenStatus = mustElement("githubTokenStatus");
+const clearGitHubTokenButton = mustButton("clearGitHubTokenButton");
+const usePublishedContentButton = mustButton("usePublishedContentButton");
 
-const confirmModal = document.getElementById("confirmModal");
-const confirmModalCard = confirmModal?.querySelector(".modal-card") || null;
-const confirmMessage = document.getElementById("confirmMessage");
-const cancelConfirmButton = document.getElementById("cancelConfirmButton");
-const confirmActionButton = document.getElementById("confirmActionButton");
+const confirmModal = mustElement("confirmModal");
+const confirmModalCard =
+  /** @type {HTMLElement | null} */ (confirmModal.querySelector(".modal-card"));
+const confirmMessage = mustElement("confirmMessage");
+const cancelConfirmButton = mustButton("cancelConfirmButton");
+const confirmActionButton = mustButton("confirmActionButton");
 
-const clearNoticeFormButton = document.getElementById("clearNoticeForm");
-const clearLinkFormButton = document.getElementById("clearLinkForm");
-const clearMediaFormButton = document.getElementById("clearMediaForm");
-const logoutAdminButton = document.getElementById("logoutAdminButton");
-const goToNoticesButton = document.getElementById("goToNoticesButton");
-const goToMediaButton = document.getElementById("goToMediaButton");
+const clearNoticeFormButton = mustButton("clearNoticeForm");
+const clearLinkFormButton = mustButton("clearLinkForm");
+const clearMediaFormButton = mustButton("clearMediaForm");
+const logoutAdminButton = mustButton("logoutAdminButton");
+const goToNoticesButton = mustButton("goToNoticesButton");
+const goToMediaButton = mustButton("goToMediaButton");
 
-const saveNoticeButton = noticeForm?.querySelector('button[type="submit"]') || null;
-const saveLinkButton = linkForm?.querySelector('button[type="submit"]') || null;
-const saveMediaButton = mediaForm?.querySelector('button[type="submit"]') || null;
-const connectGitHubButton = githubTokenForm?.querySelector('button[type="submit"]') || null;
+const saveNoticeButton = queryButton(noticeForm, 'button[type="submit"]');
+const saveLinkButton = queryButton(linkForm, 'button[type="submit"]');
+const saveMediaButton = queryButton(mediaForm, 'button[type="submit"]');
+const connectGitHubButton = queryButton(githubTokenForm, 'button[type="submit"]');
 
+/** @type {HTMLButtonElement[]} */
 const publishLockedControls = [
   saveNoticeButton,
   saveLinkButton,
@@ -123,8 +232,12 @@ const publishLockedControls = [
   usePublishedContentButton,
   confirmActionButton,
   refreshImageLibraryButton
-].filter(Boolean);
+].filter((control) => control instanceof HTMLButtonElement);
 
+/**
+ * @param {string | number | null | undefined} [value=""]
+ * @returns {string}
+ */
 const escapeHtml = (value = "") =>
   String(value)
     .replaceAll("&", "&amp;")
@@ -133,6 +246,10 @@ const escapeHtml = (value = "") =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
+/**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
 const formatDate = (value) => {
   if (!value) {
     return "-";
@@ -146,21 +263,33 @@ const formatDate = (value) => {
   return parsed.toLocaleDateString("pt-BR");
 };
 
+/**
+ * @param {Partial<SiteContent> | SiteContent | null | undefined} content
+ * @returns {SiteContent}
+ */
 const cloneContent = (content) => structuredClone(normalizeSiteContent(content));
+/**
+ * @param {Partial<SiteContent> | SiteContent | null | undefined} content
+ * @returns {string}
+ */
 const contentFingerprint = (content) => JSON.stringify(normalizeSiteContent(content));
 
 function isPublishedSnapshotInSync() {
   return contentFingerprint(adminState) === contentFingerprint(publishedSnapshot);
 }
 
+/**
+ * @param {HTMLElement | null} container
+ * @returns {HTMLElement[]}
+ */
 function getFocusableElements(container) {
   if (!container) {
     return [];
   }
 
-  return [...container.querySelectorAll(
+  return /** @type {HTMLElement[]} */ (Array.from(container.querySelectorAll(
     'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-  )].filter((element) => !element.hasAttribute("hidden") && element.getAttribute("aria-hidden") !== "true");
+  ))).filter((element) => !element.hasAttribute("hidden") && element.getAttribute("aria-hidden") !== "true");
 }
 
 function updateSyncIndicator(forcedState = "") {
@@ -195,6 +324,12 @@ function updateSyncIndicator(forcedState = "") {
   adminSyncIndicator.className = config.className;
 }
 
+/**
+ * @param {string} message
+ * @param {StatusTone} [tone="info"]
+ * @param {string} [syncState=""]
+ * @returns {void}
+ */
 function setStatus(message, tone = "info", syncState = "") {
   if (!adminStatus || !adminStatusMessage) {
     return;
@@ -212,28 +347,34 @@ function setStatus(message, tone = "info", syncState = "") {
   updateSyncIndicator(syncState);
 }
 
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
 function buildPublishErrorMessage(error) {
   if (!error) {
     return "Não foi possível publicar no GitHub. O rascunho continua salvo localmente.";
   }
 
-  if (error.status === 401 || error.status === 403) {
+  const publishError = /** @type {{ status?: number }} */ (error);
+
+  if (publishError.status === 401 || publishError.status === 403) {
     return "O GitHub recusou a publicação. Verifique se o token ainda é válido e se possui permissão Contents: write.";
   }
 
-  if (error.status === 404) {
+  if (publishError.status === 404) {
     return "O GitHub não encontrou o repositório ou o arquivo de conteúdo. Verifique o acesso da conta e do token.";
   }
 
-  if (error.status === 409) {
+  if (publishError.status === 409) {
     return "Houve conflito ao atualizar o arquivo no GitHub. O painel tentou novamente, mas outra alteração chegou antes. Tente publicar de novo em alguns segundos.";
   }
 
-  if (error.status === 422) {
+  if (publishError.status === 422) {
     return "O GitHub recusou a publicação por validação ou excesso de requisições em sequência. Aguarde alguns segundos e tente novamente.";
   }
 
-  if (error.status === 503) {
+  if (publishError.status === 503) {
     return "O GitHub estava temporariamente indisponível no momento da publicação. Tente novamente em alguns instantes.";
   }
 
@@ -264,6 +405,10 @@ function updateGitHubTokenStatus() {
   updateSyncIndicator();
 }
 
+/**
+ * @param {boolean} nextState
+ * @returns {void}
+ */
 function setPublishingState(nextState) {
   isPublishing = nextState;
   publishLockedControls.forEach((control) => {
@@ -275,6 +420,10 @@ function setPublishingState(nextState) {
   updateSyncIndicator(nextState ? "publishing" : "");
 }
 
+/**
+ * @param {string} panelId
+ * @returns {void}
+ */
 function showPanel(panelId) {
   panels.forEach((panel) => {
     const isActive = panel.id === panelId;
@@ -289,11 +438,19 @@ function showPanel(panelId) {
   });
 }
 
+/**
+ * @param {string} panelId
+ * @returns {void}
+ */
 function jumpToPanel(panelId) {
   showPanel(panelId);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+/**
+ * @param {KeyboardEvent} event
+ * @returns {void}
+ */
 function handleConfirmModalKeydown(event) {
   if (event.key === "Escape") {
     event.preventDefault();
@@ -327,6 +484,11 @@ function handleConfirmModalKeydown(event) {
   }
 }
 
+/**
+ * @param {string} message
+ * @param {ConfirmHandler} onConfirm
+ * @returns {void}
+ */
 function openConfirmModal(message, onConfirm) {
   pendingConfirmation = onConfirm;
   lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -376,6 +538,10 @@ function setMediaPreview(src = "", label = "", alt = "") {
   mediaPreviewLabel.textContent = label || "Imagem pronta para publicação.";
 }
 
+/**
+ * @param {File} file
+ * @returns {void}
+ */
 function setMediaPreviewFromFile(file) {
   revokeMediaPreviewObjectUrl();
   mediaPreviewObjectUrl = URL.createObjectURL(file);
@@ -393,6 +559,10 @@ function buildGalleryLibraryEntries() {
   );
 }
 
+/**
+ * @param {PortalImageLibraryEntry[]} [repositoryEntries=[]]
+ * @returns {void}
+ */
 function mergeImageLibraryEntries(repositoryEntries = []) {
   imageLibraryEntries = normalizePortalImageLibraryEntries([
     ...buildGalleryLibraryEntries(),
@@ -441,6 +611,10 @@ function renderImageLibrary() {
   });
 }
 
+/**
+ * @param {PortalImageLibraryEntry | undefined} entry
+ * @returns {void}
+ */
 function selectLibraryImage(entry) {
   if (!entry) {
     return;
@@ -459,6 +633,10 @@ function selectLibraryImage(entry) {
   renderImageLibrary();
 }
 
+/**
+ * @param {{ silent?: boolean }} [options={}]
+ * @returns {Promise<void>}
+ */
 async function refreshImageLibrary(options = {}) {
   const { silent = false } = options;
   const token = getGitHubPublishToken();
@@ -480,6 +658,10 @@ async function refreshImageLibrary(options = {}) {
   }
 }
 
+/**
+ * @param {string} reason
+ * @returns {Promise<void>}
+ */
 async function publishStateToGitHub(reason) {
   const token = getGitHubPublishToken();
   if (!token) {
@@ -488,7 +670,7 @@ async function publishStateToGitHub(reason) {
       "warning",
       "local"
     );
-    return false;
+    return;
   }
 
   publishQueue = publishQueue
@@ -505,11 +687,9 @@ async function publishStateToGitHub(reason) {
           "success",
           "synced"
         );
-        return true;
       } catch (error) {
         console.error(error);
         setStatus(buildPublishErrorMessage(error), "danger", "pending");
-        return false;
       } finally {
         setPublishingState(false);
       }
@@ -518,6 +698,11 @@ async function publishStateToGitHub(reason) {
   return publishQueue;
 }
 
+/**
+ * @param {string} localMessage
+ * @param {string} publishMessage
+ * @returns {void}
+ */
 function saveState(localMessage, publishMessage) {
   adminState.updatedAt = new Date().toISOString();
   saveDraftSiteContent(adminState);
@@ -648,6 +833,10 @@ async function saveMediaWithUpload() {
   }
 }
 
+/**
+ * @param {NoticeItem | null} [item=null]
+ * @returns {void}
+ */
 function fillNoticeForm(item = null) {
   noticeId.value = item?.id || "";
   noticeTitle.value = item?.title || "";
@@ -658,6 +847,10 @@ function fillNoticeForm(item = null) {
   noticePublished.checked = item?.published !== false;
 }
 
+/**
+ * @param {QuickLinkItem | null} [item=null]
+ * @returns {void}
+ */
 function fillLinkForm(item = null) {
   linkId.value = item?.id || "";
   linkLabel.value = item?.label || "";
@@ -665,13 +858,17 @@ function fillLinkForm(item = null) {
   linkPublished.checked = item?.published !== false;
 }
 
+/**
+ * @param {GalleryItem | null} [item=null]
+ * @returns {void}
+ */
 function fillMediaForm(item = null) {
   revokeMediaPreviewObjectUrl();
   mediaId.value = item?.id || "";
   mediaTitle.value = item?.title || "";
   mediaPath.value = item?.src || "";
   mediaAlt.value = item?.alt || "";
-  mediaOrder.value = item?.order || adminState.gallery.length + 1;
+  mediaOrder.value = String(item?.order || adminState.gallery.length + 1);
   mediaPublished.checked = item?.published !== false;
   if (mediaFile) {
     mediaFile.value = "";
@@ -723,21 +920,23 @@ function renderNotices() {
     )
     .join("");
 
-  noticeItems.querySelectorAll("[data-edit-notice]").forEach((button) => {
+  Array.from(noticeItems.querySelectorAll("[data-edit-notice]")).forEach((button) => {
     button.addEventListener("click", () => {
-      const item = adminState.notices.find((entry) => entry.id === button.dataset.editNotice);
-      fillNoticeForm(item);
+      const noticeButton = /** @type {HTMLButtonElement} */ (button);
+      const item = adminState.notices.find((entry) => entry.id === noticeButton.dataset.editNotice);
+      fillNoticeForm(item || null);
       jumpToPanel("noticesPanel");
     });
   });
 
-  noticeItems.querySelectorAll("[data-delete-notice]").forEach((button) => {
+  Array.from(noticeItems.querySelectorAll("[data-delete-notice]")).forEach((button) => {
     button.addEventListener("click", () => {
+      const noticeButton = /** @type {HTMLButtonElement} */ (button);
       openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", () => {
-        adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
+        adminState.notices = adminState.notices.filter((entry) => entry.id !== noticeButton.dataset.deleteNotice);
         saveState(
           "Aviso removido do rascunho local.",
-          `Remove notice ${button.dataset.deleteNotice} from site content`
+          `Remove notice ${noticeButton.dataset.deleteNotice} from site content`
         );
       });
     });
@@ -771,21 +970,23 @@ function renderLinks() {
     )
     .join("");
 
-  linkItems.querySelectorAll("[data-edit-link]").forEach((button) => {
+  Array.from(linkItems.querySelectorAll("[data-edit-link]")).forEach((button) => {
     button.addEventListener("click", () => {
-      const item = adminState.quickLinks.find((entry) => entry.id === button.dataset.editLink);
-      fillLinkForm(item);
+      const linkButton = /** @type {HTMLButtonElement} */ (button);
+      const item = adminState.quickLinks.find((entry) => entry.id === linkButton.dataset.editLink);
+      fillLinkForm(item || null);
       jumpToPanel("linksPanel");
     });
   });
 
-  linkItems.querySelectorAll("[data-delete-link]").forEach((button) => {
+  Array.from(linkItems.querySelectorAll("[data-delete-link]")).forEach((button) => {
     button.addEventListener("click", () => {
+      const linkButton = /** @type {HTMLButtonElement} */ (button);
       openConfirmModal("Esse link deixará de aparecer para os alunos.", () => {
-        adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
+        adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== linkButton.dataset.deleteLink);
         saveState(
           "Link removido do rascunho local.",
-          `Remove quick link ${button.dataset.deleteLink} from site content`
+          `Remove quick link ${linkButton.dataset.deleteLink} from site content`
         );
       });
     });
@@ -821,21 +1022,23 @@ function renderGallery() {
     )
     .join("");
 
-  mediaItems.querySelectorAll("[data-edit-media]").forEach((button) => {
+  Array.from(mediaItems.querySelectorAll("[data-edit-media]")).forEach((button) => {
     button.addEventListener("click", () => {
-      const item = adminState.gallery.find((entry) => entry.id === button.dataset.editMedia);
-      fillMediaForm(item);
+      const mediaButton = /** @type {HTMLButtonElement} */ (button);
+      const item = adminState.gallery.find((entry) => entry.id === mediaButton.dataset.editMedia);
+      fillMediaForm(item || null);
       jumpToPanel("mediaPanel");
     });
   });
 
-  mediaItems.querySelectorAll("[data-delete-media]").forEach((button) => {
+  Array.from(mediaItems.querySelectorAll("[data-delete-media]")).forEach((button) => {
     button.addEventListener("click", () => {
+      const mediaButton = /** @type {HTMLButtonElement} */ (button);
       openConfirmModal("Essa imagem será retirada da galeria pública do portal.", () => {
-        adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
+        adminState.gallery = adminState.gallery.filter((entry) => entry.id !== mediaButton.dataset.deleteMedia);
         saveState(
           "Imagem removida da galeria local.",
-          `Remove gallery item ${button.dataset.deleteMedia} from site content`
+          `Remove gallery item ${mediaButton.dataset.deleteMedia} from site content`
         );
       });
     });
@@ -847,9 +1050,9 @@ function renderDashboard() {
   const publishedLinks = adminState.quickLinks.filter((item) => item.published).length;
   const publishedGallery = adminState.gallery.filter((item) => item.published).length;
 
-  dashboardNoticeCount.textContent = publishedNotices;
-  dashboardLinkCount.textContent = publishedLinks;
-  dashboardGalleryCount.textContent = publishedGallery;
+  dashboardNoticeCount.textContent = String(publishedNotices);
+  dashboardLinkCount.textContent = String(publishedLinks);
+  dashboardGalleryCount.textContent = String(publishedGallery);
   dashboardUpdatedAt.textContent = adminState.updatedAt
     ? new Date(adminState.updatedAt).toLocaleString("pt-BR")
     : "-";
@@ -865,7 +1068,7 @@ function renderAll() {
 }
 
 panelButtons.forEach((button) => {
-  button.addEventListener("click", () => showPanel(button.dataset.panel));
+  button.addEventListener("click", () => showPanel(button.dataset.panel || "dashboardPanel"));
 });
 
 goToNoticesButton?.addEventListener("click", () => jumpToPanel("noticesPanel"));
