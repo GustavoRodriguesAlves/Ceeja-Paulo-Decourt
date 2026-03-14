@@ -2,13 +2,10 @@ import {
   clearPortalAuth,
   getPortalSessionEmail,
   isAllowedTestUser,
-  PRIMARY_TEST_LOGIN_EMAIL,
   syncRememberedPortalSession
 } from "../core/auth.js";
 import { fetchPublishedSiteContent } from "../core/site-content.js";
 
-const NOTES_TOKEN =
-  "eyJhbGciOiJSUzI1NiIsImtpZCI6IjUzMDcyNGQ0OTE3M2EzZWQ2YjRhMDBhYTYzNDQyMDMwMGQ3MmFlNWIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNDI0ODk5MjM4NjQ2LTlyb3Y0djIxbjg5MzZ0cnJhdWdybDN2Y2IzY3M1NGlkLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTE1Nzg3Mzk5MTg0MDg5MjE5ODc0IiwiZW1haWwiOiJldWd1c3Rhdm9yb2RyaWd1ZXNhbHZlc0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IkFhVmgyU2MwSHBDeHN4QTYtRExkMmciLCJuYmYiOjE3NzMzNDgxMDUsIm5hbWUiOiJHdXN0YXZvIFJvZHJpZ3VlcyBBbHZlcyIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMMUQtSWoyd2s5SlV4cF9WWFJvMDgyS3pJMER1OXVmQWI2cllsWTVZMEQyeTBqSXc9czk2LWMiLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiUm9kcmlndWVzIEFsdmVzIiwiaWF0IjoxNzczMzQ4NDA1LCJleHAiOjE3NzMzNTIwMDUsImp0aSI6IjZkMDNkYzc2MGM2Yzc5ZmVmNzNmNTFjNzgxNWNjYzdiNzRmM2VlYzIifQ.ABVzBNz-S6hTeDgACwOyafRzgQltKJd0THkPT1YekGo4ntO44oLdef6NtudsAe4C_NWKKyJqAJb4NSFRO_VS0XqqKx6HtmkbJxOyMBmu46bAIkBAY6EpNi-o1-b3YSNQr3heA3z7PpPrfcGWvkZsdmDEHeGUrgtMEtY22q43Kj5Ge3hCaW49enscGrF0U0TE3TlvlrLBNTNnbeWmmi1evo9DW9n1w75qkbuf8XftbywTKeSEHKO06CraJMZUde4YUHgJsj6zY9Bnb5mv_fRKJzfIjTAWDGCc962QdPlW2ZB8nw8CuN9mEVnZ1WzE2gA9vnw3MHneHLEljAxRhp_Wzg";
 const NOTES_BASE_URL =
   "https://script.google.com/macros/s/AKfycbyVf3T34dxhgWYWebvuPE8o2JHQIhzLrIqOfDCK1UvdC_vGz6gLj20A30FS5EwTGZXdxw/exec";
 const RA_STORAGE_KEY = "ceeja_prepared_ra";
@@ -21,7 +18,9 @@ if (!userEmail || !isAllowedTestUser(userEmail)) {
 }
 
 const userEmailElement = document.getElementById("userEmail");
+const userEmailMobileElement = document.getElementById("userEmailMobile");
 const logoutButton = document.getElementById("logoutBtn");
+const openNotasModalButton = document.getElementById("openNotasModalBtn");
 const notasModal = document.getElementById("notasModal");
 const popupBlockedMessage = document.getElementById("popupBlockedMessage");
 const notasDirectLink = document.getElementById("notasDirectLink");
@@ -36,6 +35,9 @@ const portalGallery = document.getElementById("portalGallery");
 
 let portalRefreshTimer = null;
 let lastPortalRefreshAt = 0;
+let isPortalContentLoading = false;
+let shouldReloadPortalContent = false;
+let lastFocusedElement = null;
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -59,14 +61,22 @@ const formatDisplayDate = (value) => {
 if (userEmailElement) {
   userEmailElement.textContent = userEmail || "-";
 }
+if (userEmailMobileElement) {
+  userEmailMobileElement.textContent = userEmail || "-";
+}
 
 function buildNotasUrl() {
-  return `${NOTES_BASE_URL}?usuario=${encodeURIComponent(
-    userEmail || PRIMARY_TEST_LOGIN_EMAIL
-  )}&ra=&tel=&token=${NOTES_TOKEN}`;
+  return NOTES_BASE_URL;
+}
+
+function getFocusableElements(container) {
+  return [...container.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => element.offsetParent !== null);
 }
 
 function openNotasModal() {
+  lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   popupBlockedMessage?.classList.add("hidden");
   raValidationMessage?.classList.add("hidden");
   raPreparedMessage?.classList.add("hidden");
@@ -78,6 +88,7 @@ function openNotasModal() {
   }
   notasModal?.classList.remove("hidden");
   notasModal?.classList.add("flex");
+  notasModal?.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
   window.setTimeout(() => raWithUfInput?.focus(), 0);
 }
@@ -85,7 +96,9 @@ function openNotasModal() {
 function closeNotasModal() {
   notasModal?.classList.add("hidden");
   notasModal?.classList.remove("flex");
+  notasModal?.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  lastFocusedElement?.focus();
 }
 
 async function openNotasPopup() {
@@ -219,6 +232,12 @@ function renderPortalContent(content) {
 }
 
 async function loadPortalContent() {
+  if (isPortalContentLoading) {
+    shouldReloadPortalContent = true;
+    return;
+  }
+
+  isPortalContentLoading = true;
   try {
     const content = await fetchPublishedSiteContent();
     renderPortalContent(content);
@@ -236,6 +255,12 @@ async function loadPortalContent() {
     if (portalGallery) {
       portalGallery.innerHTML =
         '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar a galeria agora.</div>';
+    }
+  } finally {
+    isPortalContentLoading = false;
+    if (shouldReloadPortalContent) {
+      shouldReloadPortalContent = false;
+      loadPortalContent();
     }
   }
 }
@@ -266,6 +291,7 @@ logoutButton?.addEventListener("click", () => {
   window.location.replace("index.html?logout=1");
 });
 
+openNotasModalButton?.addEventListener("click", openNotasModal);
 launchNotasPopup?.addEventListener("click", openNotasPopup);
 closeNotasModalButton?.addEventListener("click", closeNotasModal);
 raWithUfInput?.addEventListener("input", () => {
@@ -283,6 +309,27 @@ notasModal?.addEventListener("click", (event) => {
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !notasModal?.classList.contains("hidden")) {
     closeNotasModal();
+    return;
+  }
+
+  if (event.key !== "Tab" || notasModal?.classList.contains("hidden")) {
+    return;
+  }
+
+  const focusableElements = getFocusableElements(notasModal);
+  if (!focusableElements.length) {
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
   }
 });
 
@@ -293,8 +340,6 @@ document.addEventListener("visibilitychange", () => {
     refreshPortalContentIfNeeded(true);
   }
 });
-
-window.openNotasModal = openNotasModal;
 
 loadPortalContent();
 startPortalRefreshLoop();

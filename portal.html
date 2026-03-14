@@ -37,6 +37,12 @@
           </button>
         </div>
       </div>
+      <div class="md:hidden pb-3">
+        <div class="rounded border border-blue-800/60 bg-blue-950/20 px-3 py-2 text-xs text-blue-100">
+          <span class="font-semibold">Aluno conectado:</span>
+          <span id="userEmailMobile">-</span>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -138,7 +144,7 @@
         <div class="card-body flex-grow bg-gray-50 flex flex-col gap-2 relative">
           <p class="text-sm text-gray-500 mb-2">Acesso a relatórios de frequência, notas e emissão de documentos acadêmicos legados.</p>
 
-          <button type="button" onclick="openNotasModal()" class="dashboard-link action-btn flex items-center justify-between group">
+          <button id="openNotasModalBtn" type="button" class="dashboard-link action-btn flex items-center justify-between group">
             <div>
               <p class="font-bold text-[var(--success)] text-sm group-hover:text-green-800 transition-colors">Notas Correntes</p>
               <p class="text-xs text-gray-500">Avaliações do período letivo atual.</p>
@@ -216,23 +222,23 @@
     </div>
   </footer>
 
-  <div id="notasModal" class="modal-scrim fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div id="notasModal" class="modal-scrim fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="notasModalTitle" aria-hidden="true">
     <div class="popup-panel w-full max-w-lg rounded-2xl overflow-hidden">
       <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
         <div class="flex items-center justify-between gap-4">
           <div>
             <p class="text-xs font-semibold uppercase tracking-widest text-[var(--brand-secondary)]">Acesso seguro</p>
-            <h3 class="mt-1 text-lg font-bold text-[var(--brand-primary)]">Consulta de notas correntes</h3>
+            <h3 id="notasModalTitle" class="mt-1 text-lg font-bold text-[var(--brand-primary)]">Consulta de notas correntes</h3>
           </div>
           <button id="closeNotasModal" type="button" class="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:text-red-600">Fechar</button>
         </div>
       </div>
       <div class="px-6 py-5">
         <p class="text-sm leading-6 text-gray-600">
-          O ambiente oficial de notas será aberto em uma janela separada e centralizada. Assim, o portal principal permanece disponível enquanto a consulta é realizada no sistema da SEDUC.
+          O ambiente oficial de notas será aberto em uma janela separada e centralizada. Assim, o portal principal permanece disponível enquanto a consulta é realizada no sistema externo.
         </p>
         <div class="mt-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-          Informe o RA com UF aqui para deixar a consulta preparada. Na janela seguinte, o sistema oficial será aberto já autenticado e o RA ficará pronto para você copiar e colar no campo de busca.
+          Informe o RA com UF aqui para deixar a consulta preparada. Por segurança, o portal público não mantém mais um token de autenticação embutido no código. O ambiente oficial será aberto para continuidade manual e o RA ficará pronto para você copiar e colar no campo de busca.
         </div>
         <div class="mt-5">
           <label for="raWithUfInput" class="mb-2 block text-sm font-semibold text-gray-700">RA com UF</label>
@@ -246,6 +252,9 @@
             RA preparado. Se o navegador permitir, ele também será copiado para facilitar o preenchimento.
           </p>
         </div>
+        <p id="notasSecurityMessage" class="mt-4 text-sm text-amber-800">
+          A autenticação automática foi removida do site público para proteger o acesso. Se necessário, conclua a entrada diretamente no ambiente oficial.
+        </p>
         <p id="popupBlockedMessage" class="mt-4 hidden text-sm font-medium text-red-700">
           O navegador bloqueou a janela. Libere pop-ups para este site e tente novamente, ou use o link direto abaixo.
         </p>
