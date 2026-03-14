@@ -41,8 +41,6 @@ const loginError = document.getElementById("loginError");
 const adminLoginError = document.getElementById("adminLoginError");
 const keepConnectedCheckbox = document.getElementById("keepConnected");
 const keepAdminConnectedCheckbox = document.getElementById("keepAdminConnected");
-const homepageHighlightTitle = document.getElementById("homepageHighlightTitle");
-const homepageHighlightText = document.getElementById("homepageHighlightText");
 const carouselTrack = document.getElementById("carouselTrack");
 const carouselIndicators = document.getElementById("carouselIndicators");
 const photoModal = document.getElementById("photoModal");
@@ -61,6 +59,49 @@ const openAdminLoginButton = document.getElementById("openAdminLoginBtn");
 
 let currentSlide = 0;
 let slideInterval = null;
+
+const DEFAULT_GALLERY = [
+  {
+    id: "default-media-001",
+    title: "Fachada do CEEJA",
+    src: "assets/images/DSC06864.JPG",
+    alt: "Fachada do CEEJA Paulo Decourt",
+    order: 1,
+    published: true
+  },
+  {
+    id: "default-media-002",
+    title: "Equipe escolar e atendimento",
+    src: "assets/images/WhatsApp%20Image%202026-02-26%20at%2013.04.05.jpeg",
+    alt: "Equipe escolar e atendimento",
+    order: 2,
+    published: true
+  },
+  {
+    id: "default-media-003",
+    title: "Ambiente de estudo",
+    src: "assets/images/WhatsApp%20Image%202026-02-26%20at%2013.04.04.jpeg",
+    alt: "Ambiente de estudo e salas",
+    order: 3,
+    published: true
+  },
+  {
+    id: "default-media-004",
+    title: "Infraestrutura interna",
+    src: "assets/images/WhatsApp%20Image%202026-02-27%20at%2013.16.21.jpeg",
+    alt: "Infraestrutura interna",
+    order: 4,
+    published: true
+  },
+  {
+    id: "default-media-005",
+    title: "Área de convivência",
+    src: "assets/images/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
+    alt: "Área de convivência escolar",
+    order: 5,
+    published: true
+  }
+];
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -178,40 +219,20 @@ function goToSlide(index) {
   resetSlideTimer();
 }
 
-function applyHomepageContent(content) {
-  const homepage = content?.homepage || {};
+function getPublishedGallery(content) {
   const gallery = Array.isArray(content?.gallery)
     ? content.gallery
         .filter((item) => item.published !== false)
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
     : [];
 
-  if (homepageHighlightTitle && homepage.highlightTitle) {
-    const safeTitle = escapeHtml(homepage.highlightTitle);
-    homepageHighlightTitle.innerHTML = safeTitle.replace(
-      /propósito e clareza/i,
-      '<span class="text-[var(--brand-accent)]">propósito e clareza</span>'
-    );
-  }
+  return gallery.length ? gallery : DEFAULT_GALLERY;
+}
 
-  if (homepageHighlightText && homepage.highlightText) {
-    homepageHighlightText.textContent = homepage.highlightText;
-  }
+function applyHomepageContent(content) {
+  const gallery = getPublishedGallery(content);
 
   if (carouselTrack && carouselIndicators) {
-    if (!gallery.length) {
-      carouselTrack.innerHTML = `
-        <div class="carousel-slide active">
-          <div class="flex h-full items-center justify-center bg-slate-100 text-center text-sm text-slate-500">
-            Nenhuma imagem foi publicada para a galeria.
-          </div>
-        </div>
-      `;
-      carouselIndicators.innerHTML = "";
-      resetSlideTimer();
-      return;
-    }
-
     carouselTrack.innerHTML = gallery
       .map(
         (item, index) => `
@@ -253,7 +274,7 @@ async function loadHomepageContent() {
     applyHomepageContent(content);
   } catch (error) {
     console.warn("Falha ao carregar conteúdo estruturado da home.", error);
-    applyHomepageContent({ gallery: [], homepage: {} });
+    applyHomepageContent({ gallery: DEFAULT_GALLERY });
   }
 }
 

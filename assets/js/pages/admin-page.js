@@ -28,8 +28,7 @@ const defaultContent = {
   updatedAt: new Date().toISOString(),
   notices: [],
   quickLinks: [],
-  gallery: [],
-  homepage: { highlightTitle: "", highlightText: "" }
+  gallery: []
 };
 
 let adminState = structuredClone(defaultContent);

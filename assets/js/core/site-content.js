@@ -15,11 +15,7 @@ export function normalizeSiteContent(raw = {}) {
     updatedAt: raw.updatedAt || new Date().toISOString(),
     notices: Array.isArray(raw.notices) ? raw.notices : [],
     quickLinks: Array.isArray(raw.quickLinks) ? raw.quickLinks : [],
-    gallery: Array.isArray(raw.gallery) ? raw.gallery : [],
-    homepage: {
-      highlightTitle: raw.homepage?.highlightTitle || "",
-      highlightText: raw.homepage?.highlightText || ""
-    }
+    gallery: Array.isArray(raw.gallery) ? raw.gallery : []
   };
 }
 
