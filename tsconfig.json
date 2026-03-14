@@ -12,7 +12,6 @@
   },
   "include": [
     "src/ts/**/*.ts",
-    "assets/js/pages/admin-page.js",
     "assets/js/types/**/*.d.ts"
   ],
   "exclude": [
