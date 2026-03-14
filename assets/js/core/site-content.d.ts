@@ -12,6 +12,7 @@ export declare function normalizeSiteContent(raw?: Partial<SiteContent> | null):
 export declare function readDraftSiteContent(): SiteContent | null;
 export declare function saveDraftSiteContent(content: Partial<SiteContent> | SiteContent): void;
 export declare function clearDraftSiteContent(): void;
+export declare function fetchPublishedSiteContentFromJson(): Promise<SiteContent>;
 export declare function fetchPublishedSiteContent(): Promise<SiteContent>;
 export declare function loadEditorSiteContent(): Promise<SiteContent>;
 export declare function getGitHubPublishToken(): string;

@@ -6,10 +6,10 @@ export interface SupabasePublicConfig {
 }
 
 export const SUPABASE_CONFIG: SupabasePublicConfig = {
-  projectUrl: "",
-  publishableKey: "",
+  projectUrl: "https://rmrmbqxrqatkpmjyvtis.supabase.co",
+  publishableKey: "sb_publishable_XxJa4ollf0CCDH5nsZ6SQA_WQsAmbad",
   storageBucket: "portal-media",
-  enabled: false
+  enabled: true
 };
 
 export function isSupabaseConfigReady(): boolean {

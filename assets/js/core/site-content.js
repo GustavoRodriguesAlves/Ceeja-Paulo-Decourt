@@ -1,4 +1,5 @@
 import { SITE_CONTENT_STORAGE_KEY } from "./auth.js";
+import { fetchSupabasePublishedSiteContent, getSupabasePublicConfig } from "./supabase.js";
 export const SITE_CONTENT_SOURCE = "data/site-content.json";
 export const PORTAL_IMAGE_DIRECTORIES = ["assets/images/portal", "assets/images"];
 export const PORTAL_IMAGE_UPLOAD_DIR = "assets/images/portal";
@@ -50,12 +51,33 @@ export function saveDraftSiteContent(content) {
 export function clearDraftSiteContent() {
     localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
 }
-export async function fetchPublishedSiteContent() {
+export async function fetchPublishedSiteContentFromJson() {
     const response = await fetch(SITE_CONTENT_SOURCE, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
     }
     return normalizeSiteContent((await response.json()));
+}
+function hasRenderableSiteContent(content) {
+    return (content.notices.length > 0 ||
+        content.quickLinks.length > 0 ||
+        content.gallery.length > 0);
+}
+export async function fetchPublishedSiteContent() {
+    const supabaseConfig = getSupabasePublicConfig();
+    if (supabaseConfig.enabled) {
+        try {
+            const supabaseContent = await fetchSupabasePublishedSiteContent();
+            if (hasRenderableSiteContent(supabaseContent)) {
+                return supabaseContent;
+            }
+            console.info("Supabase respondeu sem conteúdo publicado. Mantendo fallback para o JSON local.");
+        }
+        catch (error) {
+            console.warn("Falha ao carregar conteúdo público via Supabase. Usando fallback local.", error);
+        }
+    }
+    return fetchPublishedSiteContentFromJson();
 }
 export async function loadEditorSiteContent() {
     const draft = readDraftSiteContent();

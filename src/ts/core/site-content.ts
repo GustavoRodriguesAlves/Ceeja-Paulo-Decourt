@@ -1,6 +1,7 @@
 import {
   SITE_CONTENT_STORAGE_KEY
 } from "./auth.js";
+import { fetchSupabasePublishedSiteContent, getSupabasePublicConfig } from "./supabase.js";
 import type {
   GitHubContentWriteResponse,
   GitHubRateHeaders,
@@ -73,13 +74,42 @@ export function clearDraftSiteContent(): void {
   localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
 }
 
-export async function fetchPublishedSiteContent(): Promise<SiteContent> {
+export async function fetchPublishedSiteContentFromJson(): Promise<SiteContent> {
   const response = await fetch(SITE_CONTENT_SOURCE, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
 
   return normalizeSiteContent((await response.json()) as Partial<SiteContent>);
+}
+
+function hasRenderableSiteContent(content: SiteContent): boolean {
+  return (
+    content.notices.length > 0 ||
+    content.quickLinks.length > 0 ||
+    content.gallery.length > 0
+  );
+}
+
+export async function fetchPublishedSiteContent(): Promise<SiteContent> {
+  const supabaseConfig = getSupabasePublicConfig();
+
+  if (supabaseConfig.enabled) {
+    try {
+      const supabaseContent = await fetchSupabasePublishedSiteContent();
+      if (hasRenderableSiteContent(supabaseContent)) {
+        return supabaseContent;
+      }
+
+      console.info(
+        "Supabase respondeu sem conteúdo publicado. Mantendo fallback para o JSON local."
+      );
+    } catch (error) {
+      console.warn("Falha ao carregar conteúdo público via Supabase. Usando fallback local.", error);
+    }
+  }
+
+  return fetchPublishedSiteContentFromJson();
 }
 
 export async function loadEditorSiteContent(): Promise<SiteContent> {

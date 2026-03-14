@@ -1,8 +1,8 @@
 export const SUPABASE_CONFIG = {
-    projectUrl: "",
-    publishableKey: "",
+    projectUrl: "https://rmrmbqxrqatkpmjyvtis.supabase.co",
+    publishableKey: "sb_publishable_XxJa4ollf0CCDH5nsZ6SQA_WQsAmbad",
     storageBucket: "portal-media",
-    enabled: false
+    enabled: true
 };
 export function isSupabaseConfigReady() {
     return (SUPABASE_CONFIG.enabled &&
