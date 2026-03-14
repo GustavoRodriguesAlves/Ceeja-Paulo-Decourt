@@ -1,98 +1,20 @@
 {
-  "updatedAt": "2026-03-12T22:00:00Z",
+  "updatedAt": "2026-03-14T00:16:08.102Z",
   "notices": [
     {
-      "id": "notice-001",
-      "title": "Orientação geral para novos alunos",
-      "summary": "A orientação geral acontece em horários fixos durante a semana e apresenta o funcionamento da escola, materiais de estudo e avaliações.",
-      "category": "Matrículas",
-      "date": "2026-03-12",
+      "id": "notice-1773447368101",
+      "title": "Mama engole",
+      "summary": "Mama engole curta",
+      "category": "mama saco",
+      "date": "2026-03-26",
       "featured": true,
       "published": true
-    },
-    {
-      "id": "notice-002",
-      "title": "Atendimento da secretaria",
-      "summary": "A secretaria realiza matrículas e atendimento administrativo de segunda a sexta, das 08:30 às 20:00.",
-      "category": "Secretaria",
-      "date": "2026-03-12",
-      "featured": false,
-      "published": true
-    },
-    {
-      "id": "notice-003",
-      "title": "Refeições para alunos",
-      "summary": "Almoço das 12h10 às 13h10 e jantar das 18h10 às 18h45 para alunos presentes na unidade.",
-      "category": "Serviços",
-      "date": "2026-03-12",
-      "featured": false,
-      "published": true
     }
   ],
-  "quickLinks": [
-    {
-      "id": "link-001",
-      "label": "WhatsApp da direção",
-      "url": "https://wa.me/5519995111514",
-      "published": true
-    },
-    {
-      "id": "link-002",
-      "label": "Consulta pública do histórico",
-      "url": "https://sed.educacao.sp.gov.br/SedCon/ConsultaPublica/Index",
-      "published": true
-    },
-    {
-      "id": "link-003",
-      "label": "Instagram oficial",
-      "url": "https://www.instagram.com/ceeja.paulo.decourt/",
-      "published": true
-    }
-  ],
-  "gallery": [
-    {
-      "id": "media-001",
-      "title": "Fachada do CEEJA",
-      "src": "assets/images/DSC06864.JPG",
-      "alt": "Fachada do CEEJA Paulo Decourt",
-      "order": 1,
-      "published": true
-    },
-    {
-      "id": "media-002",
-      "title": "Equipe escolar e atendimento",
-      "src": "assets/images/WhatsApp%20Image%202026-02-26%20at%2013.04.05.jpeg",
-      "alt": "Equipe escolar e atendimento",
-      "order": 2,
-      "published": true
-    },
-    {
-      "id": "media-003",
-      "title": "Ambiente de estudo",
-      "src": "assets/images/WhatsApp%20Image%202026-02-26%20at%2013.04.04.jpeg",
-      "alt": "Ambiente de estudo e salas",
-      "order": 3,
-      "published": true
-    },
-    {
-      "id": "media-004",
-      "title": "Infraestrutura interna",
-      "src": "assets/images/WhatsApp%20Image%202026-02-27%20at%2013.16.21.jpeg",
-      "alt": "Infraestrutura interna",
-      "order": 4,
-      "published": true
-    },
-    {
-      "id": "media-005",
-      "title": "Área de convivência",
-      "src": "assets/images/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
-      "alt": "Área de convivência escolar",
-      "order": 5,
-      "published": true
-    }
-  ],
+  "quickLinks": [],
+  "gallery": [],
   "homepage": {
-    "highlightTitle": "Uma instituição para quem busca retomar os estudos com propósito e clareza.",
-    "highlightText": "O CEEJA Paulo Decourt oferece um percurso flexível, com orientação pedagógica presencial, materiais de estudo qualificados e certificação oficial para a conclusão da Educação Básica."
+    "highlightTitle": "Ola",
+    "highlightText": "Comunicados oficias"
   }
 }
