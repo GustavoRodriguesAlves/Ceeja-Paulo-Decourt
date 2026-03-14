@@ -1,6 +1,13 @@
 {
-  "updatedAt": "2026-03-14T01:30:19.996Z",
+  "updatedAt": "2026-03-14T10:43:11.199Z",
   "notices": [],
-  "quickLinks": [],
+  "quickLinks": [
+    {
+      "id": "link-1773484991199",
+      "label": "Últimas notícias",
+      "url": "https://últimasnoticias.com",
+      "published": true
+    }
+  ],
   "gallery": []
 }
