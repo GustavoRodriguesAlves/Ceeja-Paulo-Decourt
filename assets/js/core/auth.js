@@ -9,6 +9,7 @@ export const TEST_ACCOUNTS = [
   }
 ];
 export const PRIMARY_TEST_LOGIN_EMAIL = TEST_ACCOUNTS[0].email;
+export const ADMIN_TEST_EMAIL = PRIMARY_TEST_LOGIN_EMAIL;
 export const AUTH_STORAGE_KEY = "ceeja_portal_auth";
 export const ADMIN_SESSION_KEY = "ceeja_admin_auth";
 export const ADMIN_REMEMBER_KEY = "ceeja_admin_auth_remembered";
@@ -88,4 +89,8 @@ export function isValidTestCredential(email, password) {
 
 export function isAllowedTestUser(email) {
   return TEST_ACCOUNTS.some((account) => account.email === email);
+}
+
+export function isAllowedAdminUser(email) {
+  return email === ADMIN_TEST_EMAIL;
 }
