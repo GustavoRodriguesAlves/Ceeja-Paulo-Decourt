@@ -1,6 +1,16 @@
 {
-  "updatedAt": "2026-03-14T10:43:11.199Z",
-  "notices": [],
+  "updatedAt": "2026-03-14T10:44:49.033Z",
+  "notices": [
+    {
+      "id": "notice-1773485089032",
+      "title": "Últimas notícias",
+      "summary": "Aviso das últimas notícias",
+      "category": "Atenção",
+      "date": "2026-03-14",
+      "featured": true,
+      "published": true
+    }
+  ],
   "quickLinks": [
     {
       "id": "link-1773484991199",
