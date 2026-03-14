@@ -6,6 +6,7 @@
     "rootDir": "src/ts",
     "outDir": "assets/js",
     "strict": true,
+    "declaration": true,
     "noEmit": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true

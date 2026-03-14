@@ -1,0 +1,30 @@
+import type { GitHubContentWriteResponse, GitHubRepositoryEntry, PortalImageLibraryEntry, SiteContent } from "../../../assets/js/types/core";
+export declare const SITE_CONTENT_SOURCE = "data/site-content.json";
+export declare const PORTAL_IMAGE_DIRECTORIES: readonly ["assets/images/portal", "assets/images"];
+export declare const PORTAL_IMAGE_UPLOAD_DIR = "assets/images/portal";
+export declare const GITHUB_REPO_CONFIG: {
+    readonly owner: "GustavoRodriguesAlves";
+    readonly repo: "Ceeja-Paulo-Decourt";
+    readonly branch: "main";
+    readonly path: "data/site-content.json";
+};
+export declare function normalizeSiteContent(raw?: Partial<SiteContent> | null): SiteContent;
+export declare function readDraftSiteContent(): SiteContent | null;
+export declare function saveDraftSiteContent(content: Partial<SiteContent> | SiteContent): void;
+export declare function clearDraftSiteContent(): void;
+export declare function fetchPublishedSiteContent(): Promise<SiteContent>;
+export declare function loadEditorSiteContent(): Promise<SiteContent>;
+export declare function getGitHubPublishToken(): string;
+export declare function setGitHubPublishToken(token: string): void;
+export declare function clearGitHubPublishToken(): void;
+export declare function fetchPublishedSiteContentMeta(token: string): Promise<GitHubRepositoryEntry>;
+export declare function publishSiteContentToGitHub(content: Partial<SiteContent> | SiteContent, token: string, commitMessage?: string, maxRetries?: number): Promise<GitHubContentWriteResponse>;
+export declare function isAllowedPortalImageFileName(fileName?: string): boolean;
+export declare function normalizePortalImageLibraryEntries(entries?: Partial<PortalImageLibraryEntry>[] | null): PortalImageLibraryEntry[];
+export declare function listRepositoryDirectory(token: string, path: string): Promise<GitHubRepositoryEntry[]>;
+export declare function listPortalImageLibrary(token: string): Promise<PortalImageLibraryEntry[]>;
+export declare function createPortalImagePath(title: string, originalFileName: string): string;
+export declare function uploadPortalImageToGitHub(file: File, token: string, path: string, commitMessage?: string): Promise<{
+    path: string;
+    response: GitHubContentWriteResponse;
+}>;
