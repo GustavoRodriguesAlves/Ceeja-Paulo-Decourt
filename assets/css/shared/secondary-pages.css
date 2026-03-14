@@ -11,6 +11,19 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 body {
   font-family: "Inter", sans-serif;
   color: var(--text-main);
@@ -36,6 +49,12 @@ body {
 .btn-outline-white:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: #fff;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
 }
 
 .card {

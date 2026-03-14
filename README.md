@@ -27,6 +27,18 @@ Site institucional estático do CEEJA Paulo Decourt, publicado via GitHub Pages.
 
 O projeto já possui deploy automático configurado em `.github/workflows/deploy-pages.yml`.
 
+## Desenvolvimento
+
+Scripts disponíveis:
+
+- `npm run typecheck`: valida os arquivos TypeScript sem gerar saída.
+- `npm run build`: gera os arquivos JavaScript em `assets/js`.
+- `npm run verify`: executa `typecheck` e `build` em sequência.
+- `npm run clean`: remove os arquivos JavaScript e `.d.ts` gerados a partir de `src/ts`.
+- `npm run rebuild`: limpa os gerados e executa um novo build completo.
+- `npm run typecheck:watch`: mantém a checagem de tipos em modo observação.
+- `npm run build:watch`: recompila automaticamente enquanto os arquivos `.ts` mudam.
+
 Para publicar:
 
 1. envie o repositório para a branch `main`;

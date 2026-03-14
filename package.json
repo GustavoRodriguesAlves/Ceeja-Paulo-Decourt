@@ -6,8 +6,13 @@
     "doc": "docs"
   },
   "scripts": {
+    "clean": "node scripts/clean-generated.mjs",
     "typecheck": "tsc -p tsconfig.json",
-    "build": "tsc -p tsconfig.build.json"
+    "typecheck:watch": "tsc -w -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -w -p tsconfig.build.json",
+    "rebuild": "npm run clean && npm run build",
+    "verify": "npm run typecheck && npm run build"
   },
   "repository": {
     "type": "git",
