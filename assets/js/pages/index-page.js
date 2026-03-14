@@ -10,8 +10,6 @@ import {
   setAdminSession,
   setPortalSession
 } from "../core/auth.js";
-import { fetchPublishedSiteContent } from "../core/site-content.js";
-
 const urlParams = new URLSearchParams(window.location.search);
 const forceHomeView = urlParams.get("home") === "1";
 const logoutRequested = urlParams.get("logout") === "1";
@@ -219,18 +217,8 @@ function goToSlide(index) {
   resetSlideTimer();
 }
 
-function getPublishedGallery(content) {
-  const gallery = Array.isArray(content?.gallery)
-    ? content.gallery
-        .filter((item) => item.published !== false)
-        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
-    : [];
-
-  return gallery.length ? gallery : DEFAULT_GALLERY;
-}
-
-function applyHomepageContent(content) {
-  const gallery = getPublishedGallery(content);
+function applyHomepageContent() {
+  const gallery = DEFAULT_GALLERY;
 
   if (carouselTrack && carouselIndicators) {
     carouselTrack.innerHTML = gallery
@@ -265,16 +253,6 @@ function applyHomepageContent(content) {
     currentSlide = 0;
     showSlide(0);
     resetSlideTimer();
-  }
-}
-
-async function loadHomepageContent() {
-  try {
-    const content = await fetchPublishedSiteContent();
-    applyHomepageContent(content);
-  } catch (error) {
-    console.warn("Falha ao carregar conteúdo estruturado da home.", error);
-    applyHomepageContent({ gallery: DEFAULT_GALLERY });
   }
 }
 
@@ -365,4 +343,4 @@ window.prevSlide = prevSlide;
 window.nextSlide = nextSlide;
 window.goToSlide = goToSlide;
 
-loadHomepageContent();
+applyHomepageContent();

@@ -361,7 +361,7 @@ function renderLinks() {
 function renderGallery() {
   const gallery = [...adminState.gallery].sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
   if (!gallery.length) {
-    mediaItems.innerHTML = '<div class="empty-state">Nenhuma imagem cadastrada para a galeria.</div>';
+    mediaItems.innerHTML = '<div class="empty-state">Nenhuma imagem cadastrada para o portal.</div>';
     return;
   }
 
@@ -398,7 +398,7 @@ function renderGallery() {
 
   mediaItems.querySelectorAll("[data-delete-media]").forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem será retirada do carrossel público da home.", () => {
+      openConfirmModal("Essa imagem será retirada da galeria pública do portal.", () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
         saveState(
           "Imagem removida da galeria local.",

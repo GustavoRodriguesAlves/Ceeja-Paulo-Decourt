@@ -32,6 +32,10 @@ const raValidationMessage = document.getElementById("raValidationMessage");
 const raPreparedMessage = document.getElementById("raPreparedMessage");
 const noticeList = document.getElementById("noticeList");
 const quickLinksList = document.getElementById("quickLinksList");
+const portalGallery = document.getElementById("portalGallery");
+
+let portalRefreshTimer = null;
+let lastPortalRefreshAt = 0;
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -141,6 +145,11 @@ function renderPortalContent(content) {
   const quickLinks = Array.isArray(content?.quickLinks)
     ? content.quickLinks.filter((item) => item.published)
     : [];
+  const gallery = Array.isArray(content?.gallery)
+    ? content.gallery
+        .filter((item) => item.published)
+        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+    : [];
 
   if (noticeList) {
     noticeList.innerHTML = notices.length
@@ -189,12 +198,31 @@ function renderPortalContent(content) {
           .join("")
       : '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Nenhum link cadastrado.</div>';
   }
+
+  if (portalGallery) {
+    portalGallery.innerHTML = gallery.length
+      ? gallery
+          .map(
+            (item) => `
+              <article class="portal-gallery-card">
+                <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" loading="lazy" />
+                <div class="portal-gallery-card-body">
+                  <h3 class="portal-gallery-card-title">${escapeHtml(item.title || "Imagem do portal")}</h3>
+                  <p class="portal-gallery-card-text">${escapeHtml(item.alt || "Registro visual publicado pela secretaria.")}</p>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Nenhuma imagem publicada no momento.</div>';
+  }
 }
 
 async function loadPortalContent() {
   try {
     const content = await fetchPublishedSiteContent();
     renderPortalContent(content);
+    lastPortalRefreshAt = Date.now();
   } catch (error) {
     console.warn("Falha ao carregar conteúdo do portal.", error);
     if (noticeList) {
@@ -205,7 +233,32 @@ async function loadPortalContent() {
       quickLinksList.innerHTML =
         '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar os links agora.</div>';
     }
+    if (portalGallery) {
+      portalGallery.innerHTML =
+        '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Não foi possível carregar a galeria agora.</div>';
+    }
   }
+}
+
+function refreshPortalContentIfNeeded(force = false) {
+  const elapsed = Date.now() - lastPortalRefreshAt;
+  if (!force && elapsed < 15000) {
+    return;
+  }
+
+  loadPortalContent();
+}
+
+function startPortalRefreshLoop() {
+  if (portalRefreshTimer) {
+    window.clearInterval(portalRefreshTimer);
+  }
+
+  portalRefreshTimer = window.setInterval(() => {
+    if (document.visibilityState === "visible") {
+      refreshPortalContentIfNeeded();
+    }
+  }, 45000);
 }
 
 logoutButton?.addEventListener("click", () => {
@@ -233,6 +286,15 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
+window.addEventListener("focus", () => refreshPortalContentIfNeeded(true));
+window.addEventListener("pageshow", () => refreshPortalContentIfNeeded(true));
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    refreshPortalContentIfNeeded(true);
+  }
+});
+
 window.openNotasModal = openNotasModal;
 
 loadPortalContent();
+startPortalRefreshLoop();
