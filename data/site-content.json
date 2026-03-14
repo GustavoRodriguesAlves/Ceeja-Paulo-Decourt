@@ -1,6 +1,15 @@
 {
-  "updatedAt": "2026-03-14T10:45:47.445Z",
+  "updatedAt": "2026-03-14T12:37:12.825Z",
   "notices": [],
   "quickLinks": [],
-  "gallery": []
+  "gallery": [
+    {
+      "id": "media-1773491832824",
+      "title": "rqrqrqrq",
+      "src": "",
+      "alt": "rqrqrqrqrqrq",
+      "order": 1,
+      "published": true
+    }
+  ]
 }
