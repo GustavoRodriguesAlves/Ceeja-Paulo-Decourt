@@ -1,7 +1,7 @@
 import {
-  TEST_LOGIN_EMAIL,
   clearAdminAuth,
   getAdminSessionEmail,
+  isAllowedTestUser,
   syncRememberedAdminSession
 } from "../core/auth.js";
 import {
@@ -20,7 +20,7 @@ import {
 const rememberedAdminEmail = syncRememberedAdminSession();
 const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
 
-if (!adminEmail || adminEmail !== TEST_LOGIN_EMAIL) {
+if (!adminEmail || !isAllowedTestUser(adminEmail)) {
   window.location.replace("index.html?admin=1");
 }
 

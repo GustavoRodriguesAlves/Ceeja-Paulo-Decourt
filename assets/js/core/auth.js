@@ -1,5 +1,14 @@
-export const TEST_LOGIN_EMAIL = "eugustavorodriguesalves@gmail.com";
-export const TEST_LOGIN_PASSWORD = "Gu130106.";
+export const TEST_ACCOUNTS = [
+  {
+    email: "chief@gmail.com",
+    password: "123"
+  },
+  {
+    email: "gabriel@gmail.com",
+    password: "123"
+  }
+];
+export const PRIMARY_TEST_LOGIN_EMAIL = TEST_ACCOUNTS[0].email;
 export const AUTH_STORAGE_KEY = "ceeja_portal_auth";
 export const ADMIN_SESSION_KEY = "ceeja_admin_auth";
 export const ADMIN_REMEMBER_KEY = "ceeja_admin_auth_remembered";
@@ -72,5 +81,11 @@ export function clearAdminAuth() {
 }
 
 export function isValidTestCredential(email, password) {
-  return email === TEST_LOGIN_EMAIL && password === TEST_LOGIN_PASSWORD;
+  return TEST_ACCOUNTS.some(
+    (account) => account.email === email && account.password === password
+  );
+}
+
+export function isAllowedTestUser(email) {
+  return TEST_ACCOUNTS.some((account) => account.email === email);
 }

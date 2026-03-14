@@ -1,7 +1,8 @@
 import {
-  TEST_LOGIN_EMAIL,
   clearPortalAuth,
   getPortalSessionEmail,
+  isAllowedTestUser,
+  PRIMARY_TEST_LOGIN_EMAIL,
   syncRememberedPortalSession
 } from "../core/auth.js";
 import { fetchPublishedSiteContent } from "../core/site-content.js";
@@ -15,7 +16,7 @@ const RA_STORAGE_KEY = "ceeja_prepared_ra";
 const rememberedEmail = syncRememberedPortalSession();
 const userEmail = getPortalSessionEmail() || rememberedEmail;
 
-if (!userEmail || userEmail !== TEST_LOGIN_EMAIL) {
+if (!userEmail || !isAllowedTestUser(userEmail)) {
   window.location.replace("index.html");
 }
 
@@ -57,7 +58,7 @@ if (userEmailElement) {
 
 function buildNotasUrl() {
   return `${NOTES_BASE_URL}?usuario=${encodeURIComponent(
-    userEmail || TEST_LOGIN_EMAIL
+    userEmail || PRIMARY_TEST_LOGIN_EMAIL
   )}&ra=&tel=&token=${NOTES_TOKEN}`;
 }
 
