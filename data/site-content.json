@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-14T00:16:08.102Z",
+  "updatedAt": "2026-03-14T00:46:28.703Z",
   "notices": [
     {
       "id": "notice-1773447368101",
@@ -11,6 +11,13 @@
       "published": true
     }
   ],
-  "quickLinks": [],
+  "quickLinks": [
+    {
+      "id": "link-1773449188703",
+      "label": "Punheta Guiada",
+      "url": "https://mamengole.com",
+      "published": true
+    }
+  ],
   "gallery": []
 }
