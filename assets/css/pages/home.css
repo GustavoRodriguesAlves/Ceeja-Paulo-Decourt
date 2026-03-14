@@ -12,6 +12,19 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 body {
   font-family: "Inter", sans-serif;
   color: var(--text-main);
@@ -68,6 +81,17 @@ h6,
 .btn-primary:hover {
   background-color: var(--brand-secondary);
   transform: translateY(-1px);
+}
+
+.btn-primary:focus-visible,
+.btn-outline:focus-visible,
+.btn-accent:focus-visible,
+.footer-admin-link:focus-visible,
+.carousel-btn:focus-visible,
+.indicator-dot:focus-visible,
+.input-field:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
 }
 
 .btn-outline {

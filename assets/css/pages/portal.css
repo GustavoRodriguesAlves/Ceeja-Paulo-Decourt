@@ -7,6 +7,15 @@
   padding: 1.5rem;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 .dashboard-link {
   display: block;
   border: 1px solid var(--border-color);
@@ -20,6 +29,15 @@
 .dashboard-link:hover {
   border-color: var(--brand-secondary);
   background-color: #F8FAFC;
+}
+
+.dashboard-link:focus-visible,
+.popup-action:focus-visible,
+.field-shell:focus-within,
+#closeNotasModal:focus-visible,
+#logoutBtn:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
 }
 
 .dashboard-link.action-btn {

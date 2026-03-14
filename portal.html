@@ -18,9 +18,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-3">
-          <img src="assets/images/logo-ceeja.svg" alt="Brasão do Estado" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
+          <img src="assets/images/logo-ceeja.svg" alt="CEEJA Paulo Decourt" class="h-10 w-auto bg-white p-0.5 rounded shadow-sm" />
           <div class="hidden sm:block">
-            <h1 class="serif text-lg font-bold leading-tight">Portal Acadêmico</h1>
+            <p class="serif text-lg font-bold leading-tight">Portal Acadêmico</p>
             <p class="text-xs text-blue-200 uppercase tracking-widest">CEEJA Paulo Decourt</p>
           </div>
         </div>
@@ -50,7 +50,7 @@
     <div class="card mb-8">
       <div class="card-body sm:flex items-start justify-between">
         <div>
-          <h2 class="serif text-2xl font-bold text-[var(--brand-primary)] mb-2">Painel do Estudante</h2>
+          <h1 class="serif text-2xl font-bold text-[var(--brand-primary)] mb-2">Painel do Estudante</h1>
           <p class="text-gray-600 max-w-3xl leading-relaxed text-sm">
             Acesso aos sistemas acadêmicos, materiais didáticos e registros escolares. Todo o seu percurso educacional reunido em um único ambiente institucional, focado em organização e transparência das informações necessárias para a sua formação.
           </p>
@@ -196,11 +196,11 @@
             <h2 class="serif text-2xl font-bold text-[var(--brand-primary)]">Mural de Avisos</h2>
           </div>
           <p class="text-sm text-gray-600 mb-6">Comunicados oficiais e prazos estipulados pela Secretaria do CEEJA.</p>
-          <div id="noticeList" class="grid gap-4"></div>
+          <div id="noticeList" class="grid gap-4" aria-live="polite"></div>
         </div>
         <aside class="card bg-gray-50 h-fit">
           <h3 class="card-title mb-4">Links Rápidos da Secretaria</h3>
-          <div id="quickLinksList" class="flex flex-col gap-3"></div>
+          <div id="quickLinksList" class="flex flex-col gap-3" aria-live="polite"></div>
         </aside>
       </div>
     </section>
@@ -211,7 +211,7 @@
         <h2 class="serif text-2xl font-bold text-[var(--brand-primary)]">Galeria do Portal</h2>
       </div>
       <p class="text-sm text-gray-600 mb-6">Registros visuais e comunicados em imagem publicados pela secretaria para os alunos.</p>
-      <div id="portalGallery" class="portal-gallery-grid"></div>
+      <div id="portalGallery" class="portal-gallery-grid" aria-live="polite"></div>
     </section>
   </main>
 
