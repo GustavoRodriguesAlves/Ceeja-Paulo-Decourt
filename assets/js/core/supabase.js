@@ -38,6 +38,10 @@ function buildAuthUrl(path) {
     const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
     return `${baseUrl}/auth/v1/${path}`;
 }
+function buildFunctionUrl(name) {
+    const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
+    return `${baseUrl}/functions/v1/${name}`;
+}
 function normalizeEmail(email) {
     return email.trim().toLowerCase();
 }
@@ -401,6 +405,30 @@ export async function syncPanelAllowlist(entries) {
             updatedAt: new Date().toISOString()
         });
     });
+}
+export async function manageSupabasePanelUser(payload) {
+    const accessToken = await getSupabaseAdminAccessToken();
+    const response = await fetch(buildFunctionUrl("manage-panel-users"), {
+        method: "POST",
+        headers: {
+            apikey: SUPABASE_CONFIG.publishableKey,
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id: payload.id || null,
+            email: normalizeEmail(payload.email),
+            password: payload.password || null,
+            role: payload.role === "owner" ? "owner" : "editor",
+            active: payload.active
+        })
+    });
+    const rawText = await response.text();
+    const responseBody = rawText ? JSON.parse(rawText) : {};
+    if (!response.ok || !responseBody.entry) {
+        throw new Error(responseBody.error || `Falha ao executar a função do Supabase (${response.status}).`);
+    }
+    return responseBody.entry;
 }
 export async function syncSupabaseNotices(notices) {
     const existingRows = await fetchSupabaseAdminRows(SUPABASE_TABLES.notices, new URLSearchParams({

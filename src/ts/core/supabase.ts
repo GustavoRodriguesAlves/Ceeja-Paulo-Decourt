@@ -56,6 +56,14 @@ export interface PanelAccessEntry {
   updatedAt: string;
 }
 
+export interface ManagePanelUserPayload {
+  id?: string;
+  email: string;
+  password?: string;
+  role: "owner" | "editor";
+  active: boolean;
+}
+
 export const SUPABASE_TABLES = {
   notices: "notices",
   quickLinks: "quick_links",
@@ -108,6 +116,11 @@ function buildRestUrl(table: string, query: URLSearchParams): string {
 function buildAuthUrl(path: string): string {
   const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
   return `${baseUrl}/auth/v1/${path}`;
+}
+
+function buildFunctionUrl(name: string): string {
+  const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
+  return `${baseUrl}/functions/v1/${name}`;
 }
 
 function normalizeEmail(email: string): string {
@@ -578,6 +591,36 @@ export async function syncPanelAllowlist(entries: PanelAccessEntry[]): Promise<P
       }
     );
   });
+}
+
+export async function manageSupabasePanelUser(
+  payload: ManagePanelUserPayload
+): Promise<PanelAccessEntry> {
+  const accessToken = await getSupabaseAdminAccessToken();
+  const response = await fetch(buildFunctionUrl("manage-panel-users"), {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_CONFIG.publishableKey,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: payload.id || null,
+      email: normalizeEmail(payload.email),
+      password: payload.password || null,
+      role: payload.role === "owner" ? "owner" : "editor",
+      active: payload.active
+    })
+  });
+
+  const rawText = await response.text();
+  const responseBody = rawText ? (JSON.parse(rawText) as { error?: string; entry?: PanelAccessEntry }) : {};
+
+  if (!response.ok || !responseBody.entry) {
+    throw new Error(responseBody.error || `Falha ao executar a função do Supabase (${response.status}).`);
+  }
+
+  return responseBody.entry;
 }
 
 export async function syncSupabaseNotices(notices: NoticeItem[]): Promise<NoticeItem[]> {

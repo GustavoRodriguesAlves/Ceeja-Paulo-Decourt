@@ -8,6 +8,13 @@ export interface PanelAccessEntry {
     createdAt: string;
     updatedAt: string;
 }
+export interface ManagePanelUserPayload {
+    id?: string;
+    email: string;
+    password?: string;
+    role: "owner" | "editor";
+    active: boolean;
+}
 export declare const SUPABASE_TABLES: {
     readonly notices: "notices";
     readonly quickLinks: "quick_links";
@@ -33,5 +40,6 @@ export declare function fetchCurrentPanelAccess(): Promise<PanelAccessEntry | nu
 export declare function ensureSupabasePanelAccess(): Promise<PanelAccessEntry>;
 export declare function fetchPanelAllowlist(): Promise<PanelAccessEntry[]>;
 export declare function syncPanelAllowlist(entries: PanelAccessEntry[]): Promise<PanelAccessEntry[]>;
+export declare function manageSupabasePanelUser(payload: ManagePanelUserPayload): Promise<PanelAccessEntry>;
 export declare function syncSupabaseNotices(notices: NoticeItem[]): Promise<NoticeItem[]>;
 export declare function syncSupabaseQuickLinks(links: QuickLinkItem[]): Promise<QuickLinkItem[]>;

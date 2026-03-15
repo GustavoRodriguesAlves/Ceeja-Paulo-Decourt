@@ -23,6 +23,7 @@ import {
   fetchSupabaseEditorSiteContent,
   getSupabaseAdminSession,
   getSupabasePublicConfig,
+  manageSupabasePanelUser,
   type PanelAccessEntry,
   signInSupabaseAdmin,
   syncPanelAllowlist,
@@ -240,6 +241,7 @@ const ownerAccessForm = mustForm("ownerAccessForm");
 const ownerAccessItems = mustElement("ownerAccessItems");
 const ownerAccessId = mustInput("ownerAccessId");
 const ownerAccessEmail = mustInput("ownerAccessEmail");
+const ownerAccessPassword = mustInput("ownerAccessPassword");
 const ownerAccessRole = mustSelect("ownerAccessRole");
 const ownerAccessActive = mustInput("ownerAccessActive");
 const clearOwnerAccessFormButton = mustButton("clearOwnerAccessForm");
@@ -1297,6 +1299,7 @@ function renderGallery(): void {
 function fillOwnerAccessForm(item: PanelAccessEntry | null = null): void {
   ownerAccessId.value = item?.id || "";
   ownerAccessEmail.value = item?.email || "";
+  ownerAccessPassword.value = "";
   ownerAccessRole.value = item?.role || "editor";
   ownerAccessActive.checked = item?.active !== false;
 }
@@ -1482,8 +1485,14 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
   }
 
   const email = ownerAccessEmail.value.trim().toLowerCase();
+  const password = ownerAccessPassword.value.trim();
   if (!email) {
     setStatus("Informe o e-mail que deve ser autorizado a entrar no painel.", "warning");
+    return;
+  }
+
+  if (!ownerAccessId.value && !password) {
+    setStatus("Defina uma senha para o novo acesso antes de salvar.", "warning");
     return;
   }
 
@@ -1517,17 +1526,36 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
 
   try {
     setPublishingState(true);
-    panelAllowlist = await syncPanelAllowlist(panelAllowlist);
+    const savedEntry = await manageSupabasePanelUser({
+      id: ownerAccessId.value || undefined,
+      email,
+      password: password || undefined,
+      role: payload.role,
+      active: payload.active
+    });
+
+    const savedIndex = panelAllowlist.findIndex((item) => item.id === savedEntry.id);
+    if (savedIndex >= 0) {
+      panelAllowlist[savedIndex] = savedEntry;
+    } else {
+      panelAllowlist.unshift(savedEntry);
+    }
+
     currentPanelAccess =
       panelAllowlist.find((entry) => entry.email === currentPanelAccess?.email) || currentPanelAccess;
     updateOwnerAccessVisibility();
     updateSupabaseAuthStatus();
     renderOwnerAccessList();
     fillOwnerAccessForm();
-    setStatus("Lista de e-mails permitidos atualizada com sucesso.", "success");
+    setStatus("Acesso do painel salvo com sucesso. E-mail, senha e permissão já foram registrados.", "success");
   } catch (error) {
     console.error(error);
-    setStatus("Não foi possível atualizar os e-mails permitidos do painel agora.", "danger");
+    setStatus(
+      error instanceof Error
+        ? error.message
+        : "Não foi possível atualizar os e-mails permitidos do painel agora.",
+      "danger"
+    );
   } finally {
     setPublishingState(false);
   }

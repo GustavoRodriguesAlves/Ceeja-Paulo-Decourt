@@ -310,6 +310,11 @@
                     <input id="ownerAccessEmail" type="email" class="field" placeholder="exemplo@dominio.com" required />
                   </div>
                   <div>
+                    <label for="ownerAccessPassword" class="mb-1 block text-sm font-semibold">Senha de acesso</label>
+                    <input id="ownerAccessPassword" type="password" class="field" placeholder="Defina a senha de quem vai entrar" autocomplete="new-password" />
+                    <p class="helper-text mt-2">No cadastro novo, a senha é obrigatória. Ao editar um acesso existente, deixe em branco para manter a senha atual.</p>
+                  </div>
+                  <div>
                     <label for="ownerAccessRole" class="mb-1 block text-sm font-semibold">Nível de acesso</label>
                     <select id="ownerAccessRole" class="field" required>
                       <option value="editor">Secretaria</option>
