@@ -1,16 +1,18 @@
-import {
+﻿import {
   clearPortalAuth,
-  forgetAdmin,
   forgetPortal,
-  getRememberedAdminEmail,
   getRememberedPortalEmail,
-  isAllowedAdminUser,
   isValidTestCredential,
-  rememberAdmin,
   rememberPortal,
-  setAdminSession,
   setPortalSession
 } from "../core/auth.js";
+import {
+  clearSupabaseAdminSession,
+  ensureSupabasePanelAccess,
+  getSupabaseAdminSession,
+  signInSupabaseAdmin,
+  syncRememberedSupabaseAdminSession
+} from "../core/supabase.js";
 import type { GalleryItem } from "../../../assets/js/types/core";
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -118,9 +120,9 @@ const DEFAULT_GALLERY: GalleryItem[] = [
   },
   {
     id: "default-media-005",
-    title: "Área de convivência",
+    title: "Ãrea de convivÃªncia",
     src: "assets/images/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
-    alt: "Área de convivência escolar",
+    alt: "Ãrea de convivÃªncia escolar",
     order: 5,
     published: true
   }
@@ -139,8 +141,7 @@ const redirectToPortal = (email: string): void => {
   window.location.href = "portal.html";
 };
 
-const redirectToAdmin = (email: string): void => {
-  setAdminSession(email);
+const redirectToAdmin = (): void => {
   window.location.href = "admin.html";
 };
 
@@ -193,11 +194,16 @@ function closeLogin(): void {
   hideModal(loginModal);
 }
 
-function openAdminLogin(): void {
-  const rememberedEmail = getRememberedAdminEmail();
-  if (rememberedEmail && isAllowedAdminUser(rememberedEmail)) {
-    redirectToAdmin(rememberedEmail);
-    return;
+async function openAdminLogin(): Promise<void> {
+  const rememberedSession = getSupabaseAdminSession() || syncRememberedSupabaseAdminSession();
+  if (rememberedSession) {
+    try {
+      await ensureSupabasePanelAccess();
+      redirectToAdmin();
+      return;
+    } catch {
+      clearSupabaseAdminSession();
+    }
   }
 
   if (adminLoginError) {
@@ -374,7 +380,7 @@ openLoginButtons.forEach((button) => {
 openAdminLoginButton?.addEventListener("click", (event) => {
   const currentTarget = event.currentTarget;
   lastFocusedTrigger = currentTarget instanceof HTMLElement ? currentTarget : null;
-  openAdminLogin();
+  void openAdminLogin();
 });
 
 closeLoginModalButton?.addEventListener("click", closeLogin);
@@ -431,27 +437,35 @@ adminLoginForm?.addEventListener("submit", (event) => {
   const email = adminLoginEmail?.value.trim().toLowerCase() || "";
   const password = adminLoginPassword?.value || "";
 
-  if (!isValidTestCredential(email, password)) {
-    adminLoginError?.classList.remove("hidden");
-    return;
-  }
-
-  if (!isAllowedAdminUser(email)) {
+  if (!email || !password) {
     if (adminLoginError) {
-      adminLoginError.textContent =
-        "Este acesso é restrito ao perfil administrativo autorizado.";
+      adminLoginError.textContent = "Informe o e-mail e a senha para continuar.";
     }
     adminLoginError?.classList.remove("hidden");
     return;
   }
 
-  if (keepAdminConnectedCheckbox?.checked) {
-    rememberAdmin(email);
-  } else {
-    forgetAdmin();
-  }
+  const submitButton = adminLoginForm.querySelector<HTMLButtonElement>('button[type="submit"]');
+  submitButton?.setAttribute("disabled", "true");
 
-  redirectToAdmin(email);
+  void (async () => {
+    try {
+      await signInSupabaseAdmin(email, password, Boolean(keepAdminConnectedCheckbox?.checked));
+      await ensureSupabasePanelAccess();
+      redirectToAdmin();
+    } catch (error) {
+      clearSupabaseAdminSession();
+      if (adminLoginError) {
+        adminLoginError.textContent =
+          error instanceof Error && error.message.includes("não está autorizado")
+            ? "Este e-mail não está autorizado a entrar no painel."
+            : "Credenciais inválidas ou conta sem acesso ao painel.";
+      }
+      adminLoginError?.classList.remove("hidden");
+    } finally {
+      submitButton?.removeAttribute("disabled");
+    }
+  })();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -484,7 +498,10 @@ window.addEventListener("keydown", (event) => {
 });
 
 if (adminRequested) {
-  window.setTimeout(openAdminLogin, 120);
+  window.setTimeout(() => {
+    void openAdminLogin();
+  }, 120);
 }
 
 applyHomepageContent();
+

@@ -33,10 +33,34 @@ type SupabaseGalleryRow = {
   published: boolean;
 };
 
+type SupabaseAdminAllowlistRow = {
+  id: string;
+  email: string;
+  role: "owner" | "editor";
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type SupabaseAdminAllowlistUpsertRow = Pick<
+  SupabaseAdminAllowlistRow,
+  "id" | "email" | "role" | "active"
+>;
+
+export interface PanelAccessEntry {
+  id: string;
+  email: string;
+  role: "owner" | "editor";
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const SUPABASE_TABLES = {
   notices: "notices",
   quickLinks: "quick_links",
-  gallery: "gallery_items"
+  gallery: "gallery_items",
+  adminAllowlist: "admin_allowlist"
 } as const;
 
 export interface SupabaseAdminSession {
@@ -84,6 +108,10 @@ function buildRestUrl(table: string, query: URLSearchParams): string {
 function buildAuthUrl(path: string): string {
   const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
   return `${baseUrl}/auth/v1/${path}`;
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 function readStoredSession(raw: string | null): SupabaseAdminSession | null {
@@ -377,6 +405,17 @@ function mapGallery(rows: SupabaseGalleryRow[]): GalleryItem[] {
   }));
 }
 
+function mapPanelAccess(rows: SupabaseAdminAllowlistRow[]): PanelAccessEntry[] {
+  return rows.map((row) => ({
+    id: row.id,
+    email: normalizeEmail(row.email),
+    role: row.role === "owner" ? "owner" : "editor",
+    active: Boolean(row.active),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }));
+}
+
 export function getSupabasePublicConfig(): SupabasePublicConfig {
   return { ...SUPABASE_CONFIG };
 }
@@ -447,6 +486,97 @@ export async function fetchSupabasePublishedSiteContent(): Promise<SiteContent> 
     notices: mapNotices(noticeRows),
     quickLinks: mapQuickLinks(quickLinkRows),
     gallery: mapGallery(galleryRows)
+  });
+}
+
+export async function fetchCurrentPanelAccess(): Promise<PanelAccessEntry | null> {
+  const session = getSupabaseAdminSession() || syncRememberedSupabaseAdminSession();
+  if (!session) {
+    return null;
+  }
+
+  const rows = await fetchSupabaseAdminRows<SupabaseAdminAllowlistRow>(
+    SUPABASE_TABLES.adminAllowlist,
+    new URLSearchParams({
+      select: "id,email,role,active,created_at,updated_at",
+      email: `eq.${normalizeEmail(session.email)}`,
+      active: "eq.true",
+      limit: "1"
+    })
+  );
+
+  return mapPanelAccess(rows)[0] || null;
+}
+
+export async function ensureSupabasePanelAccess(): Promise<PanelAccessEntry> {
+  const access = await fetchCurrentPanelAccess();
+  if (!access) {
+    clearSupabaseAdminSession();
+    throw new Error("Este e-mail não está autorizado a entrar no painel.");
+  }
+
+  return access;
+}
+
+export async function fetchPanelAllowlist(): Promise<PanelAccessEntry[]> {
+  const rows = await fetchSupabaseAdminRows<SupabaseAdminAllowlistRow>(
+    SUPABASE_TABLES.adminAllowlist,
+    new URLSearchParams({
+      select: "id,email,role,active,created_at,updated_at",
+      order: "role.asc,created_at.asc"
+    })
+  );
+
+  return mapPanelAccess(rows).sort((left, right) => {
+    if (left.role !== right.role) {
+      return left.role === "owner" ? -1 : 1;
+    }
+
+    return left.email.localeCompare(right.email);
+  });
+}
+
+export async function syncPanelAllowlist(entries: PanelAccessEntry[]): Promise<PanelAccessEntry[]> {
+  const existingRows = await fetchSupabaseAdminRows<Pick<SupabaseAdminAllowlistRow, "id">>(
+    SUPABASE_TABLES.adminAllowlist,
+    new URLSearchParams({
+      select: "id"
+    })
+  );
+
+  const payload: SupabaseAdminAllowlistUpsertRow[] = entries.map((entry) => ({
+    id: ensureSupabaseRecordId(entry.id),
+    email: normalizeEmail(entry.email),
+    role: entry.role === "owner" ? "owner" : "editor",
+    active: entry.active
+  }));
+
+  const persistedRows = payload.length
+    ? (await upsertSupabaseAdminRows<SupabaseAdminAllowlistUpsertRow>(
+        SUPABASE_TABLES.adminAllowlist,
+        payload
+      )) as SupabaseAdminAllowlistRow[]
+    : [];
+
+  const payloadIds = new Set(payload.map((item) => item.id));
+  const deleteIds = existingRows
+    .map((row) => row.id)
+    .filter((id) => !payloadIds.has(id));
+
+  await deleteSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, deleteIds);
+  const persistedById = new Map(mapPanelAccess(persistedRows).map((item) => [item.id, item]));
+  return payload.map((item) => {
+    const persisted = persistedById.get(item.id);
+    return (
+      persisted || {
+        id: item.id,
+        email: item.email,
+        role: item.role === "owner" ? "owner" : "editor",
+        active: item.active,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    );
   });
 }
 

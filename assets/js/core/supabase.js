@@ -3,7 +3,8 @@ import { SUPABASE_CONFIG, isSupabaseConfigReady } from "./supabase-config.js";
 export const SUPABASE_TABLES = {
     notices: "notices",
     quickLinks: "quick_links",
-    gallery: "gallery_items"
+    gallery: "gallery_items",
+    adminAllowlist: "admin_allowlist"
 };
 const SUPABASE_ADMIN_SESSION_KEY = "ceeja_supabase_admin_session";
 const SUPABASE_ADMIN_REMEMBER_KEY = "ceeja_supabase_admin_session_remembered";
@@ -36,6 +37,9 @@ function buildRestUrl(table, query) {
 function buildAuthUrl(path) {
     const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
     return `${baseUrl}/auth/v1/${path}`;
+}
+function normalizeEmail(email) {
+    return email.trim().toLowerCase();
 }
 function readStoredSession(raw) {
     if (!raw) {
@@ -274,6 +278,16 @@ function mapGallery(rows) {
         published: Boolean(row.published)
     }));
 }
+function mapPanelAccess(rows) {
+    return rows.map((row) => ({
+        id: row.id,
+        email: normalizeEmail(row.email),
+        role: row.role === "owner" ? "owner" : "editor",
+        active: Boolean(row.active),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    }));
+}
 export function getSupabasePublicConfig() {
     return { ...SUPABASE_CONFIG };
 }
@@ -322,6 +336,70 @@ export async function fetchSupabasePublishedSiteContent() {
         notices: mapNotices(noticeRows),
         quickLinks: mapQuickLinks(quickLinkRows),
         gallery: mapGallery(galleryRows)
+    });
+}
+export async function fetchCurrentPanelAccess() {
+    const session = getSupabaseAdminSession() || syncRememberedSupabaseAdminSession();
+    if (!session) {
+        return null;
+    }
+    const rows = await fetchSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, new URLSearchParams({
+        select: "id,email,role,active,created_at,updated_at",
+        email: `eq.${normalizeEmail(session.email)}`,
+        active: "eq.true",
+        limit: "1"
+    }));
+    return mapPanelAccess(rows)[0] || null;
+}
+export async function ensureSupabasePanelAccess() {
+    const access = await fetchCurrentPanelAccess();
+    if (!access) {
+        clearSupabaseAdminSession();
+        throw new Error("Este e-mail não está autorizado a entrar no painel.");
+    }
+    return access;
+}
+export async function fetchPanelAllowlist() {
+    const rows = await fetchSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, new URLSearchParams({
+        select: "id,email,role,active,created_at,updated_at",
+        order: "role.asc,created_at.asc"
+    }));
+    return mapPanelAccess(rows).sort((left, right) => {
+        if (left.role !== right.role) {
+            return left.role === "owner" ? -1 : 1;
+        }
+        return left.email.localeCompare(right.email);
+    });
+}
+export async function syncPanelAllowlist(entries) {
+    const existingRows = await fetchSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, new URLSearchParams({
+        select: "id"
+    }));
+    const payload = entries.map((entry) => ({
+        id: ensureSupabaseRecordId(entry.id),
+        email: normalizeEmail(entry.email),
+        role: entry.role === "owner" ? "owner" : "editor",
+        active: entry.active
+    }));
+    const persistedRows = payload.length
+        ? (await upsertSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, payload))
+        : [];
+    const payloadIds = new Set(payload.map((item) => item.id));
+    const deleteIds = existingRows
+        .map((row) => row.id)
+        .filter((id) => !payloadIds.has(id));
+    await deleteSupabaseAdminRows(SUPABASE_TABLES.adminAllowlist, deleteIds);
+    const persistedById = new Map(mapPanelAccess(persistedRows).map((item) => [item.id, item]));
+    return payload.map((item) => {
+        const persisted = persistedById.get(item.id);
+        return (persisted || {
+            id: item.id,
+            email: item.email,
+            role: item.role === "owner" ? "owner" : "editor",
+            active: item.active,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
     });
 }
 export async function syncSupabaseNotices(notices) {

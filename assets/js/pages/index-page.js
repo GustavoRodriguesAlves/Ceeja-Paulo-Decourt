@@ -1,4 +1,5 @@
-import { clearPortalAuth, forgetAdmin, forgetPortal, getRememberedAdminEmail, getRememberedPortalEmail, isAllowedAdminUser, isValidTestCredential, rememberAdmin, rememberPortal, setAdminSession, setPortalSession } from "../core/auth.js";
+import { clearPortalAuth, forgetPortal, getRememberedPortalEmail, isValidTestCredential, rememberPortal, setPortalSession } from "../core/auth.js";
+import { clearSupabaseAdminSession, ensureSupabasePanelAccess, getSupabaseAdminSession, signInSupabaseAdmin, syncRememberedSupabaseAdminSession } from "../core/supabase.js";
 const urlParams = new URLSearchParams(window.location.search);
 const logoutRequested = urlParams.get("logout") === "1";
 const adminRequested = urlParams.get("admin") === "1";
@@ -94,9 +95,9 @@ const DEFAULT_GALLERY = [
     },
     {
         id: "default-media-005",
-        title: "Área de convivência",
+        title: "Ãrea de convivÃªncia",
         src: "assets/images/WhatsApp%20Image%202026-03-04%20at%2020.57.47.jpeg",
-        alt: "Área de convivência escolar",
+        alt: "Ãrea de convivÃªncia escolar",
         order: 5,
         published: true
     }
@@ -111,8 +112,7 @@ const redirectToPortal = (email) => {
     setPortalSession(email);
     window.location.href = "portal.html";
 };
-const redirectToAdmin = (email) => {
-    setAdminSession(email);
+const redirectToAdmin = () => {
     window.location.href = "admin.html";
 };
 function hideMobileMenu() {
@@ -155,11 +155,17 @@ function openLogin() {
 function closeLogin() {
     hideModal(loginModal);
 }
-function openAdminLogin() {
-    const rememberedEmail = getRememberedAdminEmail();
-    if (rememberedEmail && isAllowedAdminUser(rememberedEmail)) {
-        redirectToAdmin(rememberedEmail);
-        return;
+async function openAdminLogin() {
+    const rememberedSession = getSupabaseAdminSession() || syncRememberedSupabaseAdminSession();
+    if (rememberedSession) {
+        try {
+            await ensureSupabasePanelAccess();
+            redirectToAdmin();
+            return;
+        }
+        catch {
+            clearSupabaseAdminSession();
+        }
     }
     if (adminLoginError) {
         adminLoginError.textContent = "As credenciais fornecidas não conferem nos registros.";
@@ -294,7 +300,7 @@ openLoginButtons.forEach((button) => {
 openAdminLoginButton?.addEventListener("click", (event) => {
     const currentTarget = event.currentTarget;
     lastFocusedTrigger = currentTarget instanceof HTMLElement ? currentTarget : null;
-    openAdminLogin();
+    void openAdminLogin();
 });
 closeLoginModalButton?.addEventListener("click", closeLogin);
 closeAdminLoginModalButton?.addEventListener("click", closeAdminLogin);
@@ -341,25 +347,35 @@ adminLoginForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = adminLoginEmail?.value.trim().toLowerCase() || "";
     const password = adminLoginPassword?.value || "";
-    if (!isValidTestCredential(email, password)) {
-        adminLoginError?.classList.remove("hidden");
-        return;
-    }
-    if (!isAllowedAdminUser(email)) {
+    if (!email || !password) {
         if (adminLoginError) {
-            adminLoginError.textContent =
-                "Este acesso é restrito ao perfil administrativo autorizado.";
+            adminLoginError.textContent = "Informe o e-mail e a senha para continuar.";
         }
         adminLoginError?.classList.remove("hidden");
         return;
     }
-    if (keepAdminConnectedCheckbox?.checked) {
-        rememberAdmin(email);
-    }
-    else {
-        forgetAdmin();
-    }
-    redirectToAdmin(email);
+    const submitButton = adminLoginForm.querySelector('button[type="submit"]');
+    submitButton?.setAttribute("disabled", "true");
+    void (async () => {
+        try {
+            await signInSupabaseAdmin(email, password, Boolean(keepAdminConnectedCheckbox?.checked));
+            await ensureSupabasePanelAccess();
+            redirectToAdmin();
+        }
+        catch (error) {
+            clearSupabaseAdminSession();
+            if (adminLoginError) {
+                adminLoginError.textContent =
+                    error instanceof Error && error.message.includes("não está autorizado")
+                        ? "Este e-mail não está autorizado a entrar no painel."
+                        : "Credenciais inválidas ou conta sem acesso ao painel.";
+            }
+            adminLoginError?.classList.remove("hidden");
+        }
+        finally {
+            submitButton?.removeAttribute("disabled");
+        }
+    })();
 });
 window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -387,6 +403,8 @@ window.addEventListener("keydown", (event) => {
     }
 });
 if (adminRequested) {
-    window.setTimeout(openAdminLogin, 120);
+    window.setTimeout(() => {
+        void openAdminLogin();
+    }, 120);
 }
 applyHomepageContent();

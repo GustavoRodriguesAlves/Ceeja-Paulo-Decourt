@@ -1,10 +1,4 @@
-import {
-  clearAdminAuth,
-  getAdminSessionEmail,
-  isAllowedAdminUser,
-  syncRememberedAdminSession
-} from "../core/auth.js";
-import {
+﻿import {
   clearDraftSiteContent,
   clearGitHubPublishToken,
   createPortalImagePath,
@@ -24,10 +18,14 @@ import {
 } from "../core/site-content.js";
 import {
   clearSupabaseAdminSession,
+  ensureSupabasePanelAccess,
+  fetchPanelAllowlist,
   fetchSupabaseEditorSiteContent,
   getSupabaseAdminSession,
   getSupabasePublicConfig,
+  type PanelAccessEntry,
   signInSupabaseAdmin,
+  syncPanelAllowlist,
   syncRememberedSupabaseAdminSession,
   syncSupabaseNotices,
   syncSupabaseQuickLinks
@@ -56,7 +54,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 function mustElement(id: string): HTMLElement {
   const element = document.getElementById(id);
   if (!(element instanceof HTMLElement)) {
-    throw new Error(`Elemento obrigatório não encontrado: #${id}`);
+    throw new Error(`Elemento obrigatÃ³rio nÃ£o encontrado: #${id}`);
   }
 
   return element;
@@ -69,7 +67,7 @@ function mustElement(id: string): HTMLElement {
 function mustForm(id: string): HTMLFormElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLFormElement)) {
-    throw new Error(`Formulário obrigatório inválido: #${id}`);
+    throw new Error(`FormulÃ¡rio obrigatÃ³rio invÃ¡lido: #${id}`);
   }
 
   return element;
@@ -82,7 +80,7 @@ function mustForm(id: string): HTMLFormElement {
 function mustInput(id: string): HTMLInputElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLInputElement)) {
-    throw new Error(`Campo obrigatório inválido: #${id}`);
+    throw new Error(`Campo obrigatÃ³rio invÃ¡lido: #${id}`);
   }
 
   return element;
@@ -92,10 +90,19 @@ function mustInput(id: string): HTMLInputElement {
  * @param {string} id
  * @returns {HTMLTextAreaElement}
  */
+function mustSelect(id: string): HTMLSelectElement {
+  const element = mustElement(id);
+  if (!(element instanceof HTMLSelectElement)) {
+    throw new Error(`Sele??o obrigat?ria inv?lida: #${id}`);
+  }
+
+  return element;
+}
+
 function mustTextArea(id: string): HTMLTextAreaElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLTextAreaElement)) {
-    throw new Error(`Área de texto obrigatória inválida: #${id}`);
+    throw new Error(`Ãrea de texto obrigatÃ³ria invÃ¡lida: #${id}`);
   }
 
   return element;
@@ -108,7 +115,7 @@ function mustTextArea(id: string): HTMLTextAreaElement {
 function mustButton(id: string): HTMLButtonElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLButtonElement)) {
-    throw new Error(`Botão obrigatório inválido: #${id}`);
+    throw new Error(`BotÃ£o obrigatÃ³rio invÃ¡lido: #${id}`);
   }
 
   return element;
@@ -121,7 +128,7 @@ function mustButton(id: string): HTMLButtonElement {
 function mustImage(id: string): HTMLImageElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLImageElement)) {
-    throw new Error(`Imagem obrigatória inválida: #${id}`);
+    throw new Error(`Imagem obrigatÃ³ria invÃ¡lida: #${id}`);
   }
 
   return element;
@@ -137,11 +144,9 @@ function queryButton(root: ParentNode, selector: string): HTMLButtonElement | nu
   return element instanceof HTMLButtonElement ? element : null;
 }
 
-const rememberedAdminEmail = syncRememberedAdminSession();
-const adminEmail = getAdminSessionEmail() || rememberedAdminEmail;
 syncRememberedSupabaseAdminSession();
 
-if (!adminEmail || !isAllowedAdminUser(adminEmail)) {
+if (!getSupabaseAdminSession()) {
   window.location.replace("index.html?admin=1");
 }
 
@@ -161,6 +166,8 @@ let lastFocusedElement: HTMLElement | null = null;
 let selectedLibraryImagePath = "";
 let imageLibraryEntries: PortalImageLibraryEntry[] = [];
 let mediaPreviewObjectUrl = "";
+let currentPanelAccess: PanelAccessEntry | null = null;
+let panelAllowlist: PanelAccessEntry[] = [];
 
 const panelButtons = Array.from(document.querySelectorAll<HTMLElement>("[data-panel]"));
 const panels = Array.from(document.querySelectorAll<HTMLElement>(".content-panel"));
@@ -228,10 +235,19 @@ const clearMediaFormButton = mustButton("clearMediaForm");
 const logoutAdminButton = mustButton("logoutAdminButton");
 const goToNoticesButton = mustButton("goToNoticesButton");
 const goToMediaButton = mustButton("goToMediaButton");
+const ownerAccessNavButton = mustButton("ownerAccessNavButton");
+const ownerAccessForm = mustForm("ownerAccessForm");
+const ownerAccessItems = mustElement("ownerAccessItems");
+const ownerAccessId = mustInput("ownerAccessId");
+const ownerAccessEmail = mustInput("ownerAccessEmail");
+const ownerAccessRole = mustSelect("ownerAccessRole");
+const ownerAccessActive = mustInput("ownerAccessActive");
+const clearOwnerAccessFormButton = mustButton("clearOwnerAccessForm");
 
 const saveNoticeButton = queryButton(noticeForm, 'button[type="submit"]');
 const saveLinkButton = queryButton(linkForm, 'button[type="submit"]');
 const saveMediaButton = queryButton(mediaForm, 'button[type="submit"]');
+const saveOwnerAccessButton = queryButton(ownerAccessForm, 'button[type="submit"]');
 const connectSupabaseButton = queryButton(supabaseAuthForm, 'button[type="submit"]');
 const connectGitHubButton = queryButton(githubTokenForm, 'button[type="submit"]');
 
@@ -239,6 +255,7 @@ const publishLockedControls = [
   saveNoticeButton,
   saveLinkButton,
   saveMediaButton,
+  saveOwnerAccessButton,
   connectSupabaseButton,
   clearSupabaseSessionButton,
   connectGitHubButton,
@@ -354,26 +371,26 @@ function updateSyncIndicator(forcedState: SyncState = ""): void {
 
   const config = {
     synced: { text: "Publicado no site", className: "sync-indicator sync-indicator-success" },
-    local: { text: "Salvo só neste computador", className: "sync-indicator sync-indicator-warning" },
+    local: { text: "Salvo sÃ³ neste computador", className: "sync-indicator sync-indicator-warning" },
     pending: { text: "Pronto para publicar", className: "sync-indicator sync-indicator-warning" },
     publishing: { text: "Publicando no site...", className: "sync-indicator sync-indicator-info" },
-    offline: { text: "Site público indisponível", className: "sync-indicator sync-indicator-danger" }
+    offline: { text: "Site pÃºblico indisponÃ­vel", className: "sync-indicator sync-indicator-danger" }
   }[state] || { text: "Sincronizando", className: "sync-indicator sync-indicator-info" };
 
   adminSyncIndicator.textContent = config.text;
   adminSyncIndicator.className = config.className;
   adminSyncIndicator.title =
     state === "synced"
-      ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+      ? `ConteÃºdo jÃ¡ publicado no site. Ãšltima publicaÃ§Ã£o conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
       : state === "publishing"
-        ? "O painel está enviando as alterações para o repositório e atualizando o site."
+        ? "O painel estÃ¡ enviando as alteraÃ§Ãµes para o repositÃ³rio e atualizando o site."
         : state === "pending"
-          ? `Existe um rascunho diferente do site público. Última versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+          ? `Existe um rascunho diferente do site pÃºblico. Ãšltima versÃ£o publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
           : state === "local"
-            ? "Existe conteúdo salvo apenas neste computador."
+            ? "Existe conteÃºdo salvo apenas neste computador."
             : state === "offline"
-              ? "O painel não conseguiu consultar a versão publicada do site agora."
-              : "O painel está verificando o estado da publicação.";
+              ? "O painel nÃ£o conseguiu consultar a versÃ£o publicada do site agora."
+              : "O painel estÃ¡ verificando o estado da publicaÃ§Ã£o.";
 }
 
 /**
@@ -409,32 +426,32 @@ function setStatus(
  */
 function buildPublishErrorMessage(error: unknown): string {
   if (!error) {
-    return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador.";
+    return "NÃ£o foi possÃ­vel publicar agora. O conteÃºdo continua salvo sÃ³ neste computador.";
   }
 
   const publishError = error as { status?: number };
 
   if (publishError.status === 401 || publishError.status === 403) {
-    return "O GitHub recusou a publicação. Verifique se o token ainda é válido e se possui permissão Contents: write.";
+    return "O GitHub recusou a publicaÃ§Ã£o. Verifique se o token ainda Ã© vÃ¡lido e se possui permissÃ£o Contents: write.";
   }
 
   if (publishError.status === 404) {
-    return "O GitHub não encontrou o repositório ou o arquivo de conteúdo. Verifique o acesso da conta e do token.";
+    return "O GitHub nÃ£o encontrou o repositÃ³rio ou o arquivo de conteÃºdo. Verifique o acesso da conta e do token.";
   }
 
   if (publishError.status === 409) {
-    return "Outra alteração chegou antes desta publicação. O conteúdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
+    return "Outra alteraÃ§Ã£o chegou antes desta publicaÃ§Ã£o. O conteÃºdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
   }
 
   if (publishError.status === 422) {
-    return "O GitHub recusou esta publicação por validação ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
+    return "O GitHub recusou esta publicaÃ§Ã£o por validaÃ§Ã£o ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
   }
 
   if (publishError.status === 503) {
-    return "O GitHub ficou indisponível no momento da publicação. Tente novamente em instantes.";
+    return "O GitHub ficou indisponÃ­vel no momento da publicaÃ§Ã£o. Tente novamente em instantes.";
   }
 
-  return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique o token e as permissões de escrita no repositório.";
+  return "NÃ£o foi possÃ­vel publicar agora. O conteÃºdo continua salvo sÃ³ neste computador. Verifique o token e as permissÃµes de escrita no repositÃ³rio.";
 }
 
 /**
@@ -443,21 +460,21 @@ function buildPublishErrorMessage(error: unknown): string {
  */
 function buildLibraryRefreshErrorMessage(error: unknown): string {
   if (!error) {
-    return "Não foi possível atualizar a biblioteca de imagens agora.";
+    return "NÃ£o foi possÃ­vel atualizar a biblioteca de imagens agora.";
   }
 
   const repositoryError = error as { status?: number };
 
   if (repositoryError.status === 401 || repositoryError.status === 403) {
-    return "A biblioteca de imagens não pôde ser atualizada porque o GitHub recusou o token. Verifique se ele ainda é válido e se tem acesso ao repositório.";
+    return "A biblioteca de imagens nÃ£o pÃ´de ser atualizada porque o GitHub recusou o token. Verifique se ele ainda Ã© vÃ¡lido e se tem acesso ao repositÃ³rio.";
   }
 
   if (repositoryError.status === 404) {
-    return "A biblioteca de imagens não pôde ser atualizada porque a pasta de imagens ou o repositório não foi encontrado no GitHub.";
+    return "A biblioteca de imagens nÃ£o pÃ´de ser atualizada porque a pasta de imagens ou o repositÃ³rio nÃ£o foi encontrado no GitHub.";
   }
 
   if (repositoryError.status === 409 || repositoryError.status === 422) {
-    return "A biblioteca de imagens encontrou um conflito temporário ao consultar o GitHub. Tente novamente em alguns segundos.";
+    return "A biblioteca de imagens encontrou um conflito temporÃ¡rio ao consultar o GitHub. Tente novamente em alguns segundos.";
   }
 
   if (repositoryError.status === 429) {
@@ -465,10 +482,10 @@ function buildLibraryRefreshErrorMessage(error: unknown): string {
   }
 
   if (repositoryError.status === 503) {
-    return "O GitHub estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
+    return "O GitHub estava indisponÃ­vel no momento da atualizaÃ§Ã£o da biblioteca de imagens. Tente novamente em instantes.";
   }
 
-  return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão, o token e o acesso ao repositório.";
+  return "NÃ£o foi possÃ­vel atualizar a biblioteca de imagens agora. Verifique a conexÃ£o, o token e o acesso ao repositÃ³rio.";
 }
 
 function updateGitHubTokenStatus(): void {
@@ -480,8 +497,8 @@ function updateGitHubTokenStatus(): void {
   }
 
   githubTokenStatus.textContent = hasToken
-    ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
-    : "Nenhum token conectado. As alterações ficarão apenas neste navegador até você conectar o GitHub.";
+    ? "Token conectado. As alteraÃ§Ãµes serÃ£o enviadas ao GitHub automaticamente."
+    : "Nenhum token conectado. As alteraÃ§Ãµes ficarÃ£o apenas neste navegador atÃ© vocÃª conectar o GitHub.";
   githubTokenStatus.className = hasToken ? "text-sm text-green-700" : "text-sm text-yellow-700";
 
   if (clearGitHubTokenButton) {
@@ -503,20 +520,37 @@ function isSupabaseConnected(): boolean {
   return Boolean(getSupabaseAdminSession());
 }
 
+function isOwnerPanelUser(): boolean {
+  return currentPanelAccess?.role === "owner";
+}
+
+function updateOwnerAccessVisibility(): void {
+  const canManageAccess = isOwnerPanelUser();
+  ownerAccessNavButton.hidden = !canManageAccess;
+
+  if (!canManageAccess && document.querySelector<HTMLElement>("#ownerAccessPanel.active")) {
+    showPanel("dashboardPanel");
+  }
+}
+
 function updateSupabaseAuthStatus(): void {
   const configured = isSupabaseConfigured();
   const session = getSupabaseAdminSession();
 
   if (!configured) {
     supabaseAuthStatus.textContent =
-      "Supabase ainda não está habilitado neste projeto. O painel continuará usando apenas o fluxo legado.";
+      "Supabase ainda nÃ£o estÃ¡ habilitado neste projeto. O painel continuarÃ¡ usando apenas o fluxo legado.";
     supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
     clearSupabaseSessionButton.disabled = true;
     return;
   }
 
   if (session) {
-    supabaseAuthStatus.textContent = `Sessão do Supabase conectada como ${session.email}. Avisos e links rápidos já podem ser salvos no banco.`;
+    const scopeLabel = isOwnerPanelUser()
+      ? "Voc? tamb?m pode gerenciar os e-mails permitidos do painel."
+      : "Avisos e links r?pidos j? podem ser salvos no banco.";
+    supabaseAuthStatus.textContent =
+      `Sess?o do Supabase conectada como ${session.email}. ${scopeLabel}`;
     supabaseAuthStatus.className = "mt-4 text-sm text-green-700";
     supabaseEmailInput.value = session.email;
     supabasePasswordInput.value = "";
@@ -525,7 +559,7 @@ function updateSupabaseAuthStatus(): void {
   }
 
   supabaseAuthStatus.textContent =
-    "Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.";
+    "Supabase configurado, mas ainda sem uma sessÃ£o administrativa conectada neste painel.";
   supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
   clearSupabaseSessionButton.disabled = true;
 }
@@ -533,19 +567,23 @@ function updateSupabaseAuthStatus(): void {
 function buildSupabasePublishErrorMessage(error: unknown, sectionLabel: string): string {
   const message = error instanceof Error ? error.message : "";
 
+  if (message.includes("não está autorizado")) {
+    return "Este e-mail foi autenticado no Supabase, mas ainda não está liberado para usar o painel.";
+  }
+
   if (message.includes("Invalid login credentials")) {
-    return `Não foi possível autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
+    return `NÃ£o foi possÃ­vel autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
   }
 
   if (message.includes("JWT") || message.includes("refresh")) {
-    return `A sessão do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
+    return `A sessÃ£o do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
   }
 
   if (message.includes("new row violates row-level security") || message.includes("permission denied")) {
-    return `O Supabase recusou a gravação de ${sectionLabel}. Verifique se as políticas de escrita para usuários autenticados já foram aplicadas.`;
+    return `O Supabase recusou a gravaÃ§Ã£o de ${sectionLabel}. Verifique se as polÃ­ticas de escrita para usuÃ¡rios autenticados jÃ¡ foram aplicadas.`;
   }
 
-  return `Não foi possível salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
+  return `NÃ£o foi possÃ­vel salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
 }
 
 /**
@@ -568,14 +606,18 @@ function setPublishingState(nextState: boolean): void {
  * @returns {void}
  */
 function showPanel(panelId: string): void {
+  const safePanelId = panelId === "ownerAccessPanel" && !isOwnerPanelUser()
+    ? "dashboardPanel"
+    : panelId;
+
   panels.forEach((panel) => {
-    const isActive = panel.id === panelId;
+    const isActive = panel.id === safePanelId;
     panel.classList.toggle("active", isActive);
     panel.hidden = !isActive;
   });
 
   panelButtons.forEach((button) => {
-    const isActive = button.dataset.panel === panelId;
+    const isActive = button.dataset.panel === safePanelId;
     button.classList.toggle("active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
   });
@@ -675,10 +717,10 @@ function setMediaPreview(src = "", label = "", alt = ""): void {
   }
 
   mediaPreviewImage.src = src;
-  mediaPreviewImage.alt = alt || label || "Pré-visualização da imagem";
+  mediaPreviewImage.alt = alt || label || "PrÃ©-visualizaÃ§Ã£o da imagem";
   mediaPreviewImage.hidden = false;
   mediaPreviewEmpty.hidden = true;
-  mediaPreviewLabel.textContent = label || "Imagem pronta para publicação.";
+  mediaPreviewLabel.textContent = label || "Imagem pronta para publicaÃ§Ã£o.";
 }
 
 /**
@@ -719,7 +761,7 @@ function renderImageLibrary(): void {
   }
 
   if (!imageLibraryEntries.length) {
-    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Conecte o GitHub para carregar o repositório ou envie a primeira imagem.</div>';
+    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponÃ­vel ainda. Conecte o GitHub para carregar o repositÃ³rio ou envie a primeira imagem.</div>';
     return;
   }
 
@@ -736,7 +778,7 @@ function renderImageLibrary(): void {
             <p class="image-library-name">${escapeHtml(item.name)}</p>
             <p class="image-library-path">${escapeHtml(item.path)}</p>
             <div class="image-library-actions">
-              <span class="image-library-badge">${isInGallery ? "Na galeria" : "Disponível"}</span>
+              <span class="image-library-badge">${isInGallery ? "Na galeria" : "DisponÃ­vel"}</span>
               <button type="button" class="btn-secondary text-xs px-3 py-1.5" data-use-library-image="${escapeHtml(item.path)}">Usar</button>
             </div>
           </div>
@@ -791,7 +833,7 @@ async function refreshImageLibrary(
     mergeImageLibraryEntries(repositoryEntries);
     renderImageLibrary();
     if (!silent && token) {
-      setStatus("Biblioteca de imagens atualizada a partir do repositório.", "success");
+      setStatus("Biblioteca de imagens atualizada a partir do repositÃ³rio.", "success");
     }
   } catch (error) {
     console.error(error);
@@ -811,7 +853,7 @@ async function publishStateToGitHub(reason: string): Promise<void> {
   const token = getGitHubPublishToken();
   if (!token) {
     setStatus(
-      "Alteração salva só neste computador. Conecte o GitHub para enviar isso ao site público.",
+      "AlteraÃ§Ã£o salva sÃ³ neste computador. Conecte o GitHub para enviar isso ao site pÃºblico.",
       "warning",
       "local"
     );
@@ -822,13 +864,13 @@ async function publishStateToGitHub(reason: string): Promise<void> {
     .catch(() => null)
     .then(async () => {
       setPublishingState(true);
-      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info", "publishing");
+      setStatus("Publicando alteraÃ§Ãµes no GitHub. O deploy do Pages serÃ¡ disparado em seguida.", "info", "publishing");
 
       try {
         await publishSiteContentToGitHub(adminState, token, reason);
         publishedSnapshot = cloneContent(adminState);
         setStatus(
-          "Alterações publicadas com sucesso. O site público pode levar alguns segundos para mostrar a nova versão.",
+          "AlteraÃ§Ãµes publicadas com sucesso. O site pÃºblico pode levar alguns segundos para mostrar a nova versÃ£o.",
           "success",
           "synced"
         );
@@ -854,11 +896,11 @@ function saveState(localMessage: string, publishMessage: string): void {
   renderAll();
 
   if (!getGitHubPublishToken()) {
-    setStatus(`${localMessage} O conteúdo segue salvo localmente neste navegador.`, "warning", "local");
+    setStatus(`${localMessage} O conteÃºdo segue salvo localmente neste navegador.`, "warning", "local");
     return;
   }
 
-  setStatus(`${localMessage} Enviando atualização para o GitHub...`, "info", "publishing");
+  setStatus(`${localMessage} Enviando atualizaÃ§Ã£o para o GitHub...`, "info", "publishing");
   publishStateToGitHub(publishMessage);
 }
 
@@ -868,7 +910,7 @@ async function saveNoticesToPrimaryStore(localMessage: string): Promise<void> {
   renderAll();
 
   if (!isSupabaseConfigured()) {
-    setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+    setStatus(`${localMessage} O Supabase ainda nÃ£o estÃ¡ habilitado neste projeto.`, "warning", "local");
     return;
   }
 
@@ -905,18 +947,18 @@ async function saveQuickLinksToPrimaryStore(localMessage: string): Promise<void>
   renderAll();
 
   if (!isSupabaseConfigured()) {
-    setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+    setStatus(`${localMessage} O Supabase ainda nÃ£o estÃ¡ habilitado neste projeto.`, "warning", "local");
     return;
   }
 
   if (!isSupabaseConnected()) {
-    setStatus(`${localMessage} Conecte o Supabase para publicar os links rápidos no portal.`, "warning", "local");
+    setStatus(`${localMessage} Conecte o Supabase para publicar os links rÃ¡pidos no portal.`, "warning", "local");
     return;
   }
 
   try {
     setPublishingState(true);
-    setStatus("Salvando links rápidos no Supabase...", "info", "publishing");
+    setStatus("Salvando links rÃ¡pidos no Supabase...", "info", "publishing");
     const persistedLinks = await syncSupabaseQuickLinks(adminState.quickLinks);
     adminState.quickLinks = persistedLinks;
     adminState.updatedAt = new Date().toISOString();
@@ -927,10 +969,10 @@ async function saveQuickLinksToPrimaryStore(localMessage: string): Promise<void>
     });
     saveDraftSiteContent(adminState);
     renderAll();
-    setStatus("Links rápidos salvos no Supabase com sucesso.", "success", "synced");
+    setStatus("Links rÃ¡pidos salvos no Supabase com sucesso.", "success", "synced");
   } catch (error) {
     console.error(error);
-    setStatus(buildSupabasePublishErrorMessage(error, "os links rápidos"), "danger", "local");
+    setStatus(buildSupabasePublishErrorMessage(error, "os links rÃ¡pidos"), "danger", "local");
   } finally {
     setPublishingState(false);
   }
@@ -948,7 +990,7 @@ async function saveMediaWithUpload(): Promise<void> {
 
   if (selectedFile) {
     if (!isAllowedPortalImageFileName(selectedFile.name)) {
-      setStatus("Formato de imagem não suportado. Use JPG, JPEG, PNG ou WEBP.", "warning");
+      setStatus("Formato de imagem nÃ£o suportado. Use JPG, JPEG, PNG ou WEBP.", "warning");
       return;
     }
 
@@ -969,7 +1011,7 @@ async function saveMediaWithUpload(): Promise<void> {
   try {
     if (selectedFile) {
       setPublishingState(true);
-      setStatus("Enviando imagem para o repositório do GitHub...", "info", "publishing");
+      setStatus("Enviando imagem para o repositÃ³rio do GitHub...", "info", "publishing");
       const generatedPath = createPortalImagePath(mediaTitle.value.trim(), selectedFile.name);
       const uploadResult = await uploadPortalImageToGitHub(
         selectedFile,
@@ -1015,14 +1057,14 @@ async function saveMediaWithUpload(): Promise<void> {
     renderAll();
 
     if (!token) {
-      setStatus("Imagem salva só neste computador. Conecte o GitHub para publicá-la no portal.", "warning", "local");
+      setStatus("Imagem salva sÃ³ neste computador. Conecte o GitHub para publicÃ¡-la no portal.", "warning", "local");
       fillMediaForm();
       return;
     }
 
     if (!isPublishing) {
       setPublishingState(true);
-      setStatus("Publicando atualização da galeria no GitHub...", "info", "publishing");
+      setStatus("Publicando atualizaÃ§Ã£o da galeria no GitHub...", "info", "publishing");
     }
 
     await publishSiteContentToGitHub(adminState, token, "Update gallery in site content");
@@ -1040,7 +1082,7 @@ async function saveMediaWithUpload(): Promise<void> {
     console.error(error);
     if (uploadSucceeded) {
       setStatus(
-        "A imagem foi enviada ao repositório, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.",
+        "A imagem foi enviada ao repositÃ³rio, mas a galeria ainda nÃ£o foi publicada no site. Salve novamente para concluir.",
         "danger",
         "pending"
       );
@@ -1149,7 +1191,7 @@ function renderNotices(): void {
 
   Array.from(noticeItems.querySelectorAll<HTMLButtonElement>("[data-delete-notice]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", async () => {
+      openConfirmModal("Esse aviso serÃ¡ removido do painel e do portal dos alunos.", async () => {
         adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
         await saveNoticesToPrimaryStore("Aviso removido do painel.");
       });
@@ -1160,7 +1202,7 @@ function renderNotices(): void {
 function renderLinks(): void {
   const links = [...adminState.quickLinks];
   if (!links.length) {
-    linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
+    linkItems.innerHTML = '<div class="empty-state">Nenhum link rÃ¡pido cadastrado.</div>';
     return;
   }
 
@@ -1194,7 +1236,7 @@ function renderLinks(): void {
 
   Array.from(linkItems.querySelectorAll<HTMLButtonElement>("[data-delete-link]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse link deixará de aparecer para os alunos.", async () => {
+      openConfirmModal("Esse link deixarÃ¡ de aparecer para os alunos.", async () => {
         adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
         await saveQuickLinksToPrimaryStore("Link removido do painel.");
       });
@@ -1216,7 +1258,7 @@ function renderGallery(): void {
           <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" class="media-thumb w-24 h-16 object-cover rounded shadow-sm border border-gray-200" loading="lazy" />
           <div class="list-card-horizontal-content">
             <div class="flex items-center gap-2 mb-1">
-              <span class="chip text-xs">Posição ${escapeHtml(String(item.order || "-"))}</span>
+              <span class="chip text-xs">PosiÃ§Ã£o ${escapeHtml(String(item.order || "-"))}</span>
               <span class="status-badge ${item.published ? "status-live" : "status-draft"} text-xs">${item.published ? "Ativa" : "Oculta"}</span>
             </div>
             <h4 class="text-base font-bold text-[var(--brand-primary)] leading-tight mt-1">${escapeHtml(item.title || "")}</h4>
@@ -1241,12 +1283,81 @@ function renderGallery(): void {
 
   Array.from(mediaItems.querySelectorAll<HTMLButtonElement>("[data-delete-media]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem será retirada da galeria pública do portal.", () => {
+      openConfirmModal("Essa imagem serÃ¡ retirada da galeria pÃºblica do portal.", () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
         saveState(
           "Imagem removida da galeria local.",
           `Remove gallery item ${button.dataset.deleteMedia} from site content`
         );
+      });
+    });
+  });
+}
+
+function fillOwnerAccessForm(item: PanelAccessEntry | null = null): void {
+  ownerAccessId.value = item?.id || "";
+  ownerAccessEmail.value = item?.email || "";
+  ownerAccessRole.value = item?.role || "editor";
+  ownerAccessActive.checked = item?.active !== false;
+}
+
+function renderOwnerAccessList(): void {
+  if (!isOwnerPanelUser()) {
+    ownerAccessItems.innerHTML =
+      '<div class="empty-state">Somente o dono do painel pode visualizar esta Ã¡rea.</div>';
+    return;
+  }
+
+  if (!panelAllowlist.length) {
+    ownerAccessItems.innerHTML =
+      '<div class="empty-state">Nenhum e-mail autorizado foi cadastrado ainda.</div>';
+    return;
+  }
+
+  ownerAccessItems.innerHTML = panelAllowlist
+    .map((entry) => {
+      const isCurrentUser = entry.email === currentPanelAccess?.email;
+      return `
+        <article class="list-card-horizontal">
+          <div class="list-card-horizontal-content">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="chip">${escapeHtml(entry.role === "owner" ? "Dono" : "Secretaria")}</span>
+              <span class="status-badge ${entry.active ? "status-live" : "status-draft"}">${entry.active ? "Ativo" : "Bloqueado"}</span>
+              ${isCurrentUser ? '<span class="status-badge status-live">VocÃª</span>' : ""}
+            </div>
+            <h4 class="text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(entry.email)}</h4>
+            <p class="helper-text mt-1 text-sm">Atualizado em ${escapeHtml(formatDateTime(entry.updatedAt))}</p>
+          </div>
+          <div class="list-card-horizontal-actions flex-col sm:flex-row">
+            <button type="button" class="btn-secondary px-4 py-2 text-sm" data-edit-owner-access="${entry.id}">Editar</button>
+            <button type="button" class="btn-danger px-4 py-2 text-sm" data-delete-owner-access="${entry.id}" ${isCurrentUser ? "disabled" : ""}>Excluir</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  Array.from(ownerAccessItems.querySelectorAll<HTMLButtonElement>("[data-edit-owner-access]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = panelAllowlist.find((entry) => entry.id === button.dataset.editOwnerAccess);
+      fillOwnerAccessForm(item || null);
+      jumpToPanel("ownerAccessPanel");
+    });
+  });
+
+  Array.from(ownerAccessItems.querySelectorAll<HTMLButtonElement>("[data-delete-owner-access]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = panelAllowlist.find((entry) => entry.id === button.dataset.deleteOwnerAccess);
+      if (!item || item.email === currentPanelAccess?.email) {
+        return;
+      }
+
+      openConfirmModal(`O e-mail ${item.email} perderÃ¡ o acesso ao painel.`, async () => {
+        panelAllowlist = panelAllowlist.filter((entry) => entry.id !== item.id);
+        panelAllowlist = await syncPanelAllowlist(panelAllowlist);
+        renderOwnerAccessList();
+        fillOwnerAccessForm();
+        setStatus("Lista de e-mails permitidos atualizada com sucesso.", "success");
       });
     });
   });
@@ -1269,6 +1380,7 @@ function renderAll(): void {
   renderNotices();
   renderLinks();
   renderGallery();
+  renderOwnerAccessList();
   renderDashboard();
   renderImageLibrary();
   updateSyncIndicator();
@@ -1363,6 +1475,64 @@ mediaForm?.addEventListener("submit", async (event) => {
   await saveMediaWithUpload();
 });
 
+ownerAccessForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (isPublishing || !isOwnerPanelUser()) {
+    return;
+  }
+
+  const email = ownerAccessEmail.value.trim().toLowerCase();
+  if (!email) {
+    setStatus("Informe o e-mail que deve ser autorizado a entrar no painel.", "warning");
+    return;
+  }
+
+  const payload: PanelAccessEntry = {
+    id: ownerAccessId.value || crypto.randomUUID(),
+    email,
+    role: ownerAccessRole.value === "owner" ? "owner" : "editor",
+    active: ownerAccessActive.checked,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (
+    currentPanelAccess &&
+    payload.email === currentPanelAccess.email &&
+    (payload.role !== "owner" || !payload.active)
+  ) {
+    setStatus("O dono atual do painel não pode remover o próprio acesso por aqui.", "warning");
+    return;
+  }
+
+  const existingIndex = panelAllowlist.findIndex((item) => item.id === payload.id);
+  if (existingIndex >= 0) {
+    panelAllowlist[existingIndex] = {
+      ...panelAllowlist[existingIndex],
+      ...payload
+    };
+  } else {
+    panelAllowlist.unshift(payload);
+  }
+
+  try {
+    setPublishingState(true);
+    panelAllowlist = await syncPanelAllowlist(panelAllowlist);
+    currentPanelAccess =
+      panelAllowlist.find((entry) => entry.email === currentPanelAccess?.email) || currentPanelAccess;
+    updateOwnerAccessVisibility();
+    updateSupabaseAuthStatus();
+    renderOwnerAccessList();
+    fillOwnerAccessForm();
+    setStatus("Lista de e-mails permitidos atualizada com sucesso.", "success");
+  } catch (error) {
+    console.error(error);
+    setStatus("Não foi possível atualizar os e-mails permitidos do painel agora.", "danger");
+  } finally {
+    setPublishingState(false);
+  }
+});
+
 supabaseAuthForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (isPublishing) {
@@ -1381,6 +1551,9 @@ supabaseAuthForm?.addEventListener("submit", async (event) => {
     setPublishingState(true);
     setStatus("Conectando a conta administrativa ao Supabase...", "info");
     await signInSupabaseAdmin(email, password, supabaseRememberSession.checked);
+    currentPanelAccess = await ensureSupabasePanelAccess();
+    panelAllowlist = isOwnerPanelUser() ? await fetchPanelAllowlist() : [];
+    updateOwnerAccessVisibility();
     updateSupabaseAuthStatus();
 
     const localDraft = readDraftSiteContent();
@@ -1390,13 +1563,16 @@ supabaseAuthForm?.addEventListener("submit", async (event) => {
     }
 
     setStatus(
-      "Conta do Supabase conectada. A partir de agora, avisos e links rápidos podem ser publicados direto no banco.",
+      "Conta do Supabase conectada. A partir de agora, avisos e links rÃ¡pidos podem ser publicados direto no banco.",
       "success",
       isPublishedSnapshotInSync() ? "synced" : "local"
     );
   } catch (error) {
     console.error(error);
-    setStatus(buildSupabasePublishErrorMessage(error, "a conexão editorial"), "danger");
+    currentPanelAccess = null;
+    panelAllowlist = [];
+    updateOwnerAccessVisibility();
+    setStatus(buildSupabasePublishErrorMessage(error, "a conexÃ£o editorial"), "danger");
   } finally {
     setPublishingState(false);
   }
@@ -1404,6 +1580,9 @@ supabaseAuthForm?.addEventListener("submit", async (event) => {
 
 clearSupabaseSessionButton?.addEventListener("click", () => {
   clearSupabaseAdminSession();
+  currentPanelAccess = null;
+  panelAllowlist = [];
+  updateOwnerAccessVisibility();
   updateSupabaseAuthStatus();
   setStatus("Sessão administrativa do Supabase removida deste navegador.", "warning", "local");
 });
@@ -1416,7 +1595,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
 
   const token = githubTokenInput.value.trim();
   if (!token) {
-    setStatus("Informe um token do GitHub com permissão de escrita no repositório.", "warning");
+    setStatus("Informe um token do GitHub com permissÃ£o de escrita no repositÃ³rio.", "warning");
     return;
   }
 
@@ -1434,14 +1613,14 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     }
 
     setStatus(
-      "Conexão com o GitHub validada. As próximas alterações poderão ser enviadas direto para o site.",
+      "ConexÃ£o com o GitHub validada. As prÃ³ximas alteraÃ§Ãµes poderÃ£o ser enviadas direto para o site.",
       "success",
       "synced"
     );
   } catch (error) {
     console.error(error);
     setStatus(
-      "Não foi possível validar o token. Verifique se ele tem permissão de Contents: write neste repositório.",
+      "NÃ£o foi possÃ­vel validar o token. Verifique se ele tem permissÃ£o de Contents: write neste repositÃ³rio.",
       "danger"
     );
   }
@@ -1451,12 +1630,12 @@ clearGitHubTokenButton?.addEventListener("click", () => {
   clearGitHubPublishToken();
   updateGitHubTokenStatus();
   refreshImageLibrary({ silent: true });
-  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning", "local");
+  setStatus("Token removido da sessÃ£o atual. O painel voltou para modo local.", "warning", "local");
 });
 
 usePublishedContentButton?.addEventListener("click", async () => {
   openConfirmModal(
-    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteúdo publicado atualmente no GitHub.",
+    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteÃºdo publicado atualmente no GitHub.",
     async () => {
       try {
         clearDraftSiteContent();
@@ -1468,10 +1647,10 @@ usePublishedContentButton?.addEventListener("click", async () => {
         fillLinkForm();
         fillMediaForm();
         await refreshImageLibrary({ silent: true });
-        setStatus("Conteúdo publicado recarregado com sucesso.", "success", "synced");
+        setStatus("ConteÃºdo publicado recarregado com sucesso.", "success", "synced");
       } catch (error) {
         console.error(error);
-        setStatus("Não foi possível recarregar o conteúdo publicado agora.", "danger");
+        setStatus("NÃ£o foi possÃ­vel recarregar o conteÃºdo publicado agora.", "danger");
       }
     }
   );
@@ -1480,6 +1659,7 @@ usePublishedContentButton?.addEventListener("click", async () => {
 clearNoticeFormButton?.addEventListener("click", () => fillNoticeForm());
 clearLinkFormButton?.addEventListener("click", () => fillLinkForm());
 clearMediaFormButton?.addEventListener("click", () => fillMediaForm());
+clearOwnerAccessFormButton?.addEventListener("click", () => fillOwnerAccessForm());
 
 mediaFile?.addEventListener("change", () => {
   const selectedFile = mediaFile.files?.[0];
@@ -1498,23 +1678,34 @@ mediaFile?.addEventListener("change", () => {
 
 mediaTitle?.addEventListener("input", () => {
   if (!mediaPreviewImage?.hidden) {
-    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "PrÃ©-visualizaÃ§Ã£o da imagem";
   }
 });
 
 mediaAlt?.addEventListener("input", () => {
   if (!mediaPreviewImage?.hidden) {
-    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "PrÃ©-visualizaÃ§Ã£o da imagem";
   }
 });
 
 logoutAdminButton?.addEventListener("click", () => {
   clearSupabaseAdminSession();
-  clearAdminAuth();
   window.location.replace("index.html?home=1");
 });
 
 async function bootstrap() {
+  try {
+    currentPanelAccess = await ensureSupabasePanelAccess();
+    panelAllowlist = isOwnerPanelUser() ? await fetchPanelAllowlist() : [];
+  } catch (error) {
+    console.error(error);
+    clearSupabaseAdminSession();
+    window.location.replace("index.html?admin=1");
+    return;
+  }
+
+  updateOwnerAccessVisibility();
+
   let publishedContent = null;
   let draftOrPublishedContent = null;
   const localDraft = readDraftSiteContent();
@@ -1522,7 +1713,7 @@ async function bootstrap() {
   try {
     publishedContent = await fetchPublishedSiteContent();
   } catch (error) {
-    console.warn("Falha ao carregar conteúdo publicado.", error);
+    console.warn("Falha ao carregar conteÃºdo publicado.", error);
   }
 
   if (localDraft) {
@@ -1531,7 +1722,7 @@ async function bootstrap() {
     try {
       draftOrPublishedContent = await fetchSupabaseEditorSiteContent();
     } catch (error) {
-      console.warn("Falha ao carregar conteúdo editorial do Supabase.", error);
+      console.warn("Falha ao carregar conteÃºdo editorial do Supabase.", error);
     }
   }
 
@@ -1539,7 +1730,7 @@ async function bootstrap() {
     try {
       draftOrPublishedContent = await loadEditorSiteContent();
     } catch (error) {
-      console.warn("Falha ao carregar conteúdo base do editor.", error);
+      console.warn("Falha ao carregar conteÃºdo base do editor.", error);
     }
   }
 
@@ -1549,6 +1740,7 @@ async function bootstrap() {
   fillNoticeForm();
   fillLinkForm();
   fillMediaForm();
+  fillOwnerAccessForm();
   renderAll();
   showPanel("dashboardPanel");
   updateSupabaseAuthStatus();
@@ -1557,7 +1749,7 @@ async function bootstrap() {
 
   if (!publishedContent) {
     setStatus(
-      "Painel carregado com conteúdo salvo neste computador, mas a versão publicada do site não pôde ser consultada agora.",
+      "Painel carregado com conteÃºdo salvo neste computador, mas a versÃ£o publicada do site nÃ£o pÃ´de ser consultada agora.",
       "warning",
       "offline"
     );
@@ -1566,7 +1758,7 @@ async function bootstrap() {
 
   if (isPublishedSnapshotInSync()) {
     setStatus(
-      `Painel carregado. O conteúdo abaixo já está igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
+      `Painel carregado. O conteÃºdo abaixo jÃ¡ estÃ¡ igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
       getGitHubPublishToken() ? "success" : "info",
       "synced"
     );
@@ -1575,11 +1767,12 @@ async function bootstrap() {
 
   setStatus(
     getGitHubPublishToken()
-      ? `Existe um rascunho salvo neste computador diferente do site publicado. Última versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
-      : "Existe um rascunho salvo só neste computador. Conecte o GitHub para publicar essa versão no site.",
+      ? `Existe um rascunho salvo neste computador diferente do site publicado. Ãšltima versÃ£o pÃºblica conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
+      : "Existe um rascunho salvo sÃ³ neste computador. Conecte o GitHub para publicar essa versÃ£o no site.",
     "warning",
     getGitHubPublishToken() ? "pending" : "local"
   );
 }
 
 bootstrap();
+
