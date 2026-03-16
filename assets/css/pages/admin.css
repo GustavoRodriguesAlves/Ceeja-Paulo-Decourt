@@ -583,6 +583,11 @@ textarea.field {
   transform: translateY(-1px);
 }
 
+.image-library-card button,
+.quick-action-card {
+  font-family: inherit;
+}
+
 .image-library-thumb {
   width: 100%;
   aspect-ratio: 16 / 10;

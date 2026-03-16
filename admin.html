@@ -252,39 +252,55 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-purple-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados da imagem</h3>
-                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já salvo na biblioteca.</p>
+                <div class="editor-panel-header">
+                  <div>
+                    <p class="section-kicker">Galeria visual</p>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados da imagem</h3>
+                  </div>
+                  <span class="chip">Imagem</span>
+                </div>
+                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já salvo na biblioteca. Mantenha títulos curtos e descrições claras.</p>
                 <form id="mediaForm" class="space-y-4">
                   <input id="mediaId" type="hidden" />
-                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
-                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">Descrição da imagem</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">Ordem no portal</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
-                  </div>
-                  <div>
-                    <label for="mediaFile" class="mb-1 block text-sm font-semibold">Nova imagem</label>
-                    <input id="mediaFile" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="field media-file-input" />
-                    <p class="helper-text mt-2">Formatos aceitos: JPG, JPEG, PNG e WEBP. Tamanho recomendado de até 5 MB.</p>
-                  </div>
-                  <div>
-                    <label for="mediaPath" class="mb-1 block text-sm font-semibold">Arquivo selecionado</label>
-                    <input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="Selecione uma imagem abaixo ou envie uma nova" readonly />
-                  </div>
-
-                  <div class="media-preview-panel">
-                    <p class="text-sm font-semibold text-[var(--brand-primary)]">Pré-visualização</p>
-                    <div class="media-preview-frame">
-                      <img id="mediaPreviewImage" alt="" hidden />
-                      <p id="mediaPreviewEmpty" class="media-preview-empty">Nenhuma imagem selecionada.</p>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Informações da imagem</p>
+                    <div class="space-y-4">
+                      <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
+                      <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">Descrição da imagem</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
+                      <div class="grid grid-cols-2 gap-4">
+                        <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">Ordem no portal</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
+                      </div>
                     </div>
-                    <p id="mediaPreviewLabel" class="helper-text mt-2">Selecione uma imagem da biblioteca ou envie um arquivo do computador.</p>
+                  </div>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Arquivo</p>
+                    <div>
+                      <label for="mediaFile" class="mb-1 block text-sm font-semibold">Nova imagem</label>
+                      <input id="mediaFile" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="field media-file-input" />
+                      <p class="helper-text mt-2">Formatos aceitos: JPG, JPEG, PNG e WEBP. Tamanho recomendado de até 5 MB.</p>
+                    </div>
+                    <div class="mt-4">
+                      <label for="mediaPath" class="mb-1 block text-sm font-semibold">Imagem escolhida</label>
+                      <input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="Selecione uma imagem abaixo ou envie uma nova" readonly />
+                    </div>
                   </div>
 
-                  <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="mediaPublished" type="checkbox" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" checked />Exibir no site</label>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Pré-visualização e publicação</p>
+                    <div class="media-preview-panel">
+                      <p class="text-sm font-semibold text-[var(--brand-primary)]">Pré-visualização</p>
+                      <div class="media-preview-frame">
+                        <img id="mediaPreviewImage" alt="" hidden />
+                        <p id="mediaPreviewEmpty" class="media-preview-empty">Nenhuma imagem selecionada.</p>
+                      </div>
+                      <p id="mediaPreviewLabel" class="helper-text mt-2">Selecione uma imagem da biblioteca ou envie um arquivo do computador.</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-4">
+                      <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="mediaPublished" type="checkbox" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" checked />Exibir no site</label>
+                    </div>
                   </div>
-                  <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
+                  <div class="form-actions-row">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar imagem</button>
                     <button id="clearMediaForm" type="button" class="btn-secondary px-3" title="Nova imagem">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
@@ -295,18 +311,25 @@
 
             <div class="space-y-6">
               <div>
-                <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="section-heading mb-3">
                   <div>
+                    <p class="section-kicker">Arquivos</p>
                     <h3 class="text-xl font-bold text-[var(--brand-primary)]">Biblioteca</h3>
-                    <p class="helper-text mt-1">Escolha uma imagem já enviada para a biblioteca ou aproveite as que já estão na galeria.</p>
                   </div>
+                  <p class="helper-text">Escolha uma imagem já enviada para a biblioteca ou aproveite as que já estão na galeria.</p>
                   <button id="refreshImageLibraryButton" type="button" class="btn-secondary text-sm">Atualizar</button>
                 </div>
                 <div id="imageLibrary" class="image-library-grid"></div>
               </div>
 
               <div>
-                <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Imagens publicadas</h3>
+                <div class="section-heading mb-5">
+                  <div>
+                    <p class="section-kicker">Publicação</p>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Imagens publicadas</h3>
+                  </div>
+                  <p class="helper-text">Revise a ordem e retire da galeria o que não deve mais aparecer para os alunos.</p>
+                </div>
                 <div id="mediaItems" class="space-y-3"></div>
               </div>
             </div>

@@ -995,7 +995,7 @@ function renderLinks() {
 function renderGallery() {
     const gallery = [...adminState.gallery].sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
     if (!gallery.length) {
-        mediaItems.innerHTML = '<div class="empty-state">Nenhuma imagem cadastrada para o portal.</div>';
+        mediaItems.innerHTML = '<div class="empty-state">Nenhuma imagem publicada ainda.</div>';
         return;
     }
     mediaItems.innerHTML = gallery
