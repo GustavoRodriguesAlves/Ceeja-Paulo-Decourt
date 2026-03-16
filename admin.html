@@ -147,23 +147,37 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-[var(--brand-secondary)]">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do aviso</h3>
-                <p class="helper-text mt-2 mb-5">Cadastre ou edite comunicados exibidos no Portal do Aluno.</p>
+                <div class="editor-panel-header">
+                  <div>
+                    <p class="section-kicker">Mural do portal</p>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do aviso</h3>
+                  </div>
+                  <span class="chip">Aviso</span>
+                </div>
+                <p class="helper-text mt-2 mb-5">Cadastre ou edite comunicados exibidos no Portal do Aluno. Use frases objetivas, com data e orientação clara.</p>
                 <form id="noticeForm" class="space-y-4">
                   <input id="noticeId" type="hidden" />
-                  <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">Título principal</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
-                  <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">Mensagem curta</label><textarea id="noticeSummary" class="field min-h-[100px]" placeholder="Informação rápida e direta" required></textarea></div>
-                  <div class="grid grid-cols-2 gap-4">
-                  <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">Categoria</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
-                    <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">Data visível</label><input id="noticeDate" type="date" class="field" required /></div>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Conteúdo principal</p>
+                    <div class="space-y-4">
+                      <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">Título principal</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
+                      <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">Mensagem curta</label><textarea id="noticeSummary" class="field min-h-[110px]" placeholder="Informe o que mudou, quem precisa agir e até quando." required></textarea></div>
+                    </div>
                   </div>
-                  <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded border border-gray-100 mt-2">
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticeFeatured" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />Destacar aviso no topo da lista</label>
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticePublished" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />Exibir aviso aos alunos</label>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Classificação e exibição</p>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">Categoria</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
+                      <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">Data visível</label><input id="noticeDate" type="date" class="field" required /></div>
+                    </div>
+                    <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded border border-gray-100 mt-4">
+                      <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticeFeatured" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />Destacar aviso no topo da lista</label>
+                      <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="noticePublished" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />Exibir aviso aos alunos</label>
+                    </div>
                   </div>
-                  <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
-                    <button id="clearNoticeForm" type="button" class="btn-secondary px-3" title="Limpar formulário">
+                  <div class="form-actions-row">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar aviso</button>
+                    <button id="clearNoticeForm" type="button" class="btn-secondary px-3" title="Novo aviso">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
                   </div>
@@ -172,7 +186,13 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Avisos publicados</h3>
+              <div class="section-heading mb-5">
+                <div>
+                  <p class="section-kicker">Publicação</p>
+                  <h3 class="text-xl font-bold text-[var(--brand-primary)]">Avisos publicados</h3>
+                </div>
+                <p class="helper-text">Revise os comunicados já ativos e edite rapidamente quando necessário.</p>
+              </div>
               <div id="noticeItems" class="space-y-3"></div>
             </div>
           </div>

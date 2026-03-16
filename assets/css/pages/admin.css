@@ -305,6 +305,35 @@ textarea.field {
   line-height: 1.5;
 }
 
+.editor-panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.form-section-card {
+  border: 1px solid #e5edf6;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  padding: 1rem;
+}
+
+.form-section-title {
+  margin: 0 0 0.9rem;
+  color: var(--brand-primary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.form-actions-row {
+  display: flex;
+  gap: 0.6rem;
+  padding-top: 0.2rem;
+}
+
 .section-heading {
   display: flex;
   flex-wrap: wrap;
@@ -725,6 +754,11 @@ textarea.field {
   .status-banner {
     top: 0.75rem;
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .editor-panel-header,
+  .form-actions-row {
     flex-direction: column;
   }
 }
