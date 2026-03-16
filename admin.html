@@ -340,34 +340,48 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-amber-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Acessos do painel</h3>
-                <p class="helper-text mt-2 mb-5">Somente o dono do painel pode cadastrar, editar ou remover acessos desta área.</p>
+                <div class="editor-panel-header">
+                  <div>
+                    <p class="section-kicker">Controle de acesso</p>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Acessos do painel</h3>
+                  </div>
+                  <span class="chip">Permissões</span>
+                </div>
+                <p class="helper-text mt-2 mb-5">Somente o dono do painel pode cadastrar, editar ou remover acessos desta área. Defina quem pode entrar e qual perfil cada pessoa terá.</p>
                 <form id="ownerAccessForm" class="space-y-4">
                   <input id="ownerAccessId" type="hidden" />
-                  <div>
-                    <label for="ownerAccessEmail" class="mb-1 block text-sm font-semibold">E-mail autorizado</label>
-                    <input id="ownerAccessEmail" type="email" class="field" placeholder="exemplo@dominio.com" required />
+                  <div class="form-section-card">
+                    <p class="form-section-title">Conta</p>
+                    <div class="space-y-4">
+                      <div>
+                        <label for="ownerAccessEmail" class="mb-1 block text-sm font-semibold">E-mail autorizado</label>
+                        <input id="ownerAccessEmail" type="email" class="field" placeholder="exemplo@dominio.com" required />
+                      </div>
+                      <div>
+                        <label for="ownerAccessPassword" class="mb-1 block text-sm font-semibold">Senha de acesso</label>
+                        <input id="ownerAccessPassword" type="password" class="field" placeholder="Defina a senha de quem vai entrar" autocomplete="new-password" />
+                        <p class="helper-text mt-2">No cadastro novo, a senha é obrigatória. Ao editar um acesso existente, deixe em branco para manter a senha atual.</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label for="ownerAccessPassword" class="mb-1 block text-sm font-semibold">Senha de acesso</label>
-                    <input id="ownerAccessPassword" type="password" class="field" placeholder="Defina a senha de quem vai entrar" autocomplete="new-password" />
-                    <p class="helper-text mt-2">No cadastro novo, a senha é obrigatória. Ao editar um acesso existente, deixe em branco para manter a senha atual.</p>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Perfil e situação</p>
+                    <div>
+                      <label for="ownerAccessRole" class="mb-1 block text-sm font-semibold">Perfil</label>
+                      <select id="ownerAccessRole" class="field" required>
+                        <option value="editor">Secretaria</option>
+                        <option value="owner">Dono do painel</option>
+                      </select>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-4">
+                      <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                        <input id="ownerAccessActive" type="checkbox" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500" checked />
+                        Permitir acesso a este e-mail
+                      </label>
+                    </div>
                   </div>
-                  <div>
-                    <label for="ownerAccessRole" class="mb-1 block text-sm font-semibold">Perfil</label>
-                    <select id="ownerAccessRole" class="field" required>
-                      <option value="editor">Secretaria</option>
-                      <option value="owner">Dono do painel</option>
-                    </select>
-                  </div>
-                  <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
-                      <input id="ownerAccessActive" type="checkbox" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500" checked />
-                      Permitir acesso a este e-mail
-                    </label>
-                  </div>
-                  <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
+                  <div class="form-actions-row">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar acesso</button>
                     <button id="clearOwnerAccessForm" type="button" class="btn-secondary px-3" title="Novo acesso">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
@@ -377,7 +391,13 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Acessos ativos</h3>
+              <div class="section-heading mb-5">
+                <div>
+                  <p class="section-kicker">Permissões</p>
+                  <h3 class="text-xl font-bold text-[var(--brand-primary)]">Acessos ativos</h3>
+                </div>
+                <p class="helper-text">Revise quem pode entrar no painel e ajuste o perfil de cada conta quando necessário.</p>
+              </div>
               <div id="ownerAccessItems" class="space-y-3"></div>
             </div>
           </div>

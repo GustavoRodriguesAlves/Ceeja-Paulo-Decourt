@@ -1263,13 +1263,13 @@ function renderOwnerAccessList(): void {
 
   if (!isOwnerPanelUser()) {
     ownerAccessItems.innerHTML =
-      '<div class="empty-state">Somente o dono do painel pode visualizar esta área.</div>';
+      '<div class="empty-state">Esta área fica disponível apenas para o dono do painel.</div>';
     return;
   }
 
   if (!panelAllowlist.length) {
     ownerAccessItems.innerHTML =
-      '<div class="empty-state">Nenhum e-mail autorizado foi cadastrado ainda.</div>';
+      '<div class="empty-state">Nenhum acesso foi cadastrado ainda.</div>';
     return;
   }
 
@@ -1316,7 +1316,7 @@ function renderOwnerAccessList(): void {
         panelAllowlist = dedupePanelAllowlist(await syncPanelAllowlist(panelAllowlist));
         renderOwnerAccessList();
         fillOwnerAccessForm();
-        setStatus("Lista de e-mails permitidos atualizada com sucesso.", "success");
+        setStatus("Lista de acessos atualizada com sucesso.", "success");
       });
     });
   });
