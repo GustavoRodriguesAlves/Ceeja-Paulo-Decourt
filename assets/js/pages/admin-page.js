@@ -956,7 +956,7 @@ function renderNotices() {
 function renderLinks() {
     const links = [...adminState.quickLinks];
     if (!links.length) {
-        linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
+        linkItems.innerHTML = '<div class="empty-state">Nenhum link publicado ainda.</div>';
         return;
     }
     linkItems.innerHTML = links

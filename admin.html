@@ -202,18 +202,32 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-green-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do link</h3>
-                <p class="helper-text mt-2 mb-5">Cadastre acessos rápidos que ficarão visíveis no portal dos alunos.</p>
+                <div class="editor-panel-header">
+                  <div>
+                    <p class="section-kicker">Acesso rápido</p>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do link</h3>
+                  </div>
+                  <span class="chip">Link</span>
+                </div>
+                <p class="helper-text mt-2 mb-5">Cadastre acessos rápidos que ficarão visíveis no portal dos alunos. Use nomes curtos para facilitar a leitura.</p>
                 <form id="linkForm" class="space-y-4">
                   <input id="linkId" type="hidden" />
-                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Texto do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
-                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">Link de destino</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
-                  <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Ativo para uso dos alunos</label>
+                  <div class="form-section-card">
+                    <p class="form-section-title">Informações do botão</p>
+                    <div class="space-y-4">
+                      <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Texto do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
+                      <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">Link de destino</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
+                    </div>
                   </div>
-                  <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
-                    <button id="clearLinkForm" type="button" class="btn-secondary px-3" title="Novo">
+                  <div class="form-section-card">
+                    <p class="form-section-title">Publicação</p>
+                    <div class="bg-gray-50 p-3 rounded border border-gray-100">
+                      <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Exibir link para os alunos</label>
+                    </div>
+                  </div>
+                  <div class="form-actions-row">
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar link</button>
+                    <button id="clearLinkForm" type="button" class="btn-secondary px-3" title="Novo link">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
                   </div>
@@ -222,7 +236,13 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links publicados</h3>
+              <div class="section-heading mb-5">
+                <div>
+                  <p class="section-kicker">Publicação</p>
+                  <h3 class="text-xl font-bold text-[var(--brand-primary)]">Links publicados</h3>
+                </div>
+                <p class="helper-text">Revise os atalhos ativos e ajuste rapidamente quando algum endereço mudar.</p>
+              </div>
               <div id="linkItems" class="space-y-3"></div>
             </div>
           </div>
