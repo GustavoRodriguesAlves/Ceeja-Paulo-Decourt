@@ -55,7 +55,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 function mustElement(id: string): HTMLElement {
   const element = document.getElementById(id);
   if (!(element instanceof HTMLElement)) {
-    throw new Error(`Elemento obrigatÃ³rio nÃ£o encontrado: #${id}`);
+    throw new Error(`Elemento obrigatório não encontrado: #${id}`);
   }
 
   return element;
@@ -68,7 +68,7 @@ function mustElement(id: string): HTMLElement {
 function mustForm(id: string): HTMLFormElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLFormElement)) {
-    throw new Error(`FormulÃ¡rio obrigatÃ³rio invÃ¡lido: #${id}`);
+    throw new Error(`Formulário obrigatório inválido: #${id}`);
   }
 
   return element;
@@ -81,7 +81,7 @@ function mustForm(id: string): HTMLFormElement {
 function mustInput(id: string): HTMLInputElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLInputElement)) {
-    throw new Error(`Campo obrigatÃ³rio invÃ¡lido: #${id}`);
+    throw new Error(`Campo obrigatório inválido: #${id}`);
   }
 
   return element;
@@ -103,7 +103,7 @@ function mustSelect(id: string): HTMLSelectElement {
 function mustTextArea(id: string): HTMLTextAreaElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLTextAreaElement)) {
-    throw new Error(`Ãrea de texto obrigatÃ³ria invÃ¡lida: #${id}`);
+    throw new Error(`Área de texto obrigatória inválida: #${id}`);
   }
 
   return element;
@@ -116,7 +116,7 @@ function mustTextArea(id: string): HTMLTextAreaElement {
 function mustButton(id: string): HTMLButtonElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLButtonElement)) {
-    throw new Error(`BotÃ£o obrigatÃ³rio invÃ¡lido: #${id}`);
+    throw new Error(`Botão obrigatório inválido: #${id}`);
   }
 
   return element;
@@ -129,7 +129,7 @@ function mustButton(id: string): HTMLButtonElement {
 function mustImage(id: string): HTMLImageElement {
   const element = mustElement(id);
   if (!(element instanceof HTMLImageElement)) {
-    throw new Error(`Imagem obrigatÃ³ria invÃ¡lida: #${id}`);
+    throw new Error(`Imagem obrigatória inválida: #${id}`);
   }
 
   return element;
@@ -374,26 +374,26 @@ function updateSyncIndicator(forcedState: SyncState = ""): void {
 
   const config = {
     synced: { text: "Publicado no site", className: "sync-indicator sync-indicator-success" },
-    local: { text: "Salvo sÃ³ neste computador", className: "sync-indicator sync-indicator-warning" },
+    local: { text: "Salvo só neste computador", className: "sync-indicator sync-indicator-warning" },
     pending: { text: "Pronto para publicar", className: "sync-indicator sync-indicator-warning" },
     publishing: { text: "Publicando no site...", className: "sync-indicator sync-indicator-info" },
-    offline: { text: "Site pÃºblico indisponÃ­vel", className: "sync-indicator sync-indicator-danger" }
+    offline: { text: "Site público indisponível", className: "sync-indicator sync-indicator-danger" }
   }[state] || { text: "Sincronizando", className: "sync-indicator sync-indicator-info" };
 
   adminSyncIndicator.textContent = config.text;
   adminSyncIndicator.className = config.className;
   adminSyncIndicator.title =
     state === "synced"
-      ? `Conteúdo já publicado no site. �altima publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+      ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
       : state === "publishing"
         ? "O painel está enviando as alterações para o repositório e atualizando o site."
         : state === "pending"
-          ? `Existe um rascunho diferente do site público. �altima versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+          ? `Existe um rascunho diferente do site público. Última versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
           : state === "local"
             ? "Existe conteúdo salvo apenas neste computador."
             : state === "offline"
               ? "O painel não conseguiu consultar a versão publicada do site agora."
-              : "O painel estÃ¡ verificando o estado da publicaÃ§Ã£o.";
+              : "O painel está verificando o estado da publicação.";
 }
 
 /**
@@ -429,32 +429,32 @@ function setStatus(
  */
 function buildPublishErrorMessage(error: unknown): string {
   if (!error) {
-    return "NÃ£o foi possÃ­vel publicar agora. O conteÃºdo continua salvo sÃ³ neste computador.";
+    return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador.";
   }
 
   const publishError = error as { status?: number };
 
   if (publishError.status === 401 || publishError.status === 403) {
-    return "O GitHub recusou a publicaÃ§Ã£o. Verifique se o token ainda Ã© vÃ¡lido e se possui permissÃ£o Contents: write.";
+    return "O GitHub recusou a publicação. Verifique se o token ainda é válido e se possui permissão Contents: write.";
   }
 
   if (publishError.status === 404) {
-    return "O GitHub nÃ£o encontrou o repositÃ³rio ou o arquivo de conteÃºdo. Verifique o acesso da conta e do token.";
+    return "O GitHub não encontrou o repositório ou o arquivo de conteúdo. Verifique o acesso da conta e do token.";
   }
 
   if (publishError.status === 409) {
-    return "Outra alteraÃ§Ã£o chegou antes desta publicaÃ§Ã£o. O conteÃºdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
+    return "Outra alteração chegou antes desta publicação. O conteúdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
   }
 
   if (publishError.status === 422) {
-    return "O GitHub recusou esta publicaÃ§Ã£o por validaÃ§Ã£o ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
+    return "O GitHub recusou esta publicação por validação ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
   }
 
   if (publishError.status === 503) {
-    return "O GitHub ficou indisponÃ­vel no momento da publicaÃ§Ã£o. Tente novamente em instantes.";
+    return "O GitHub ficou indisponível no momento da publicação. Tente novamente em instantes.";
   }
 
-  return "NÃ£o foi possÃ­vel publicar agora. O conteÃºdo continua salvo sÃ³ neste computador. Verifique o token e as permissÃµes de escrita no repositÃ³rio.";
+  return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique o token e as permissões de escrita no repositório.";
 }
 
 /**
@@ -463,21 +463,21 @@ function buildPublishErrorMessage(error: unknown): string {
  */
 function buildLibraryRefreshErrorMessage(error: unknown): string {
   if (!error) {
-    return "NÃ£o foi possÃ­vel atualizar a biblioteca de imagens agora.";
+    return "Não foi possível atualizar a biblioteca de imagens agora.";
   }
 
   const repositoryError = error as { status?: number };
 
   if (repositoryError.status === 401 || repositoryError.status === 403) {
-    return "A biblioteca de imagens nÃ£o pÃ´de ser atualizada porque o GitHub recusou o token. Verifique se ele ainda Ã© vÃ¡lido e se tem acesso ao repositÃ³rio.";
+    return "A biblioteca de imagens não pôde ser atualizada porque o GitHub recusou o token. Verifique se ele ainda é válido e se tem acesso ao repositório.";
   }
 
   if (repositoryError.status === 404) {
-    return "A biblioteca de imagens nÃ£o pÃ´de ser atualizada porque a pasta de imagens ou o repositÃ³rio nÃ£o foi encontrado no GitHub.";
+    return "A biblioteca de imagens não pôde ser atualizada porque a pasta de imagens ou o repositório não foi encontrado no GitHub.";
   }
 
   if (repositoryError.status === 409 || repositoryError.status === 422) {
-    return "A biblioteca de imagens encontrou um conflito temporÃ¡rio ao consultar o GitHub. Tente novamente em alguns segundos.";
+    return "A biblioteca de imagens encontrou um conflito temporário ao consultar o GitHub. Tente novamente em alguns segundos.";
   }
 
   if (repositoryError.status === 429) {
@@ -485,10 +485,10 @@ function buildLibraryRefreshErrorMessage(error: unknown): string {
   }
 
   if (repositoryError.status === 503) {
-    return "O GitHub estava indisponÃ­vel no momento da atualizaÃ§Ã£o da biblioteca de imagens. Tente novamente em instantes.";
+    return "O GitHub estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
   }
 
-  return "NÃ£o foi possÃ­vel atualizar a biblioteca de imagens agora. Verifique a conexÃ£o, o token e o acesso ao repositÃ³rio.";
+  return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão, o token e o acesso ao repositório.";
 }
 
 function updateGitHubTokenStatus(): void {
@@ -501,7 +501,7 @@ function updateGitHubTokenStatus(): void {
 
   githubTokenStatus.textContent = hasToken
     ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
-    : "Nenhum token conectado. As alteraÃ§Ãµes ficarÃ£o apenas neste navegador atÃ© vocÃª conectar o GitHub.";
+    : "Nenhum token conectado. As alterações ficarão apenas neste navegador até você conectar o GitHub.";
   githubTokenStatus.className = hasToken ? "text-sm text-green-700" : "text-sm text-yellow-700";
 
   if (clearGitHubTokenButton) {
@@ -536,6 +536,31 @@ function updateOwnerAccessVisibility(): void {
   }
 }
 
+function dedupePanelAllowlist(entries: PanelAccessEntry[]): PanelAccessEntry[] {
+  const deduped = new Map<string, PanelAccessEntry>();
+
+  [...entries]
+    .sort((left, right) => {
+      const leftTime = Date.parse(left.updatedAt || left.createdAt || "") || 0;
+      const rightTime = Date.parse(right.updatedAt || right.createdAt || "") || 0;
+      return rightTime - leftTime;
+    })
+    .forEach((entry) => {
+      const key = entry.email.trim().toLowerCase();
+      if (!deduped.has(key)) {
+        deduped.set(key, entry);
+      }
+    });
+
+  return [...deduped.values()].sort((left, right) => {
+    if (left.role !== right.role) {
+      return left.role === "owner" ? -1 : 1;
+    }
+
+    return left.email.localeCompare(right.email);
+  });
+}
+
 function setOwnerAccessBusy(nextState: boolean): void {
   isSavingOwnerAccess = nextState;
   ownerAccessEmail.disabled = nextState;
@@ -556,7 +581,7 @@ function updateSupabaseAuthStatus(): void {
 
   if (!configured) {
     supabaseAuthStatus.textContent =
-      "Supabase ainda nÃ£o estÃ¡ habilitado neste projeto. O painel continuarÃ¡ usando apenas o fluxo legado.";
+      "Supabase ainda não está habilitado neste projeto. O painel continuará usando apenas o fluxo legado.";
     supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
     clearSupabaseSessionButton.disabled = true;
     return;
@@ -576,7 +601,7 @@ function updateSupabaseAuthStatus(): void {
   }
 
   supabaseAuthStatus.textContent =
-    "Supabase configurado, mas ainda sem uma sessÃ£o administrativa conectada neste painel.";
+    "Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.";
   supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
   clearSupabaseSessionButton.disabled = true;
 }
@@ -589,18 +614,18 @@ function buildSupabasePublishErrorMessage(error: unknown, sectionLabel: string):
   }
 
   if (message.includes("Invalid login credentials")) {
-    return `NÃ£o foi possÃ­vel autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
+    return `Não foi possível autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
   }
 
   if (message.includes("JWT") || message.includes("refresh")) {
-    return `A sessÃ£o do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
+    return `A sessão do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
   }
 
   if (message.includes("new row violates row-level security") || message.includes("permission denied")) {
-    return `O Supabase recusou a gravaÃ§Ã£o de ${sectionLabel}. Verifique se as polÃ­ticas de escrita para usuÃ¡rios autenticados jÃ¡ foram aplicadas.`;
+    return `O Supabase recusou a gravação de ${sectionLabel}. Verifique se as políticas de escrita para usuários autenticados já foram aplicadas.`;
   }
 
-  return `NÃ£o foi possÃ­vel salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
+  return `Não foi possível salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
 }
 
 /**
@@ -734,10 +759,10 @@ function setMediaPreview(src = "", label = "", alt = ""): void {
   }
 
   mediaPreviewImage.src = src;
-  mediaPreviewImage.alt = alt || label || "PrÃ©-visualizaÃ§Ã£o da imagem";
+  mediaPreviewImage.alt = alt || label || "Pré-visualização da imagem";
   mediaPreviewImage.hidden = false;
   mediaPreviewEmpty.hidden = true;
-  mediaPreviewLabel.textContent = label || "Imagem pronta para publicaÃ§Ã£o.";
+  mediaPreviewLabel.textContent = label || "Imagem pronta para publicação.";
 }
 
 /**
@@ -778,7 +803,7 @@ function renderImageLibrary(): void {
   }
 
   if (!imageLibraryEntries.length) {
-    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponÃ­vel ainda. Conecte o GitHub para carregar o repositÃ³rio ou envie a primeira imagem.</div>';
+    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Conecte o GitHub para carregar o repositório ou envie a primeira imagem.</div>';
     return;
   }
 
@@ -850,7 +875,7 @@ async function refreshImageLibrary(
     mergeImageLibraryEntries(repositoryEntries);
     renderImageLibrary();
     if (!silent && token) {
-      setStatus("Biblioteca de imagens atualizada a partir do repositÃ³rio.", "success");
+      setStatus("Biblioteca de imagens atualizada a partir do repositório.", "success");
     }
   } catch (error) {
     console.error(error);
@@ -870,7 +895,7 @@ async function publishStateToGitHub(reason: string): Promise<void> {
   const token = getGitHubPublishToken();
   if (!token) {
     setStatus(
-      "AlteraÃ§Ã£o salva sÃ³ neste computador. Conecte o GitHub para enviar isso ao site pÃºblico.",
+      "Alteração salva só neste computador. Conecte o GitHub para enviar isso ao site público.",
       "warning",
       "local"
     );
@@ -881,13 +906,13 @@ async function publishStateToGitHub(reason: string): Promise<void> {
     .catch(() => null)
     .then(async () => {
       setPublishingState(true);
-      setStatus("Publicando alteraÃ§Ãµes no GitHub. O deploy do Pages serÃ¡ disparado em seguida.", "info", "publishing");
+      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info", "publishing");
 
       try {
         await publishSiteContentToGitHub(adminState, token, reason);
         publishedSnapshot = cloneContent(adminState);
         setStatus(
-          "AlteraÃ§Ãµes publicadas com sucesso. O site pÃºblico pode levar alguns segundos para mostrar a nova versÃ£o.",
+          "Alterações publicadas com sucesso. O site público pode levar alguns segundos para mostrar a nova versão.",
           "success",
           "synced"
         );
@@ -913,11 +938,11 @@ function saveState(localMessage: string, publishMessage: string): void {
   renderAll();
 
   if (!getGitHubPublishToken()) {
-    setStatus(`${localMessage} O conteÃºdo segue salvo localmente neste navegador.`, "warning", "local");
+    setStatus(`${localMessage} O conteúdo segue salvo localmente neste navegador.`, "warning", "local");
     return;
   }
 
-  setStatus(`${localMessage} Enviando atualizaÃ§Ã£o para o GitHub...`, "info", "publishing");
+  setStatus(`${localMessage} Enviando atualização para o GitHub...`, "info", "publishing");
   publishStateToGitHub(publishMessage);
 }
 
@@ -927,7 +952,7 @@ async function saveNoticesToPrimaryStore(localMessage: string): Promise<void> {
   renderAll();
 
   if (!isSupabaseConfigured()) {
-    setStatus(`${localMessage} O Supabase ainda nÃ£o estÃ¡ habilitado neste projeto.`, "warning", "local");
+    setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
     return;
   }
 
@@ -964,18 +989,18 @@ async function saveQuickLinksToPrimaryStore(localMessage: string): Promise<void>
   renderAll();
 
   if (!isSupabaseConfigured()) {
-    setStatus(`${localMessage} O Supabase ainda nÃ£o estÃ¡ habilitado neste projeto.`, "warning", "local");
+    setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
     return;
   }
 
   if (!isSupabaseConnected()) {
-    setStatus(`${localMessage} Conecte o Supabase para publicar os links rÃ¡pidos no portal.`, "warning", "local");
+    setStatus(`${localMessage} Conecte o Supabase para publicar os links rápidos no portal.`, "warning", "local");
     return;
   }
 
   try {
     setPublishingState(true);
-    setStatus("Salvando links rÃ¡pidos no Supabase...", "info", "publishing");
+    setStatus("Salvando links rápidos no Supabase...", "info", "publishing");
     const persistedLinks = await syncSupabaseQuickLinks(adminState.quickLinks);
     adminState.quickLinks = persistedLinks;
     adminState.updatedAt = new Date().toISOString();
@@ -986,10 +1011,10 @@ async function saveQuickLinksToPrimaryStore(localMessage: string): Promise<void>
     });
     saveDraftSiteContent(adminState);
     renderAll();
-    setStatus("Links rÃ¡pidos salvos no Supabase com sucesso.", "success", "synced");
+    setStatus("Links rápidos salvos no Supabase com sucesso.", "success", "synced");
   } catch (error) {
     console.error(error);
-    setStatus(buildSupabasePublishErrorMessage(error, "os links rÃ¡pidos"), "danger", "local");
+    setStatus(buildSupabasePublishErrorMessage(error, "os links rápidos"), "danger", "local");
   } finally {
     setPublishingState(false);
   }
@@ -1007,7 +1032,7 @@ async function saveMediaWithUpload(): Promise<void> {
 
   if (selectedFile) {
     if (!isAllowedPortalImageFileName(selectedFile.name)) {
-      setStatus("Formato de imagem nÃ£o suportado. Use JPG, JPEG, PNG ou WEBP.", "warning");
+      setStatus("Formato de imagem não suportado. Use JPG, JPEG, PNG ou WEBP.", "warning");
       return;
     }
 
@@ -1028,7 +1053,7 @@ async function saveMediaWithUpload(): Promise<void> {
   try {
     if (selectedFile) {
       setPublishingState(true);
-      setStatus("Enviando imagem para o repositÃ³rio do GitHub...", "info", "publishing");
+      setStatus("Enviando imagem para o repositório do GitHub...", "info", "publishing");
       const generatedPath = createPortalImagePath(mediaTitle.value.trim(), selectedFile.name);
       const uploadResult = await uploadPortalImageToGitHub(
         selectedFile,
@@ -1074,14 +1099,14 @@ async function saveMediaWithUpload(): Promise<void> {
     renderAll();
 
     if (!token) {
-      setStatus("Imagem salva sÃ³ neste computador. Conecte o GitHub para publicÃ¡-la no portal.", "warning", "local");
+      setStatus("Imagem salva só neste computador. Conecte o GitHub para publicá-la no portal.", "warning", "local");
       fillMediaForm();
       return;
     }
 
     if (!isPublishing) {
       setPublishingState(true);
-      setStatus("Publicando atualizaÃ§Ã£o da galeria no GitHub...", "info", "publishing");
+      setStatus("Publicando atualização da galeria no GitHub...", "info", "publishing");
     }
 
     await publishSiteContentToGitHub(adminState, token, "Update gallery in site content");
@@ -1099,7 +1124,7 @@ async function saveMediaWithUpload(): Promise<void> {
     console.error(error);
     if (uploadSucceeded) {
       setStatus(
-        "A imagem foi enviada ao repositÃ³rio, mas a galeria ainda nÃ£o foi publicada no site. Salve novamente para concluir.",
+        "A imagem foi enviada ao repositório, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.",
         "danger",
         "pending"
       );
@@ -1208,7 +1233,7 @@ function renderNotices(): void {
 
   Array.from(noticeItems.querySelectorAll<HTMLButtonElement>("[data-delete-notice]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse aviso serÃ¡ removido do painel e do portal dos alunos.", async () => {
+      openConfirmModal("Esse aviso será removido do painel e do portal dos alunos.", async () => {
         adminState.notices = adminState.notices.filter((entry) => entry.id !== button.dataset.deleteNotice);
         await saveNoticesToPrimaryStore("Aviso removido do painel.");
       });
@@ -1219,7 +1244,7 @@ function renderNotices(): void {
 function renderLinks(): void {
   const links = [...adminState.quickLinks];
   if (!links.length) {
-    linkItems.innerHTML = '<div class="empty-state">Nenhum link rÃ¡pido cadastrado.</div>';
+    linkItems.innerHTML = '<div class="empty-state">Nenhum link rápido cadastrado.</div>';
     return;
   }
 
@@ -1253,7 +1278,7 @@ function renderLinks(): void {
 
   Array.from(linkItems.querySelectorAll<HTMLButtonElement>("[data-delete-link]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Esse link deixarÃ¡ de aparecer para os alunos.", async () => {
+      openConfirmModal("Esse link deixará de aparecer para os alunos.", async () => {
         adminState.quickLinks = adminState.quickLinks.filter((entry) => entry.id !== button.dataset.deleteLink);
         await saveQuickLinksToPrimaryStore("Link removido do painel.");
       });
@@ -1275,7 +1300,7 @@ function renderGallery(): void {
           <img src="${escapeHtml(item.src || "")}" alt="${escapeHtml(item.alt || item.title || "")}" class="media-thumb w-24 h-16 object-cover rounded shadow-sm border border-gray-200" loading="lazy" />
           <div class="list-card-horizontal-content">
             <div class="flex items-center gap-2 mb-1">
-              <span class="chip text-xs">PosiÃ§Ã£o ${escapeHtml(String(item.order || "-"))}</span>
+              <span class="chip text-xs">Posição ${escapeHtml(String(item.order || "-"))}</span>
               <span class="status-badge ${item.published ? "status-live" : "status-draft"} text-xs">${item.published ? "Ativa" : "Oculta"}</span>
             </div>
             <h4 class="text-base font-bold text-[var(--brand-primary)] leading-tight mt-1">${escapeHtml(item.title || "")}</h4>
@@ -1300,7 +1325,7 @@ function renderGallery(): void {
 
   Array.from(mediaItems.querySelectorAll<HTMLButtonElement>("[data-delete-media]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem serÃ¡ retirada da galeria pÃºblica do portal.", () => {
+      openConfirmModal("Essa imagem será retirada da galeria pública do portal.", () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
         saveState(
           "Imagem removida da galeria local.",
@@ -1320,9 +1345,11 @@ function fillOwnerAccessForm(item: PanelAccessEntry | null = null): void {
 }
 
 function renderOwnerAccessList(): void {
+  panelAllowlist = dedupePanelAllowlist(panelAllowlist);
+
   if (!isOwnerPanelUser()) {
     ownerAccessItems.innerHTML =
-      '<div class="empty-state">Somente o dono do painel pode visualizar esta Ã¡rea.</div>';
+      '<div class="empty-state">Somente o dono do painel pode visualizar esta área.</div>';
     return;
   }
 
@@ -1370,9 +1397,9 @@ function renderOwnerAccessList(): void {
         return;
       }
 
-      openConfirmModal(`O e-mail ${item.email} perderÃ¡ o acesso ao painel.`, async () => {
+      openConfirmModal(`O e-mail ${item.email} perderá o acesso ao painel.`, async () => {
         panelAllowlist = panelAllowlist.filter((entry) => entry.id !== item.id);
-        panelAllowlist = await syncPanelAllowlist(panelAllowlist);
+        panelAllowlist = dedupePanelAllowlist(await syncPanelAllowlist(panelAllowlist));
         renderOwnerAccessList();
         fillOwnerAccessForm();
         setStatus("Lista de e-mails permitidos atualizada com sucesso.", "success");
@@ -1515,33 +1542,17 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const payload: PanelAccessEntry = {
-    id: ownerAccessId.value || crypto.randomUUID(),
-    email,
-    role: ownerAccessRole.value === "owner" ? "owner" : "editor",
-    active: ownerAccessActive.checked,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  const role = ownerAccessRole.value === "owner" ? "owner" : "editor";
+  const active = ownerAccessActive.checked;
 
   if (
     currentPanelAccess &&
-    payload.email === currentPanelAccess.email &&
-    (payload.role !== "owner" || !payload.active)
+    email === currentPanelAccess.email &&
+    (role !== "owner" || !active)
   ) {
     setStatus("O dono atual do painel não pode remover o próprio acesso por aqui.", "warning");
     setOwnerAccessBusy(false);
     return;
-  }
-
-  const existingIndex = panelAllowlist.findIndex((item) => item.id === payload.id);
-  if (existingIndex >= 0) {
-    panelAllowlist[existingIndex] = {
-      ...panelAllowlist[existingIndex],
-      ...payload
-    };
-  } else {
-    panelAllowlist.unshift(payload);
   }
 
   try {
@@ -1551,16 +1562,20 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
       id: ownerAccessId.value || undefined,
       email,
       password: password || undefined,
-      role: payload.role,
-      active: payload.active
+      role,
+      active
     });
 
-    const savedIndex = panelAllowlist.findIndex((item) => item.id === savedEntry.id);
-    if (savedIndex >= 0) {
-      panelAllowlist[savedIndex] = savedEntry;
+    const existingIndex = panelAllowlist.findIndex(
+      (item) =>
+        item.id === savedEntry.id || item.email.trim().toLowerCase() === savedEntry.email.trim().toLowerCase()
+    );
+    if (existingIndex >= 0) {
+      panelAllowlist[existingIndex] = savedEntry;
     } else {
       panelAllowlist.unshift(savedEntry);
     }
+    panelAllowlist = dedupePanelAllowlist(panelAllowlist);
 
     currentPanelAccess =
       panelAllowlist.find((entry) => entry.email === currentPanelAccess?.email) || currentPanelAccess;
@@ -1613,7 +1628,7 @@ supabaseAuthForm?.addEventListener("submit", async (event) => {
     }
 
     setStatus(
-      "Conta do Supabase conectada. A partir de agora, avisos e links rÃ¡pidos podem ser publicados direto no banco.",
+      "Conta do Supabase conectada. A partir de agora, avisos e links rápidos podem ser publicados direto no banco.",
       "success",
       isPublishedSnapshotInSync() ? "synced" : "local"
     );
@@ -1622,7 +1637,7 @@ supabaseAuthForm?.addEventListener("submit", async (event) => {
     currentPanelAccess = null;
     panelAllowlist = [];
     updateOwnerAccessVisibility();
-    setStatus(buildSupabasePublishErrorMessage(error, "a conexÃ£o editorial"), "danger");
+    setStatus(buildSupabasePublishErrorMessage(error, "a conexão editorial"), "danger");
   } finally {
     setPublishingState(false);
   }
@@ -1645,7 +1660,7 @@ githubTokenForm?.addEventListener("submit", async (event) => {
 
   const token = githubTokenInput.value.trim();
   if (!token) {
-    setStatus("Informe um token do GitHub com permissÃ£o de escrita no repositÃ³rio.", "warning");
+    setStatus("Informe um token do GitHub com permissão de escrita no repositório.", "warning");
     return;
   }
 
@@ -1663,14 +1678,14 @@ githubTokenForm?.addEventListener("submit", async (event) => {
     }
 
     setStatus(
-      "ConexÃ£o com o GitHub validada. As prÃ³ximas alteraÃ§Ãµes poderÃ£o ser enviadas direto para o site.",
+      "Conexão com o GitHub validada. As próximas alterações poderão ser enviadas direto para o site.",
       "success",
       "synced"
     );
   } catch (error) {
     console.error(error);
     setStatus(
-      "NÃ£o foi possÃ­vel validar o token. Verifique se ele tem permissÃ£o de Contents: write neste repositÃ³rio.",
+      "Não foi possível validar o token. Verifique se ele tem permissão de Contents: write neste repositório.",
       "danger"
     );
   }
@@ -1680,12 +1695,12 @@ clearGitHubTokenButton?.addEventListener("click", () => {
   clearGitHubPublishToken();
   updateGitHubTokenStatus();
   refreshImageLibrary({ silent: true });
-  setStatus("Token removido da sessÃ£o atual. O painel voltou para modo local.", "warning", "local");
+  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning", "local");
 });
 
 usePublishedContentButton?.addEventListener("click", async () => {
   openConfirmModal(
-    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteÃºdo publicado atualmente no GitHub.",
+    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteúdo publicado atualmente no GitHub.",
     async () => {
       try {
         clearDraftSiteContent();
@@ -1697,10 +1712,10 @@ usePublishedContentButton?.addEventListener("click", async () => {
         fillLinkForm();
         fillMediaForm();
         await refreshImageLibrary({ silent: true });
-        setStatus("ConteÃºdo publicado recarregado com sucesso.", "success", "synced");
+        setStatus("Conteúdo publicado recarregado com sucesso.", "success", "synced");
       } catch (error) {
         console.error(error);
-        setStatus("NÃ£o foi possÃ­vel recarregar o conteÃºdo publicado agora.", "danger");
+        setStatus("Não foi possível recarregar o conteúdo publicado agora.", "danger");
       }
     }
   );
@@ -1728,13 +1743,13 @@ mediaFile?.addEventListener("change", () => {
 
 mediaTitle?.addEventListener("input", () => {
   if (!mediaPreviewImage?.hidden) {
-    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "PrÃ©-visualizaÃ§Ã£o da imagem";
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
   }
 });
 
 mediaAlt?.addEventListener("input", () => {
   if (!mediaPreviewImage?.hidden) {
-    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "PrÃ©-visualizaÃ§Ã£o da imagem";
+    mediaPreviewImage.alt = mediaAlt.value.trim() || mediaTitle.value.trim() || "Pré-visualização da imagem";
   }
 });
 
@@ -1763,7 +1778,7 @@ async function bootstrap() {
   try {
     publishedContent = await fetchPublishedSiteContent();
   } catch (error) {
-    console.warn("Falha ao carregar conteÃºdo publicado.", error);
+    console.warn("Falha ao carregar conteúdo publicado.", error);
   }
 
   if (localDraft) {
@@ -1772,7 +1787,7 @@ async function bootstrap() {
     try {
       draftOrPublishedContent = await fetchSupabaseEditorSiteContent();
     } catch (error) {
-      console.warn("Falha ao carregar conteÃºdo editorial do Supabase.", error);
+      console.warn("Falha ao carregar conteúdo editorial do Supabase.", error);
     }
   }
 
@@ -1780,7 +1795,7 @@ async function bootstrap() {
     try {
       draftOrPublishedContent = await loadEditorSiteContent();
     } catch (error) {
-      console.warn("Falha ao carregar conteÃºdo base do editor.", error);
+      console.warn("Falha ao carregar conteúdo base do editor.", error);
     }
   }
 
@@ -1799,7 +1814,7 @@ async function bootstrap() {
 
   if (!publishedContent) {
     setStatus(
-      "Painel carregado com conteÃºdo salvo neste computador, mas a versÃ£o publicada do site nÃ£o pÃ´de ser consultada agora.",
+      "Painel carregado com conteúdo salvo neste computador, mas a versão publicada do site não pôde ser consultada agora.",
       "warning",
       "offline"
     );
@@ -1808,7 +1823,7 @@ async function bootstrap() {
 
   if (isPublishedSnapshotInSync()) {
     setStatus(
-      `Painel carregado. O conteÃºdo abaixo jÃ¡ estÃ¡ igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
+      `Painel carregado. O conteúdo abaixo já está igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
       getGitHubPublishToken() ? "success" : "info",
       "synced"
     );
@@ -1817,8 +1832,8 @@ async function bootstrap() {
 
   setStatus(
     getGitHubPublishToken()
-      ? `Existe um rascunho salvo neste computador diferente do site publicado. �altima versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
-      : "Existe um rascunho salvo sÃ³ neste computador. Conecte o GitHub para publicar essa versÃ£o no site.",
+      ? `Existe um rascunho salvo neste computador diferente do site publicado. Última versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
+      : "Existe um rascunho salvo só neste computador. Conecte o GitHub para publicar essa versão no site.",
     "warning",
     getGitHubPublishToken() ? "pending" : "local"
   );

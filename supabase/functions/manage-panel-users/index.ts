@@ -53,6 +53,18 @@ function isDuplicateAuthUserError(message: string): boolean {
   );
 }
 
+function pickCanonicalAllowlistRow(rows: AllowlistRow[]): AllowlistRow | null {
+  if (!rows.length) {
+    return null;
+  }
+
+  return [...rows].sort((left, right) => {
+    const leftTime = Date.parse(left.updated_at || left.created_at || "") || 0;
+    const rightTime = Date.parse(right.updated_at || right.created_at || "") || 0;
+    return rightTime - leftTime;
+  })[0];
+}
+
 async function listAllAuthUsers(adminClient: ReturnType<typeof createClient>) {
   const users: Array<{ id: string; email?: string | null }> = [];
   let page = 1;
@@ -181,7 +193,7 @@ Deno.serve(async (request) => {
   inFlightPanelUserEmails.add(email);
 
   try {
-    const { data: existingAllowlistRow, error: allowlistLookupError } = await adminClient
+    const { data: allowlistRows, error: allowlistLookupError } = await adminClient
     .from("admin_allowlist")
     .select("id,email,role,active,created_at,updated_at")
     .or(
@@ -189,12 +201,16 @@ Deno.serve(async (request) => {
         .filter(Boolean)
         .join(",")
     )
-    .limit(1)
-    .maybeSingle<AllowlistRow>();
+    .returns<AllowlistRow[]>();
 
     if (allowlistLookupError) {
       return jsonResponse({ error: "Não foi possível consultar a lista de e-mails permitidos." }, 500);
     }
+
+    const existingAllowlistRow = pickCanonicalAllowlistRow(allowlistRows || []);
+    const duplicateAllowlistIds = (allowlistRows || [])
+      .filter((row) => row.id !== existingAllowlistRow?.id)
+      .map((row) => row.id);
 
     let authUsers: Array<{ id: string; email?: string | null }> = [];
     try {
@@ -295,6 +311,20 @@ Deno.serve(async (request) => {
         { error: `Não foi possível salvar a permissão deste e-mail: ${upsertError.message}` },
         400
       );
+    }
+
+    if (duplicateAllowlistIds.length) {
+      const { error: cleanupError } = await adminClient
+        .from("admin_allowlist")
+        .delete()
+        .in("id", duplicateAllowlistIds);
+
+      if (cleanupError) {
+        return jsonResponse(
+          { error: `A conta foi salva, mas não foi possível limpar acessos duplicados: ${cleanupError.message}` },
+          500
+        );
+      }
     }
 
     const { data: savedEntry, error: savedEntryError } = await adminClient

@@ -41,6 +41,26 @@ create table if not exists public.admin_allowlist (
   updated_at timestamptz not null default now()
 );
 
+update public.admin_allowlist
+set email = lower(trim(email))
+where email <> lower(trim(email));
+
+with ranked_allowlist as (
+  select
+    id,
+    row_number() over (
+      partition by lower(trim(email))
+      order by updated_at desc, created_at desc, id desc
+    ) as duplicate_rank
+  from public.admin_allowlist
+)
+delete from public.admin_allowlist
+where id in (
+  select id
+  from ranked_allowlist
+  where duplicate_rank > 1
+);
+
 create unique index if not exists admin_allowlist_email_key
   on public.admin_allowlist (lower(email));
 
