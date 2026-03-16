@@ -5,6 +5,7 @@ import type {
   SiteContent
 } from "../../../assets/js/types/core";
 import { normalizeSiteContent } from "./site-content.js";
+import { PORTAL_IMAGE_UPLOAD_DIR } from "./site-content.js";
 import { SUPABASE_CONFIG, type SupabasePublicConfig, isSupabaseConfigReady } from "./supabase-config.js";
 
 type SupabaseNoticeRow = {
@@ -797,6 +798,7 @@ export async function listSupabasePortalImageLibrary(): Promise<Array<{
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      prefix: PORTAL_IMAGE_UPLOAD_DIR,
       limit: 200,
       offset: 0,
       sortBy: {
@@ -814,10 +816,13 @@ export async function listSupabasePortalImageLibrary(): Promise<Array<{
   const items = (await response.json()) as SupabaseStorageListItem[];
   return items
     .filter((item) => item.name && !item.name.endsWith("/"))
-    .map((item) => ({
-      path: item.name,
-      name: item.name.split("/").pop() || item.name,
-      previewSrc: resolvePublicImageUrl(item.name),
-      source: "repository" as const
-    }));
+    .map((item) => {
+      const fullPath = `${PORTAL_IMAGE_UPLOAD_DIR}/${item.name}`.replace(/\/+/g, "/");
+      return {
+        path: fullPath,
+        name: item.name.split("/").pop() || item.name,
+        previewSrc: resolvePublicImageUrl(fullPath),
+        source: "repository" as const
+      };
+    });
 }

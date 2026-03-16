@@ -1,4 +1,5 @@
 import { normalizeSiteContent } from "./site-content.js";
+import { PORTAL_IMAGE_UPLOAD_DIR } from "./site-content.js";
 import { SUPABASE_CONFIG, isSupabaseConfigReady } from "./supabase-config.js";
 export const SUPABASE_TABLES = {
     notices: "notices",
@@ -557,6 +558,7 @@ export async function listSupabasePortalImageLibrary() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            prefix: PORTAL_IMAGE_UPLOAD_DIR,
             limit: 200,
             offset: 0,
             sortBy: {
@@ -572,10 +574,13 @@ export async function listSupabasePortalImageLibrary() {
     const items = (await response.json());
     return items
         .filter((item) => item.name && !item.name.endsWith("/"))
-        .map((item) => ({
-        path: item.name,
-        name: item.name.split("/").pop() || item.name,
-        previewSrc: resolvePublicImageUrl(item.name),
-        source: "repository"
-    }));
+        .map((item) => {
+        const fullPath = `${PORTAL_IMAGE_UPLOAD_DIR}/${item.name}`.replace(/\/+/g, "/");
+        return {
+            path: fullPath,
+            name: item.name.split("/").pop() || item.name,
+            previewSrc: resolvePublicImageUrl(fullPath),
+            source: "repository"
+        };
+    });
 }

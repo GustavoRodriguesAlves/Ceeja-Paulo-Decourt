@@ -211,42 +211,6 @@ function dedupeGalleryItems(items) {
         return true;
     });
 }
-function imageLoads(src) {
-    return new Promise((resolve) => {
-        if (!src) {
-            resolve(false);
-            return;
-        }
-        const probe = new Image();
-        const clear = () => {
-            probe.onload = null;
-            probe.onerror = null;
-        };
-        const timeoutId = window.setTimeout(() => {
-            clear();
-            resolve(false);
-        }, 5000);
-        probe.onload = () => {
-            window.clearTimeout(timeoutId);
-            clear();
-            resolve(true);
-        };
-        probe.onerror = () => {
-            window.clearTimeout(timeoutId);
-            clear();
-            resolve(false);
-        };
-        probe.src = src;
-    });
-}
-async function filterRenderableGallery(items) {
-    const deduped = dedupeGalleryItems(items);
-    const checks = await Promise.all(deduped.map(async (item) => ({
-        item,
-        ok: await imageLoads(item.src || "")
-    })));
-    return checks.filter((entry) => entry.ok).map((entry) => entry.item);
-}
 async function loadPortalContent() {
     if (isPortalContentLoading) {
         shouldReloadPortalContent = true;
@@ -255,10 +219,9 @@ async function loadPortalContent() {
     isPortalContentLoading = true;
     try {
         const content = await fetchPublishedSiteContent();
-        const safeGallery = await filterRenderableGallery(Array.isArray(content.gallery) ? content.gallery : []);
         renderPortalContent({
             ...content,
-            gallery: safeGallery
+            gallery: dedupeGalleryItems(Array.isArray(content.gallery) ? content.gallery : [])
         });
         lastPortalRefreshAt = Date.now();
     }
