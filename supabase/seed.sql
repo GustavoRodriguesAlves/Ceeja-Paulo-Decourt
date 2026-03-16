@@ -16,13 +16,3 @@ values
     'https://sed.educacao.sp.gov.br/',
     true
   );
-
-insert into public.gallery_items (title, alt, image_path, sort_order, published)
-values
-  (
-    'Imagem de teste',
-    'Imagem de exemplo publicada no portal',
-    'teste/exemplo.jpg',
-    1,
-    true
-  );

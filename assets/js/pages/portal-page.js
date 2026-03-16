@@ -200,6 +200,53 @@ function renderPortalContent(content) {
             : '<div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded border border-gray-100">Nenhuma imagem publicada no momento.</div>';
     }
 }
+function dedupeGalleryItems(items) {
+    const seen = new Set();
+    return items.filter((item) => {
+        const key = String(item.src || "").trim();
+        if (!key || seen.has(key)) {
+            return false;
+        }
+        seen.add(key);
+        return true;
+    });
+}
+function imageLoads(src) {
+    return new Promise((resolve) => {
+        if (!src) {
+            resolve(false);
+            return;
+        }
+        const probe = new Image();
+        const clear = () => {
+            probe.onload = null;
+            probe.onerror = null;
+        };
+        const timeoutId = window.setTimeout(() => {
+            clear();
+            resolve(false);
+        }, 5000);
+        probe.onload = () => {
+            window.clearTimeout(timeoutId);
+            clear();
+            resolve(true);
+        };
+        probe.onerror = () => {
+            window.clearTimeout(timeoutId);
+            clear();
+            resolve(false);
+        };
+        probe.src = src;
+    });
+}
+async function filterRenderableGallery(items) {
+    const deduped = dedupeGalleryItems(items);
+    const checks = await Promise.all(deduped.map(async (item) => ({
+        item,
+        ok: await imageLoads(item.src || "")
+    })));
+    return checks.filter((entry) => entry.ok).map((entry) => entry.item);
+}
 async function loadPortalContent() {
     if (isPortalContentLoading) {
         shouldReloadPortalContent = true;
@@ -208,7 +255,11 @@ async function loadPortalContent() {
     isPortalContentLoading = true;
     try {
         const content = await fetchPublishedSiteContent();
-        renderPortalContent(content);
+        const safeGallery = await filterRenderableGallery(Array.isArray(content.gallery) ? content.gallery : []);
+        renderPortalContent({
+            ...content,
+            gallery: safeGallery
+        });
         lastPortalRefreshAt = Date.now();
     }
     catch (error) {

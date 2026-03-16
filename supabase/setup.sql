@@ -61,6 +61,25 @@ where id in (
   where duplicate_rank > 1
 );
 
+delete from public.gallery_items
+where image_path = 'teste/exemplo.jpg';
+
+with ranked_gallery as (
+  select
+    id,
+    row_number() over (
+      partition by image_path
+      order by updated_at desc, created_at desc, id desc
+    ) as duplicate_rank
+  from public.gallery_items
+)
+delete from public.gallery_items
+where id in (
+  select id
+  from ranked_gallery
+  where duplicate_rank > 1
+);
+
 create unique index if not exists admin_allowlist_email_key
   on public.admin_allowlist (lower(email));
 

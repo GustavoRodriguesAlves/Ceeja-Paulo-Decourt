@@ -5,7 +5,7 @@ import {
   syncRememberedPortalSession
 } from "../core/auth.js";
 import { fetchPublishedSiteContent } from "../core/site-content.js";
-import type { SiteContent } from "../../../assets/js/types/core";
+import type { GalleryItem, SiteContent } from "../../../assets/js/types/core";
 
 const NOTES_BASE_URL =
   "https://script.google.com/macros/s/AKfycbyVf3T34dxhgWYWebvuPE8o2JHQIhzLrIqOfDCK1UvdC_vGz6gLj20A30FS5EwTGZXdxw/exec";
@@ -273,6 +273,65 @@ function renderPortalContent(content: SiteContent | null | undefined): void {
   }
 }
 
+function dedupeGalleryItems(items: GalleryItem[]): GalleryItem[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = String(item.src || "").trim();
+    if (!key || seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function imageLoads(src: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (!src) {
+      resolve(false);
+      return;
+    }
+
+    const probe = new Image();
+    const clear = () => {
+      probe.onload = null;
+      probe.onerror = null;
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      clear();
+      resolve(false);
+    }, 5000);
+
+    probe.onload = () => {
+      window.clearTimeout(timeoutId);
+      clear();
+      resolve(true);
+    };
+
+    probe.onerror = () => {
+      window.clearTimeout(timeoutId);
+      clear();
+      resolve(false);
+    };
+
+    probe.src = src;
+  });
+}
+
+async function filterRenderableGallery(items: GalleryItem[]): Promise<GalleryItem[]> {
+  const deduped = dedupeGalleryItems(items);
+  const checks = await Promise.all(
+    deduped.map(async (item) => ({
+      item,
+      ok: await imageLoads(item.src || "")
+    }))
+  );
+
+  return checks.filter((entry) => entry.ok).map((entry) => entry.item);
+}
+
 async function loadPortalContent(): Promise<void> {
   if (isPortalContentLoading) {
     shouldReloadPortalContent = true;
@@ -282,7 +341,13 @@ async function loadPortalContent(): Promise<void> {
   isPortalContentLoading = true;
   try {
     const content = await fetchPublishedSiteContent();
-    renderPortalContent(content);
+    const safeGallery = await filterRenderableGallery(
+      Array.isArray(content.gallery) ? content.gallery : []
+    );
+    renderPortalContent({
+      ...content,
+      gallery: safeGallery
+    });
     lastPortalRefreshAt = Date.now();
   } catch (error) {
     console.warn("Falha ao carregar conteúdo do portal.", error);
