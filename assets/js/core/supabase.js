@@ -18,11 +18,11 @@ function encodeStoragePath(path) {
         .map((segment) => encodeURIComponent(segment))
         .join("/");
 }
-function resolvePublicImageUrl(path) {
+export function resolvePublicImageUrl(path) {
     if (!path) {
         return "";
     }
-    if (/^(?:https?:)?\/\//i.test(path) || path.startsWith("assets/")) {
+    if (/^(?:https?:)?\/\//i.test(path)) {
         return path;
     }
     const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);

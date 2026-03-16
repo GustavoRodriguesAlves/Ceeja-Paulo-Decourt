@@ -27,6 +27,7 @@ export interface SupabaseAdminSession {
     expiresAt: number;
     email: string;
 }
+export declare function resolvePublicImageUrl(path: string): string;
 export declare function extractSupabaseStoragePath(path: string): string;
 export declare function getSupabaseAdminSession(): SupabaseAdminSession | null;
 export declare function getRememberedSupabaseAdminSession(): SupabaseAdminSession | null;

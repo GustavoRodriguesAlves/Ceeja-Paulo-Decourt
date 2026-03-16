@@ -1,5 +1,5 @@
 import { createPortalImagePath, fetchPublishedSiteContent, isAllowedPortalImageFileName, readDraftSiteContent, loadEditorSiteContent, normalizePortalImageLibraryEntries, normalizeSiteContent, saveDraftSiteContent, } from "../core/site-content.js";
-import { clearSupabaseAdminSession, ensureSupabasePanelAccess, extractSupabaseStoragePath, fetchPanelAllowlist, fetchSupabaseEditorSiteContent, getSupabaseAdminSession, getSupabasePublicConfig, listSupabasePortalImageLibrary, manageSupabasePanelUser, signInSupabaseAdmin, syncPanelAllowlist, syncRememberedSupabaseAdminSession, syncSupabaseGallery, syncSupabaseNotices, syncSupabaseQuickLinks, uploadPortalImageToSupabase } from "../core/supabase.js";
+import { clearSupabaseAdminSession, ensureSupabasePanelAccess, extractSupabaseStoragePath, fetchPanelAllowlist, fetchSupabaseEditorSiteContent, getSupabaseAdminSession, getSupabasePublicConfig, listSupabasePortalImageLibrary, manageSupabasePanelUser, resolvePublicImageUrl, signInSupabaseAdmin, syncPanelAllowlist, syncRememberedSupabaseAdminSession, syncSupabaseGallery, syncSupabaseNotices, syncSupabaseQuickLinks, uploadPortalImageToSupabase } from "../core/supabase.js";
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 /**
  * @param {string} id
@@ -825,7 +825,7 @@ async function saveMediaWithUpload() {
                 {
                     path: uploadedImagePath,
                     name: uploadedImagePath.split("/").pop() || selectedFile.name,
-                    previewSrc: uploadedImagePath,
+                    previewSrc: uploadResult.publicUrl,
                     source: "repository"
                 }
             ]);
@@ -835,7 +835,7 @@ async function saveMediaWithUpload() {
         const payload = {
             id: mediaId.value || `media-${Date.now()}`,
             title: mediaTitle.value.trim(),
-            src: uploadedImagePath,
+            src: resolvePublicImageUrl(uploadedImagePath),
             alt: mediaAlt.value.trim(),
             order: Number(mediaOrder.value) || adminState.gallery.length + 1,
             published: mediaPublished.checked
@@ -847,7 +847,7 @@ async function saveMediaWithUpload() {
         else {
             adminState.gallery.push(payload);
         }
-        selectedLibraryImagePath = payload.src;
+        selectedLibraryImagePath = extractSupabaseStoragePath(payload.src);
         adminState.updatedAt = new Date().toISOString();
         saveDraftSiteContent(adminState);
         renderAll();
@@ -934,7 +934,8 @@ function fillMediaForm(item = null) {
     }
     selectedLibraryImagePath = item?.src ? extractSupabaseStoragePath(item.src) : "";
     if (item?.src) {
-        const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === item.src);
+        const itemPath = extractSupabaseStoragePath(item.src);
+        const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === itemPath);
         setMediaPreview(item.src, `Imagem escolhida: ${entry?.name || item.title || item.src}`, item.alt || item.title);
     }
     else {

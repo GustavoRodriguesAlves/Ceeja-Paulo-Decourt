@@ -20,6 +20,7 @@ import {
   listSupabasePortalImageLibrary,
   manageSupabasePanelUser,
   type PanelAccessEntry,
+  resolvePublicImageUrl,
   signInSupabaseAdmin,
   syncPanelAllowlist,
   syncRememberedSupabaseAdminSession,
@@ -1011,7 +1012,7 @@ async function saveMediaWithUpload(): Promise<void> {
         {
           path: uploadedImagePath,
           name: uploadedImagePath.split("/").pop() || selectedFile.name,
-          previewSrc: uploadedImagePath,
+          previewSrc: uploadResult.publicUrl,
           source: "repository"
         }
       ]);
@@ -1022,7 +1023,7 @@ async function saveMediaWithUpload(): Promise<void> {
     const payload = {
       id: mediaId.value || `media-${Date.now()}`,
       title: mediaTitle.value.trim(),
-      src: uploadedImagePath,
+      src: resolvePublicImageUrl(uploadedImagePath),
       alt: mediaAlt.value.trim(),
       order: Number(mediaOrder.value) || adminState.gallery.length + 1,
       published: mediaPublished.checked
@@ -1035,7 +1036,7 @@ async function saveMediaWithUpload(): Promise<void> {
       adminState.gallery.push(payload);
     }
 
-    selectedLibraryImagePath = payload.src;
+    selectedLibraryImagePath = extractSupabaseStoragePath(payload.src);
     adminState.updatedAt = new Date().toISOString();
     saveDraftSiteContent(adminState);
     renderAll();
@@ -1135,7 +1136,8 @@ function fillMediaForm(item: GalleryItem | null = null): void {
 
   selectedLibraryImagePath = item?.src ? extractSupabaseStoragePath(item.src) : "";
   if (item?.src) {
-    const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === item.src);
+    const itemPath = extractSupabaseStoragePath(item.src);
+    const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === itemPath);
     setMediaPreview(item.src, `Imagem escolhida: ${entry?.name || item.title || item.src}`, item.alt || item.title);
   } else {
     setMediaPreview("", "Selecione uma imagem da biblioteca ou envie um arquivo do computador.");

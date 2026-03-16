@@ -97,12 +97,12 @@ function encodeStoragePath(path: string): string {
     .join("/");
 }
 
-function resolvePublicImageUrl(path: string): string {
+export function resolvePublicImageUrl(path: string): string {
   if (!path) {
     return "";
   }
 
-  if (/^(?:https?:)?\/\//i.test(path) || path.startsWith("assets/")) {
+  if (/^(?:https?:)?\/\//i.test(path)) {
     return path;
   }
 
