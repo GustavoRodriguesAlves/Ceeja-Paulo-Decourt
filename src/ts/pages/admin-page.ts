@@ -21,7 +21,6 @@ import {
   manageSupabasePanelUser,
   type PanelAccessEntry,
   resolvePublicImageUrl,
-  signInSupabaseAdmin,
   syncPanelAllowlist,
   syncRememberedSupabaseAdminSession,
   syncSupabaseGallery,
@@ -210,12 +209,6 @@ const dashboardUpdatedAt = mustElement("dashboardUpdatedAt");
 const adminStatus = mustElement("adminStatus");
 const adminStatusMessage = mustElement("adminStatusMessage");
 const adminSyncIndicator = mustElement("adminSyncIndicator");
-const supabaseAuthForm = mustForm("supabaseAuthForm");
-const supabaseEmailInput = mustInput("supabaseEmailInput");
-const supabasePasswordInput = mustInput("supabasePasswordInput");
-const supabaseRememberSession = mustInput("supabaseRememberSession");
-const supabaseAuthStatus = mustElement("supabaseAuthStatus");
-const clearSupabaseSessionButton = mustButton("clearSupabaseSessionButton");
 
 const confirmModal = mustElement("confirmModal");
 const confirmModalCard = confirmModal.querySelector<HTMLElement>(".modal-card");
@@ -243,15 +236,12 @@ const saveNoticeButton = queryButton(noticeForm, 'button[type="submit"]');
 const saveLinkButton = queryButton(linkForm, 'button[type="submit"]');
 const saveMediaButton = queryButton(mediaForm, 'button[type="submit"]');
 const saveOwnerAccessButton = queryButton(ownerAccessForm, 'button[type="submit"]');
-const connectSupabaseButton = queryButton(supabaseAuthForm, 'button[type="submit"]');
 
 const publishLockedControls = [
   saveNoticeButton,
   saveLinkButton,
   saveMediaButton,
   saveOwnerAccessButton,
-  connectSupabaseButton,
-  clearSupabaseSessionButton,
   confirmActionButton,
   refreshImageLibraryButton
 ].filter((control): control is HTMLButtonElement => control instanceof HTMLButtonElement);
@@ -537,37 +527,6 @@ function setOwnerAccessBusy(nextState: boolean): void {
     saveOwnerAccessButton.disabled = nextState;
     saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar acesso";
   }
-}
-
-function updateSupabaseAuthStatus(): void {
-  const configured = isSupabaseConfigured();
-  const session = getSupabaseAdminSession();
-
-  if (!configured) {
-    supabaseAuthStatus.textContent =
-      "Supabase ainda não está habilitado neste projeto. O painel continuará usando apenas o fluxo legado.";
-    supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
-    clearSupabaseSessionButton.disabled = true;
-    return;
-  }
-
-  if (session) {
-    const scopeLabel = isOwnerPanelUser()
-      ? "Você também pode gerenciar os e-mails permitidos do painel."
-      : "Avisos e links rápidos já podem ser salvos no banco.";
-    supabaseAuthStatus.textContent =
-      `Sessão do Supabase conectada como ${session.email}. ${scopeLabel}`;
-    supabaseAuthStatus.className = "mt-4 text-sm text-green-700";
-    supabaseEmailInput.value = session.email;
-    supabasePasswordInput.value = "";
-    clearSupabaseSessionButton.disabled = isPublishing;
-    return;
-  }
-
-  supabaseAuthStatus.textContent =
-    "Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.";
-  supabaseAuthStatus.className = "mt-4 text-sm text-yellow-700";
-  clearSupabaseSessionButton.disabled = true;
 }
 
 function buildSupabasePublishErrorMessage(error: unknown, sectionLabel: string): string {
@@ -1535,7 +1494,6 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     currentPanelAccess =
       panelAllowlist.find((entry) => entry.email === currentPanelAccess?.email) || currentPanelAccess;
     updateOwnerAccessVisibility();
-    updateSupabaseAuthStatus();
     renderOwnerAccessList();
     fillOwnerAccessForm();
     setStatus("Acesso do painel salvo com sucesso. E-mail, senha e permissão já foram registrados.", "success");
@@ -1551,60 +1509,6 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     setPublishingState(false);
     setOwnerAccessBusy(false);
   }
-});
-
-supabaseAuthForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (isPublishing) {
-    return;
-  }
-
-  const email = supabaseEmailInput.value.trim().toLowerCase();
-  const password = supabasePasswordInput.value;
-
-  if (!email || !password) {
-    setStatus("Informe o e-mail e a senha da conta administrativa do Supabase.", "warning");
-    return;
-  }
-
-  try {
-    setPublishingState(true);
-    setStatus("Conectando a conta administrativa ao Supabase...", "info");
-    await signInSupabaseAdmin(email, password, supabaseRememberSession.checked);
-    currentPanelAccess = await ensureSupabasePanelAccess();
-    panelAllowlist = isOwnerPanelUser() ? await fetchPanelAllowlist() : [];
-    updateOwnerAccessVisibility();
-    updateSupabaseAuthStatus();
-
-    const localDraft = readDraftSiteContent();
-    if (localDraft) {
-      adminState = cloneContent(localDraft);
-      renderAll();
-    }
-
-    setStatus(
-      "Conta do Supabase conectada. A partir de agora, avisos e links rápidos podem ser publicados direto no banco.",
-      "success",
-      isPublishedSnapshotInSync() ? "synced" : "local"
-    );
-  } catch (error) {
-    console.error(error);
-    currentPanelAccess = null;
-    panelAllowlist = [];
-    updateOwnerAccessVisibility();
-    setStatus(buildSupabasePublishErrorMessage(error, "a conexão editorial"), "danger");
-  } finally {
-    setPublishingState(false);
-  }
-});
-
-clearSupabaseSessionButton?.addEventListener("click", () => {
-  clearSupabaseAdminSession();
-  currentPanelAccess = null;
-  panelAllowlist = [];
-  updateOwnerAccessVisibility();
-  updateSupabaseAuthStatus();
-  setStatus("Sessão administrativa do Supabase removida deste navegador.", "warning", "local");
 });
 
 clearNoticeFormButton?.addEventListener("click", () => fillNoticeForm());
@@ -1694,7 +1598,6 @@ async function bootstrap() {
   fillOwnerAccessForm();
   renderAll();
   showPanel("dashboardPanel");
-  updateSupabaseAuthStatus();
   await refreshImageLibrary({ silent: true });
 
   if (!publishedContent) {

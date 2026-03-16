@@ -123,37 +123,11 @@
 
             <div class="space-y-6">
               <div class="panel-soft p-6">
-                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Conexão editorial com Supabase</h3>
-                <p class="helper-text mb-4">O Supabase passa a ser a fonte principal de avisos e links rápidos do portal. A secretaria conecta uma conta administrativa aqui e salva as alterações diretamente no banco.</p>
-                <form id="supabaseAuthForm" class="space-y-4">
-                  <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label for="supabaseEmailInput" class="mb-1 block text-sm font-semibold">E-mail administrativo</label>
-                      <input id="supabaseEmailInput" type="email" class="field" placeholder="chief@gmail.com" autocomplete="username" />
-                    </div>
-                    <div>
-                      <label for="supabasePasswordInput" class="mb-1 block text-sm font-semibold">Senha do Supabase</label>
-                      <input id="supabasePasswordInput" type="password" class="field" placeholder="Informe a senha da conta" autocomplete="current-password" />
-                    </div>
-                  </div>
-                  <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
-                    <input id="supabaseRememberSession" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked />
-                    Manter esta conexão ativa neste navegador
-                  </label>
-                  <div class="flex flex-wrap gap-3">
-                    <button type="submit" class="btn-primary text-sm">Conectar Supabase</button>
-                    <button id="clearSupabaseSessionButton" type="button" class="btn-secondary text-sm">Desconectar</button>
-                  </div>
-                </form>
-                <p id="supabaseAuthStatus" class="mt-4 text-sm text-yellow-700">Supabase configurado, mas ainda sem uma sessão administrativa conectada neste painel.</p>
+                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Painel conectado</h3>
+                <p class="helper-text mb-4">Esta área já está autenticada com a sua conta administrativa do Supabase.</p>
+                <p class="helper-text">Avisos, links rápidos e galeria são salvos diretamente no banco. Para sair, use o botão <strong>Sair</strong> no topo da página.</p>
               </div>
-
-              <div class="panel-soft p-6">
-                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Fluxo editorial</h3>
-                <p class="helper-text mb-4">O painel já publica avisos, links rápidos e galeria diretamente no Supabase. O GitHub continua responsável apenas pelo código do site e pelo deploy do frontend.</p>
-                <p class="helper-text">Com isso, a secretaria não precisa mais lidar com token manual para atualizar o conteúdo do portal.</p>
-              </div>
-          </div>
+            </div>
         </section>
 
         <section id="noticesPanel" class="content-panel" hidden>
