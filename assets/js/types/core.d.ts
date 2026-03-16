@@ -36,28 +36,6 @@ export interface SiteContent {
   gallery: GalleryItem[];
 }
 
-export interface GitHubRateHeaders {
-  retryAfter?: string | null;
-  rateRemaining?: string | null;
-  rateReset?: string | null;
-}
-
-export interface GitHubRepositoryEntry {
-  type?: string;
-  name?: string;
-  path: string;
-  sha?: string;
-  content?: string;
-  download_url?: string | null;
-}
-
-export interface GitHubContentWriteResponse {
-  content?: GitHubRepositoryEntry;
-  commit?: {
-    sha?: string;
-  };
-}
-
 export type PortalImageLibrarySource = "repository" | "gallery" | "upload";
 
 export interface PortalImageLibraryEntry {

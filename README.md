@@ -1,6 +1,6 @@
 # CEEJA Paulo Decourt
 
-Site institucional estático do CEEJA Paulo Decourt, publicado via GitHub Pages.
+Site institucional do CEEJA Paulo Decourt, publicado no GitHub Pages.
 
 ## Estrutura
 
@@ -11,49 +11,51 @@ Site institucional estático do CEEJA Paulo Decourt, publicado via GitHub Pages.
 - `assets/images/`: logo e imagens do site
 - `assets/css/shared/`: estilos compartilhados
 - `assets/css/pages/`: estilos específicos por página
-- `assets/js/core/`: autenticação e conteúdo compartilhado
-- `assets/js/pages/`: scripts específicos por página
-- `data/site-content.json`: conteúdo estruturado da home
-- `docs/`: documentação do projeto e arquivos de referência
+- `assets/js/core/`: módulos gerados a partir do TypeScript para autenticação e conteúdo compartilhado
+- `assets/js/pages/`: scripts gerados por página
+- `src/ts/`: código-fonte principal em TypeScript
+- `data/site-content.json`: fallback local de conteúdo público
+- `supabase/`: SQL, configuração e functions do Supabase
+- `docs/`: documentação de apoio
 
-## Critérios usados na organização
+## Arquitetura atual
 
-- estilos e scripts foram separados do HTML;
-- código compartilhado foi isolado de código específico de página;
-- imagens e documentos saíram da raiz do projeto;
-- a estrutura foi mantida simples para funcionar bem no GitHub Pages.
-
-## Publicação
-
-O projeto já possui deploy automático configurado em `.github/workflows/deploy-pages.yml`.
+- o GitHub continua responsável pelo código e pelo deploy do frontend;
+- o Supabase é a fonte principal do conteúdo editorial:
+  - avisos
+  - links rápidos
+  - galeria do portal
+- `data/site-content.json` permanece como fallback local de leitura.
 
 ## Desenvolvimento
 
 Scripts disponíveis:
 
-- `npm run typecheck`: valida os arquivos TypeScript sem gerar saída.
-- `npm run build`: gera os arquivos JavaScript em `assets/js`.
-- `npm run verify`: executa `typecheck` e `build` em sequência.
-- `npm run clean`: remove os arquivos JavaScript e `.d.ts` gerados a partir de `src/ts`.
-- `npm run rebuild`: limpa os gerados e executa um novo build completo.
-- `npm run typecheck:watch`: mantém a checagem de tipos em modo observação.
-- `npm run build:watch`: recompila automaticamente enquanto os arquivos `.ts` mudam.
+- `npm run typecheck`: valida os arquivos TypeScript sem gerar saída
+- `npm run build`: gera os arquivos JavaScript em `assets/js`
+- `npm run verify`: executa `typecheck` e `build` em sequência
+- `npm run clean`: remove os arquivos JavaScript e `.d.ts` gerados a partir de `src/ts`
+- `npm run rebuild`: limpa os gerados e executa um novo build completo
+- `npm run typecheck:watch`: mantém a checagem de tipos em modo observação
+- `npm run build:watch`: recompila automaticamente enquanto os arquivos `.ts` mudam
 
-## Piloto com Supabase
+## Supabase
 
-O projeto já tem uma base pronta para testar Supabase sem desmontar o fluxo atual.
+Arquivos principais:
 
-- configuração pública: `src/ts/core/supabase-config.ts`
-- leitura pública: `src/ts/core/supabase.ts`
-- SQL inicial: `supabase/setup.sql`
-- seed de teste: `supabase/seed.sql`
-- guia curto: `docs/supabase-piloto.md`
+- `src/ts/core/supabase-config.ts`
+- `src/ts/core/supabase.ts`
+- `supabase/setup.sql`
+- `supabase/seed.sql`
+- `docs/supabase-piloto.md`
 
-Enquanto `enabled` estiver `false` em `supabase-config.ts`, o site continua usando apenas o fluxo atual.
+Se `enabled` estiver `false` em `supabase-config.ts`, o site volta a usar o fallback local.
 
-Para publicar:
+## Publicação
 
-1. envie o repositório para a branch `main`;
-2. abra `Settings > Pages`;
-3. selecione `GitHub Actions` em `Build and deployment`;
-4. aguarde a execução do workflow `Deploy GitHub Pages`.
+Para publicar o frontend:
+
+1. envie o repositório para a branch `main`
+2. abra `Settings > Pages`
+3. selecione `GitHub Actions` em `Build and deployment`
+4. aguarde a execução do workflow `Deploy GitHub Pages`
