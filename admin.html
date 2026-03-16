@@ -50,8 +50,8 @@
       <div class="content-wrap">
         <header class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-6">
           <div>
-            <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Gestão de Conteúdo</h2>
-            <p class="helper-text mt-1">Ambiente de edição do site oficial do CEEJA Paulo Decourt</p>
+            <h2 class="serif text-3xl font-bold text-[var(--brand-primary)]">Painel da Secretaria</h2>
+            <p class="helper-text mt-1">Edite avisos, links, imagens e acessos do site oficial do CEEJA Paulo Decourt.</p>
           </div>
           <div class="flex gap-3">
             <a href="index.html?home=1" class="btn-secondary text-sm">
@@ -79,7 +79,7 @@
               </div>
             </article>
             <article class="metric-card border-l-4 border-l-green-500">
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Atalhos</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Links</p>
               <div class="mt-2 flex items-baseline gap-2">
                 <p id="dashboardLinkCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
                 <span class="text-sm font-medium text-gray-400">ativos</span>
@@ -89,51 +89,50 @@
               <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Galeria</p>
               <div class="mt-2 flex items-baseline gap-2">
                 <p id="dashboardGalleryCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
-                <span class="text-sm font-medium text-gray-400">fotos</span>
+                <span class="text-sm font-medium text-gray-400">imagens</span>
               </div>
             </article>
             <article class="metric-card border-l-4 border-l-yellow-500">
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última edição</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última atualização</p>
               <div class="mt-2 text-sm font-medium text-gray-600">
                 <p id="dashboardUpdatedAt" class="text-lg font-bold text-[var(--brand-primary)]">-</p>
               </div>
             </article>
           </div>
 
-          <div class="grid gap-6 lg:grid-cols-2">
-            <div class="panel p-6">
-              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Ações rápidas</h3>
-              <div class="space-y-3">
-                <button id="goToNoticesButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
-                  <div>
-                    <span class="block font-semibold text-gray-800">Criar novo aviso</span>
-                    <span class="block text-sm text-gray-500">Atualize o mural do Portal do Aluno</span>
-                  </div>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-                <button id="goToMediaButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
-                  <div>
-                    <span class="block font-semibold text-gray-800">Atualizar galeria do portal</span>
-                    <span class="block text-sm text-gray-500">Envie imagens novas ou reaproveite arquivos já cadastrados na biblioteca</span>
-                  </div>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
+          <div class="panel p-6">
+            <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Ações rápidas</h3>
+            <div class="space-y-3">
+              <button id="goToNoticesButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
+                <div>
+                  <span class="block font-semibold text-gray-800">Novo aviso</span>
+                  <span class="block text-sm text-gray-500">Atualize o mural do Portal do Aluno</span>
+                </div>
+                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              </button>
+              <button id="goToMediaButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
+                <div>
+                  <span class="block font-semibold text-gray-800">Galeria do portal</span>
+                  <span class="block text-sm text-gray-500">Envie imagens novas ou reaproveite arquivos já cadastrados na biblioteca</span>
+                </div>
+                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              </button>
             </div>
+          </div>
         </section>
 
         <section id="noticesPanel" class="content-panel" hidden>
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-[var(--brand-secondary)]">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Formulário de Aviso</h3>
-                <p class="helper-text mt-2 mb-5">Adicione ou edite recados operacionais para o Portal do Aluno.</p>
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do aviso</h3>
+                <p class="helper-text mt-2 mb-5">Cadastre ou edite comunicados exibidos no Portal do Aluno.</p>
                 <form id="noticeForm" class="space-y-4">
                   <input id="noticeId" type="hidden" />
                   <div><label for="noticeTitle" class="mb-1 block text-sm font-semibold">Título principal</label><input id="noticeTitle" type="text" class="field" placeholder="Ex.: Abertos prazos para rematrícula" required /></div>
                   <div><label for="noticeSummary" class="mb-1 block text-sm font-semibold">Mensagem curta</label><textarea id="noticeSummary" class="field min-h-[100px]" placeholder="Informação rápida e direta" required></textarea></div>
                   <div class="grid grid-cols-2 gap-4">
-                    <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">Tag</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
+                  <div><label for="noticeCategory" class="mb-1 block text-sm font-semibold">Categoria</label><input id="noticeCategory" type="text" class="field" placeholder="Atenção" required /></div>
                     <div><label for="noticeDate" class="mb-1 block text-sm font-semibold">Data visível</label><input id="noticeDate" type="date" class="field" required /></div>
                   </div>
                   <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded border border-gray-100 mt-2">
@@ -151,7 +150,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Recados Cadastrados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Avisos cadastrados</h3>
               <div id="noticeItems" class="space-y-3"></div>
             </div>
           </div>
@@ -161,12 +160,12 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-green-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Formulário de Link</h3>
-                <p class="helper-text mt-2 mb-5">Crie botões de acesso externo para o Portal do Aluno.</p>
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do link</h3>
+                <p class="helper-text mt-2 mb-5">Cadastre botões de acesso rápido para os alunos.</p>
                 <form id="linkForm" class="space-y-4">
                   <input id="linkId" type="hidden" />
-                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Nome do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
-                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">URL do destino</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
+                  <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Texto do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
+                  <div><label for="linkUrl" class="mb-1 block text-sm font-semibold">Link de destino</label><input id="linkUrl" type="url" class="field" placeholder="https://..." required /></div>
                   <div class="bg-gray-50 p-3 rounded border border-gray-100 mt-2">
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Ativo para uso dos alunos</label>
                   </div>
@@ -181,7 +180,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links Rápidos Gerenciados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links cadastrados</h3>
               <div id="linkItems" class="space-y-3"></div>
             </div>
           </div>
@@ -191,22 +190,22 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-purple-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Cadastrar Imagem</h3>
-                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já disponível na biblioteca.</p>
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados da imagem</h3>
+                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já salvo na biblioteca.</p>
                 <form id="mediaForm" class="space-y-4">
                   <input id="mediaId" type="hidden" />
-                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
-                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">Texto alternativo</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
+                  <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
+                  <div><label for="mediaAlt" class="mb-1 block text-sm font-semibold">Descrição da imagem</label><input id="mediaAlt" type="text" class="field" placeholder="Breve descrição da imagem..." required /></div>
                   <div class="grid grid-cols-2 gap-4">
                     <div><label for="mediaOrder" class="mb-1 block text-sm font-semibold">Ordem no portal</label><input id="mediaOrder" type="number" min="1" class="field" placeholder="1" required /></div>
                   </div>
                   <div>
-                    <label for="mediaFile" class="mb-1 block text-sm font-semibold">Nova imagem do computador</label>
+                    <label for="mediaFile" class="mb-1 block text-sm font-semibold">Nova imagem</label>
                     <input id="mediaFile" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="field media-file-input" />
                     <p class="helper-text mt-2">Formatos aceitos: JPG, JPEG, PNG e WEBP. Tamanho recomendado de até 5 MB.</p>
                   </div>
                   <div>
-                    <label for="mediaPath" class="mb-1 block text-sm font-semibold">Imagem escolhida</label>
+                    <label for="mediaPath" class="mb-1 block text-sm font-semibold">Arquivo selecionado</label>
                     <input id="mediaPath" type="text" class="field font-mono text-sm" placeholder="Selecione uma imagem abaixo ou envie uma nova" readonly />
                   </div>
 
@@ -237,7 +236,7 @@
                 <div class="flex items-center justify-between gap-3 mb-3">
                   <div>
                     <h3 class="text-xl font-bold text-[var(--brand-primary)]">Biblioteca de Imagens</h3>
-                    <p class="helper-text mt-1">Escolha uma imagem já enviada para a biblioteca ou use as que já estão cadastradas na galeria.</p>
+                    <p class="helper-text mt-1">Escolha uma imagem já enviada para a biblioteca ou aproveite as que já estão na galeria.</p>
                   </div>
                   <button id="refreshImageLibraryButton" type="button" class="btn-secondary text-sm">Atualizar biblioteca</button>
                 </div>
@@ -245,7 +244,7 @@
               </div>
 
               <div>
-                <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Galeria Ativa</h3>
+                <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Imagens publicadas</h3>
                 <div id="mediaItems" class="space-y-3"></div>
               </div>
             </div>
@@ -256,8 +255,8 @@
           <div class="section-grid">
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-amber-500">
-                <h3 class="text-xl font-bold text-[var(--brand-primary)]">E-mails permitidos</h3>
-                <p class="helper-text mt-2 mb-5">Somente o dono do painel pode cadastrar, editar ou remover e-mails autorizados a entrar nesta área.</p>
+                <h3 class="text-xl font-bold text-[var(--brand-primary)]">Acessos do painel</h3>
+                <p class="helper-text mt-2 mb-5">Somente o dono do painel pode cadastrar, editar ou remover acessos desta área.</p>
                 <form id="ownerAccessForm" class="space-y-4">
                   <input id="ownerAccessId" type="hidden" />
                   <div>
@@ -270,7 +269,7 @@
                     <p class="helper-text mt-2">No cadastro novo, a senha é obrigatória. Ao editar um acesso existente, deixe em branco para manter a senha atual.</p>
                   </div>
                   <div>
-                    <label for="ownerAccessRole" class="mb-1 block text-sm font-semibold">Nível de acesso</label>
+                    <label for="ownerAccessRole" class="mb-1 block text-sm font-semibold">Perfil</label>
                     <select id="ownerAccessRole" class="field" required>
                       <option value="editor">Secretaria</option>
                       <option value="owner">Dono do painel</option>
@@ -293,7 +292,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Usuários autorizados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Acessos cadastrados</h3>
               <div id="ownerAccessItems" class="space-y-3"></div>
             </div>
           </div>

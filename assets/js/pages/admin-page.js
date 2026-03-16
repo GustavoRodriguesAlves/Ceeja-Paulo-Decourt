@@ -256,26 +256,26 @@ function updateSyncIndicator(forcedState = "") {
         }
     }
     const config = {
-        synced: { text: "Publicado no site", className: "sync-indicator sync-indicator-success" },
-        local: { text: "Salvo só neste computador", className: "sync-indicator sync-indicator-warning" },
-        pending: { text: "Pronto para publicar", className: "sync-indicator sync-indicator-warning" },
-        publishing: { text: "Publicando no site...", className: "sync-indicator sync-indicator-info" },
-        offline: { text: "Site público indisponível", className: "sync-indicator sync-indicator-danger" }
-    }[state] || { text: "Sincronizando", className: "sync-indicator sync-indicator-info" };
+        synced: { text: "No ar", className: "sync-indicator sync-indicator-success" },
+        local: { text: "Rascunho local", className: "sync-indicator sync-indicator-warning" },
+        pending: { text: "Aguardando envio", className: "sync-indicator sync-indicator-warning" },
+        publishing: { text: "Salvando...", className: "sync-indicator sync-indicator-info" },
+        offline: { text: "Sem resposta do site", className: "sync-indicator sync-indicator-danger" }
+    }[state] || { text: "Verificando", className: "sync-indicator sync-indicator-info" };
     adminSyncIndicator.textContent = config.text;
     adminSyncIndicator.className = config.className;
     adminSyncIndicator.title =
         state === "synced"
             ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
             : state === "publishing"
-                ? "O painel está enviando as alterações para o Supabase e atualizando o conteúdo público."
+                ? "O painel está enviando as alterações para o Supabase."
                 : state === "pending"
-                    ? `Existe um rascunho diferente do site público. Última versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+                    ? `Existe um rascunho diferente do que está no site. Última versão conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
                     : state === "local"
                         ? "Existe conteúdo salvo apenas neste computador."
                         : state === "offline"
-                            ? "O painel não conseguiu consultar a versão publicada do site agora."
-                            : "O painel está verificando o estado da publicação.";
+                            ? "O painel não conseguiu consultar a versão pública do site agora."
+                            : "O painel está verificando o estado do conteúdo.";
 }
 /**
  * @param {string} message
