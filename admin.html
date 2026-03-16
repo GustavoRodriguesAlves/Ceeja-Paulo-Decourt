@@ -114,18 +114,10 @@
                 <button id="goToMediaButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
                   <div>
                     <span class="block font-semibold text-gray-800">Atualizar galeria do portal</span>
-                    <span class="block text-sm text-gray-500">Envie imagens ou reaproveite arquivos já existentes no repositório</span>
+                    <span class="block text-sm text-gray-500">Envie imagens novas ou reaproveite arquivos já cadastrados na biblioteca</span>
                   </div>
                   <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
-              </div>
-            </div>
-
-            <div class="space-y-6">
-              <div class="panel-soft p-6">
-                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Painel conectado</h3>
-                <p class="helper-text mb-4">Esta área já está autenticada com a sua conta administrativa do Supabase.</p>
-                <p class="helper-text">Avisos, links rápidos e galeria são salvos diretamente no banco. Para sair, use o botão <strong>Sair</strong> no topo da página.</p>
               </div>
             </div>
         </section>
@@ -200,7 +192,7 @@
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-purple-500">
                 <h3 class="text-xl font-bold text-[var(--brand-primary)]">Cadastrar Imagem</h3>
-                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já disponível no repositório.</p>
+                <p class="helper-text mt-2 mb-5">Envie uma nova imagem do computador ou reaproveite um arquivo já disponível na biblioteca.</p>
                 <form id="mediaForm" class="space-y-4">
                   <input id="mediaId" type="hidden" />
                   <div><label for="mediaTitle" class="mb-1 block text-sm font-semibold">Título interno</label><input id="mediaTitle" type="text" class="field" placeholder="Ex.: Evento Sala de Leitura" required /></div>
@@ -245,7 +237,7 @@
                 <div class="flex items-center justify-between gap-3 mb-3">
                   <div>
                     <h3 class="text-xl font-bold text-[var(--brand-primary)]">Biblioteca de Imagens</h3>
-                    <p class="helper-text mt-1">Escolha uma imagem já enviada para o repositório ou use as que já estão cadastradas na galeria.</p>
+                    <p class="helper-text mt-1">Escolha uma imagem já enviada para a biblioteca ou use as que já estão cadastradas na galeria.</p>
                   </div>
                   <button id="refreshImageLibraryButton" type="button" class="btn-secondary text-sm">Atualizar biblioteca</button>
                 </div>
