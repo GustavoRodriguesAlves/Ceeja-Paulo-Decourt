@@ -268,7 +268,7 @@ function updateSyncIndicator(forcedState = "") {
         state === "synced"
             ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
             : state === "publishing"
-                ? "O painel está enviando as alterações para o Supabase."
+                ? "O painel está salvando as alterações."
                 : state === "pending"
                     ? `Existe um rascunho diferente do que está no site. Última versão conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
                     : state === "local"
@@ -307,21 +307,21 @@ function buildPublishErrorMessage(error) {
     }
     const publishError = error;
     if (publishError.status === 401 || publishError.status === 403) {
-        return "O Supabase recusou a publicação. Verifique se a sessão administrativa ainda é válida.";
+        return "O painel perdeu a autenticação. Entre novamente para continuar salvando.";
     }
     if (publishError.status === 404) {
-        return "O Supabase não encontrou o recurso solicitado. Verifique a configuração do projeto e do Storage.";
+        return "Não foi possível encontrar um dos recursos necessários para salvar este conteúdo.";
     }
     if (publishError.status === 409) {
         return "Outra alteração chegou antes desta publicação. O conteúdo continua salvo neste computador. Tente publicar novamente em alguns segundos.";
     }
     if (publishError.status === 422) {
-        return "O Supabase recusou esta publicação por validação. Revise os dados e tente novamente.";
+        return "Não foi possível salvar esse conteúdo. Revise os dados e tente novamente.";
     }
     if (publishError.status === 503) {
-        return "O Supabase ficou indisponível no momento da publicação. Tente novamente em instantes.";
+        return "O serviço de conteúdo ficou indisponível no momento do salvamento. Tente novamente em instantes.";
     }
-    return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique a sessão e as permissões no Supabase.";
+    return "Não foi possível salvar agora. O conteúdo continua salvo só neste computador.";
 }
 /**
  * @param {unknown} error
@@ -333,21 +333,21 @@ function buildLibraryRefreshErrorMessage(error) {
     }
     const repositoryError = error;
     if (repositoryError.status === 401 || repositoryError.status === 403) {
-        return "A biblioteca de imagens não pôde ser atualizada porque o Supabase recusou a sessão atual. Conecte-se novamente ao painel.";
+        return "A biblioteca de imagens não pôde ser atualizada porque a sessão atual expirou. Entre novamente no painel.";
     }
     if (repositoryError.status === 404) {
-        return "A biblioteca de imagens não pôde ser atualizada porque o bucket de mídia não foi encontrado no Supabase.";
+        return "A biblioteca de imagens não pôde ser atualizada porque a pasta de mídia não foi encontrada.";
     }
     if (repositoryError.status === 409 || repositoryError.status === 422) {
-        return "A biblioteca de imagens encontrou um conflito temporário ao consultar o Supabase. Tente novamente em alguns segundos.";
+        return "A biblioteca de imagens encontrou um conflito temporário. Tente novamente em alguns segundos.";
     }
     if (repositoryError.status === 429) {
-        return "O Supabase limitou temporariamente as consultas da biblioteca de imagens. Aguarde um pouco e tente novamente.";
+        return "A biblioteca de imagens foi consultada muitas vezes em sequência. Aguarde um pouco e tente novamente.";
     }
     if (repositoryError.status === 503) {
-        return "O Supabase estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
+        return "O serviço de imagens ficou indisponível no momento da atualização. Tente novamente em instantes.";
     }
-    return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão com o Supabase e o acesso ao bucket.";
+    return "Não foi possível atualizar a biblioteca de imagens agora.";
 }
 function isSupabaseConfigured() {
     return getSupabasePublicConfig().enabled;
@@ -401,18 +401,18 @@ function setOwnerAccessBusy(nextState) {
 function buildSupabasePublishErrorMessage(error, sectionLabel) {
     const message = error instanceof Error ? error.message : "";
     if (message.includes("não está autorizado")) {
-        return "Este e-mail foi autenticado no Supabase, mas ainda não está liberado para usar o painel.";
+        return "Este e-mail ainda não está liberado para usar o painel.";
     }
     if (message.includes("Invalid login credentials")) {
-        return `Não foi possível autenticar o Supabase para salvar ${sectionLabel}. Verifique e-mail e senha da conta administrativa.`;
+        return `Não foi possível confirmar a conta que está usando o painel para salvar ${sectionLabel}. Verifique e-mail e senha.`;
     }
     if (message.includes("JWT") || message.includes("refresh")) {
-        return `A sessão do Supabase expirou ao salvar ${sectionLabel}. Conecte novamente a conta administrativa e tente outra vez.`;
+        return `A sessão do painel expirou ao salvar ${sectionLabel}. Entre novamente e tente outra vez.`;
     }
     if (message.includes("new row violates row-level security") || message.includes("permission denied")) {
-        return `O Supabase recusou a gravação de ${sectionLabel}. Verifique se as políticas de escrita para usuários autenticados já foram aplicadas.`;
+        return `O painel não conseguiu salvar ${sectionLabel} por falta de permissão.`;
     }
-    return `Não foi possível salvar ${sectionLabel} no Supabase agora. O rascunho continua salvo neste navegador.`;
+    return `Não foi possível salvar ${sectionLabel} agora. O rascunho continua salvo neste navegador.`;
 }
 /**
  * @param {boolean} nextState
@@ -566,7 +566,7 @@ function renderImageLibrary() {
         return;
     }
     if (!imageLibraryEntries.length) {
-        imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Envie a primeira imagem ao Supabase Storage para começar a biblioteca.</div>';
+        imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Envie a primeira imagem para começar a biblioteca.</div>';
         return;
     }
     const activeGalleryPaths = new Set(adminState.gallery.map((item) => extractSupabaseStoragePath(item.src)));
@@ -630,7 +630,7 @@ async function refreshImageLibrary(options = {}) {
         mergeImageLibraryEntries(repositoryEntries);
         renderImageLibrary();
         if (!silent && repositoryEntries.length) {
-            setStatus("Biblioteca de imagens atualizada a partir do Supabase.", "success");
+            setStatus("Biblioteca de imagens atualizada com sucesso.", "success");
         }
     }
     catch (error) {
@@ -647,16 +647,16 @@ async function saveNoticesToPrimaryStore(localMessage) {
     saveDraftSiteContent(adminState);
     renderAll();
     if (!isSupabaseConfigured()) {
-        setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+        setStatus(`${localMessage} O serviço de conteúdo ainda não está habilitado neste projeto.`, "warning", "local");
         return;
     }
     if (!isSupabaseConnected()) {
-        setStatus(`${localMessage} Conecte o Supabase para publicar os avisos no portal.`, "warning", "local");
+        setStatus(`${localMessage} Entre novamente no painel para publicar os avisos.`, "warning", "local");
         return;
     }
     try {
         setPublishingState(true);
-        setStatus("Salvando avisos no Supabase...", "info", "publishing");
+        setStatus("Salvando avisos...", "info", "publishing");
         const persistedNotices = await syncSupabaseNotices(adminState.notices);
         adminState.notices = persistedNotices;
         adminState.updatedAt = new Date().toISOString();
@@ -667,7 +667,7 @@ async function saveNoticesToPrimaryStore(localMessage) {
         });
         saveDraftSiteContent(adminState);
         renderAll();
-        setStatus("Avisos salvos no Supabase com sucesso.", "success", "synced");
+        setStatus("Avisos salvos com sucesso.", "success", "synced");
     }
     catch (error) {
         console.error(error);
@@ -682,16 +682,16 @@ async function saveQuickLinksToPrimaryStore(localMessage) {
     saveDraftSiteContent(adminState);
     renderAll();
     if (!isSupabaseConfigured()) {
-        setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+        setStatus(`${localMessage} O serviço de conteúdo ainda não está habilitado neste projeto.`, "warning", "local");
         return;
     }
     if (!isSupabaseConnected()) {
-        setStatus(`${localMessage} Conecte o Supabase para publicar os links rápidos no portal.`, "warning", "local");
+        setStatus(`${localMessage} Entre novamente no painel para publicar os links.`, "warning", "local");
         return;
     }
     try {
         setPublishingState(true);
-        setStatus("Salvando links rápidos no Supabase...", "info", "publishing");
+        setStatus("Salvando links...", "info", "publishing");
         const persistedLinks = await syncSupabaseQuickLinks(adminState.quickLinks);
         adminState.quickLinks = persistedLinks;
         adminState.updatedAt = new Date().toISOString();
@@ -702,7 +702,7 @@ async function saveQuickLinksToPrimaryStore(localMessage) {
         });
         saveDraftSiteContent(adminState);
         renderAll();
-        setStatus("Links rápidos salvos no Supabase com sucesso.", "success", "synced");
+        setStatus("Links salvos com sucesso.", "success", "synced");
     }
     catch (error) {
         console.error(error);
@@ -717,16 +717,16 @@ async function saveMediaWithCurrentGallery(localMessage) {
     saveDraftSiteContent(adminState);
     renderAll();
     if (!isSupabaseConfigured()) {
-        setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+        setStatus(`${localMessage} O serviço de conteúdo ainda não está habilitado neste projeto.`, "warning", "local");
         return;
     }
     if (!isSupabaseConnected()) {
-        setStatus(`${localMessage} Conecte o Supabase para publicar a galeria no portal.`, "warning", "local");
+        setStatus(`${localMessage} Entre novamente no painel para publicar a galeria.`, "warning", "local");
         return;
     }
     try {
         setPublishingState(true);
-        setStatus("Salvando galeria no Supabase...", "info", "publishing");
+        setStatus("Salvando galeria...", "info", "publishing");
         const persistedGallery = await syncSupabaseGallery(adminState.gallery);
         adminState.gallery = persistedGallery;
         adminState.updatedAt = new Date().toISOString();
@@ -738,7 +738,7 @@ async function saveMediaWithCurrentGallery(localMessage) {
         });
         renderAll();
         await refreshImageLibrary({ silent: true });
-        setStatus(`${localMessage} A galeria do portal já foi atualizada no Supabase.`, "success", "synced");
+        setStatus(`${localMessage} A galeria do portal foi atualizada com sucesso.`, "success", "synced");
     }
     catch (error) {
         console.error(error);
@@ -765,11 +765,11 @@ async function saveMediaWithUpload() {
             return;
         }
         if (!isSupabaseConfigured()) {
-            setStatus("O Supabase ainda não está habilitado neste projeto.", "warning", "local");
+            setStatus("O serviço de conteúdo ainda não está habilitado neste projeto.", "warning", "local");
             return;
         }
         if (!isSupabaseConnected()) {
-            setStatus("Conecte o Supabase antes de enviar uma nova imagem do computador.", "warning", "local");
+            setStatus("Entre novamente no painel antes de enviar uma nova imagem.", "warning", "local");
             return;
         }
     }
@@ -778,7 +778,7 @@ async function saveMediaWithUpload() {
     try {
         if (selectedFile) {
             setPublishingState(true);
-            setStatus("Enviando imagem para o Supabase Storage...", "info", "publishing");
+            setStatus("Enviando imagem...", "info", "publishing");
             const generatedPath = createPortalImagePath(mediaTitle.value.trim(), selectedFile.name);
             const uploadResult = await uploadPortalImageToSupabase(selectedFile, generatedPath);
             uploadedImagePath = uploadResult.path;
@@ -816,18 +816,18 @@ async function saveMediaWithUpload() {
         saveDraftSiteContent(adminState);
         renderAll();
         if (!isSupabaseConfigured()) {
-            setStatus("Imagem salva só neste computador. O Supabase ainda não está habilitado neste projeto.", "warning", "local");
+            setStatus("Imagem salva só neste computador. O serviço de conteúdo ainda não está habilitado neste projeto.", "warning", "local");
             fillMediaForm();
             return;
         }
         if (!isSupabaseConnected()) {
-            setStatus("Imagem salva só neste computador. Conecte o Supabase para publicá-la no portal.", "warning", "local");
+            setStatus("Imagem salva só neste computador. Entre novamente no painel para publicá-la no portal.", "warning", "local");
             fillMediaForm();
             return;
         }
         if (!isPublishing) {
             setPublishingState(true);
-            setStatus("Salvando galeria no Supabase...", "info", "publishing");
+            setStatus("Salvando galeria...", "info", "publishing");
         }
         const persistedGallery = await syncSupabaseGallery(adminState.gallery);
         adminState.gallery = persistedGallery;
@@ -848,7 +848,7 @@ async function saveMediaWithUpload() {
     catch (error) {
         console.error(error);
         if (uploadSucceeded) {
-            setStatus("A imagem foi enviada ao Supabase Storage, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.", "danger", "pending");
+            setStatus("A imagem foi enviada, mas a galeria ainda não foi atualizada no site. Salve novamente para concluir.", "danger", "pending");
         }
         else {
             setStatus(buildPublishErrorMessage(error), "danger", isSupabaseConnected() ? "pending" : "local");
@@ -1224,7 +1224,7 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     }
     try {
         setPublishingState(true);
-        setStatus("Salvando acesso do painel no Supabase...", "info");
+        setStatus("Salvando acesso do painel...", "info");
         const savedEntry = await manageSupabasePanelUser({
             id: ownerAccessId.value || undefined,
             email,
@@ -1347,6 +1347,6 @@ async function bootstrap() {
     }
     setStatus(isSupabaseConnected()
         ? `Existe um rascunho salvo neste computador diferente do site publicado. Última versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
-        : "Existe um rascunho salvo só neste computador. Conecte o Supabase para publicar essa versão no site.", "warning", isSupabaseConnected() ? "pending" : "local");
+        : "Existe um rascunho salvo só neste computador. Entre novamente no painel para publicar essa versão no site.", "warning", isSupabaseConnected() ? "pending" : "local");
 }
 bootstrap();

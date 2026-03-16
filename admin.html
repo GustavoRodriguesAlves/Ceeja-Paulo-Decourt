@@ -54,9 +54,9 @@
             <p class="helper-text mt-1">Edite avisos, links, imagens e acessos do site oficial do CEEJA Paulo Decourt.</p>
           </div>
           <div class="flex gap-3">
-            <a href="index.html?home=1" class="btn-secondary text-sm">
+              <a href="index.html?home=1" class="btn-secondary text-sm">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-              Ver site público
+              Ver site
             </a>
             <button id="logoutAdminButton" type="button" class="btn-danger text-sm">Sair</button>
           </div>
@@ -161,7 +161,7 @@
             <div class="form-sticky">
               <div class="panel p-6 shadow-md border-t-4 border-t-green-500">
                 <h3 class="text-xl font-bold text-[var(--brand-primary)]">Dados do link</h3>
-                <p class="helper-text mt-2 mb-5">Cadastre botões de acesso rápido para os alunos.</p>
+                <p class="helper-text mt-2 mb-5">Cadastre acessos rápidos que ficarão visíveis no portal dos alunos.</p>
                 <form id="linkForm" class="space-y-4">
                   <input id="linkId" type="hidden" />
                   <div><label for="linkLabel" class="mb-1 block text-sm font-semibold">Texto do botão</label><input id="linkLabel" type="text" class="field" placeholder="Ex.: Portal da SEDUC" required /></div>
@@ -170,7 +170,7 @@
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="linkPublished" type="checkbox" class="w-4 h-4 rounded text-green-600 focus:ring-green-500" checked />Ativo para uso dos alunos</label>
                   </div>
                   <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar link</button>
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
                     <button id="clearLinkForm" type="button" class="btn-secondary px-3" title="Novo">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
@@ -180,7 +180,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links cadastrados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Links publicados</h3>
               <div id="linkItems" class="space-y-3"></div>
             </div>
           </div>
@@ -222,7 +222,7 @@
                     <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer"><input id="mediaPublished" type="checkbox" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" checked />Exibir no site</label>
                   </div>
                   <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar imagem</button>
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
                     <button id="clearMediaForm" type="button" class="btn-secondary px-3" title="Nova imagem">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
@@ -235,10 +235,10 @@
               <div>
                 <div class="flex items-center justify-between gap-3 mb-3">
                   <div>
-                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Biblioteca de Imagens</h3>
+                    <h3 class="text-xl font-bold text-[var(--brand-primary)]">Biblioteca</h3>
                     <p class="helper-text mt-1">Escolha uma imagem já enviada para a biblioteca ou aproveite as que já estão na galeria.</p>
                   </div>
-                  <button id="refreshImageLibraryButton" type="button" class="btn-secondary text-sm">Atualizar biblioteca</button>
+                  <button id="refreshImageLibraryButton" type="button" class="btn-secondary text-sm">Atualizar</button>
                 </div>
                 <div id="imageLibrary" class="image-library-grid"></div>
               </div>
@@ -282,7 +282,7 @@
                     </label>
                   </div>
                   <div class="flex gap-2 pt-2">
-                    <button type="submit" class="btn-primary w-full justify-center">Salvar acesso</button>
+                    <button type="submit" class="btn-primary w-full justify-center">Salvar</button>
                     <button id="clearOwnerAccessForm" type="button" class="btn-secondary px-3" title="Novo acesso">
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
