@@ -23,6 +23,7 @@ type RequestPayload = {
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const inFlightPanelUserEmails = new Set<string>();
 
 function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -40,6 +41,16 @@ function normalizeEmail(email: string): string {
 
 function isPanelRole(value: string): value is PanelRole {
   return value === "owner" || value === "editor";
+}
+
+function isDuplicateAuthUserError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("already registered") ||
+    normalized.includes("already been registered") ||
+    normalized.includes("already exists") ||
+    normalized.includes("duplicate")
+  );
 }
 
 async function listAllAuthUsers(adminClient: ReturnType<typeof createClient>) {
@@ -152,6 +163,13 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Informe o e-mail que deve ser autorizado." }, 400);
   }
 
+  if (inFlightPanelUserEmails.has(email)) {
+    return jsonResponse(
+      { error: "Já existe uma solicitação em andamento para este e-mail. Aguarde alguns segundos e tente novamente." },
+      429
+    );
+  }
+
   if (!isPanelRole(role)) {
     return jsonResponse({ error: "Papel inválido para este acesso." }, 400);
   }
@@ -160,7 +178,10 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "O dono atual do painel não pode remover o próprio acesso." }, 400);
   }
 
-  const { data: existingAllowlistRow, error: allowlistLookupError } = await adminClient
+  inFlightPanelUserEmails.add(email);
+
+  try {
+    const { data: existingAllowlistRow, error: allowlistLookupError } = await adminClient
     .from("admin_allowlist")
     .select("id,email,role,active,created_at,updated_at")
     .or(
@@ -171,121 +192,136 @@ Deno.serve(async (request) => {
     .limit(1)
     .maybeSingle<AllowlistRow>();
 
-  if (allowlistLookupError) {
-    return jsonResponse({ error: "Não foi possível consultar a lista de e-mails permitidos." }, 500);
-  }
-
-  let authUsers: Array<{ id: string; email?: string | null }> = [];
-  try {
-    authUsers = await listAllAuthUsers(adminClient);
-  } catch {
-    return jsonResponse({ error: "Não foi possível consultar os usuários de autenticação." }, 500);
-  }
-
-  const previousEmail = existingAllowlistRow ? normalizeEmail(existingAllowlistRow.email) : "";
-  const existingAuthUser =
-    authUsers.find((entry) => normalizeEmail(String(entry.email || "")) === email) ||
-    (previousEmail && previousEmail !== email
-      ? authUsers.find((entry) => normalizeEmail(String(entry.email || "")) === previousEmail)
-      : undefined);
-
-  if (!existingAuthUser && !password) {
-    return jsonResponse(
-      { error: "Defina uma senha para criar um novo usuário do painel." },
-      400
-    );
-  }
-
-  if (password && password.length < 6) {
-    return jsonResponse(
-      { error: "A senha precisa ter pelo menos 6 caracteres." },
-      400
-    );
-  }
-
-  if (existingAuthUser) {
-    const updatePayload: Record<string, unknown> = {
-      email,
-      email_confirm: true,
-      app_metadata: {
-        panel_role: role
-      }
-    };
-
-    if (password) {
-      updatePayload.password = password;
+    if (allowlistLookupError) {
+      return jsonResponse({ error: "Não foi possível consultar a lista de e-mails permitidos." }, 500);
     }
 
-    const { error: updateUserError } = await adminClient.auth.admin.updateUserById(
-      existingAuthUser.id,
-      updatePayload
-    );
+    let authUsers: Array<{ id: string; email?: string | null }> = [];
+    try {
+      authUsers = await listAllAuthUsers(adminClient);
+    } catch {
+      return jsonResponse({ error: "Não foi possível consultar os usuários de autenticação." }, 500);
+    }
 
-    if (updateUserError) {
+    const previousEmail = existingAllowlistRow ? normalizeEmail(existingAllowlistRow.email) : "";
+    let existingAuthUser =
+      authUsers.find((entry) => normalizeEmail(String(entry.email || "")) === email) ||
+      (previousEmail && previousEmail !== email
+        ? authUsers.find((entry) => normalizeEmail(String(entry.email || "")) === previousEmail)
+        : undefined);
+
+    if (!existingAuthUser && !password) {
       return jsonResponse(
-        { error: `Não foi possível atualizar a conta deste e-mail: ${updateUserError.message}` },
+        { error: "Defina uma senha para criar um novo usuário do painel." },
         400
       );
     }
-  } else {
-    const { error: createUserError } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      app_metadata: {
-        panel_role: role
+
+    if (password && password.length < 6) {
+      return jsonResponse(
+        { error: "A senha precisa ter pelo menos 6 caracteres." },
+        400
+      );
+    }
+
+    if (existingAuthUser) {
+      const updatePayload: Record<string, unknown> = {
+        email,
+        email_confirm: true,
+        app_metadata: {
+          panel_role: role
+        }
+      };
+
+      if (password) {
+        updatePayload.password = password;
+      }
+
+      const { error: updateUserError } = await adminClient.auth.admin.updateUserById(
+        existingAuthUser.id,
+        updatePayload
+      );
+
+      if (updateUserError) {
+        return jsonResponse(
+          { error: `Não foi possível atualizar a conta deste e-mail: ${updateUserError.message}` },
+          400
+        );
+      }
+    } else {
+      const { error: createUserError } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        app_metadata: {
+          panel_role: role
+        }
+      });
+
+      if (createUserError) {
+        if (!isDuplicateAuthUserError(createUserError.message)) {
+          return jsonResponse(
+            { error: `Não foi possível criar a conta deste e-mail: ${createUserError.message}` },
+            400
+          );
+        }
+
+        authUsers = await listAllAuthUsers(adminClient);
+        existingAuthUser = authUsers.find((entry) => normalizeEmail(String(entry.email || "")) === email);
+
+        if (!existingAuthUser) {
+          return jsonResponse(
+            { error: `Não foi possível confirmar a conta já existente deste e-mail: ${createUserError.message}` },
+            400
+          );
+        }
+      }
+    }
+
+    const { error: upsertError } = await adminClient.from("admin_allowlist").upsert(
+      {
+        id: existingAllowlistRow?.id || allowlistId || crypto.randomUUID(),
+        email,
+        role,
+        active
+      },
+      {
+        onConflict: "id"
+      }
+    );
+
+    if (upsertError) {
+      return jsonResponse(
+        { error: `Não foi possível salvar a permissão deste e-mail: ${upsertError.message}` },
+        400
+      );
+    }
+
+    const { data: savedEntry, error: savedEntryError } = await adminClient
+      .from("admin_allowlist")
+      .select("id,email,role,active,created_at,updated_at")
+      .eq("email", email)
+      .limit(1)
+      .single<AllowlistRow>();
+
+    if (savedEntryError || !savedEntry) {
+      return jsonResponse(
+        { error: "A conta foi criada, mas não foi possível retornar o acesso salvo." },
+        500
+      );
+    }
+
+    return jsonResponse({
+      entry: {
+        id: savedEntry.id,
+        email: normalizeEmail(savedEntry.email),
+        role: savedEntry.role,
+        active: savedEntry.active,
+        createdAt: savedEntry.created_at,
+        updatedAt: savedEntry.updated_at
       }
     });
-
-    if (createUserError) {
-      return jsonResponse(
-        { error: `Não foi possível criar a conta deste e-mail: ${createUserError.message}` },
-        400
-      );
-    }
+  } finally {
+    inFlightPanelUserEmails.delete(email);
   }
-
-  const { error: upsertError } = await adminClient.from("admin_allowlist").upsert(
-    {
-      id: existingAllowlistRow?.id || allowlistId || crypto.randomUUID(),
-      email,
-      role,
-      active
-    },
-    {
-      onConflict: "id"
-    }
-  );
-
-  if (upsertError) {
-    return jsonResponse(
-      { error: `Não foi possível salvar a permissão deste e-mail: ${upsertError.message}` },
-      400
-    );
-  }
-
-  const { data: savedEntry, error: savedEntryError } = await adminClient
-    .from("admin_allowlist")
-    .select("id,email,role,active,created_at,updated_at")
-    .eq("email", email)
-    .limit(1)
-    .single<AllowlistRow>();
-
-  if (savedEntryError || !savedEntry) {
-    return jsonResponse(
-      { error: "A conta foi criada, mas não foi possível retornar o acesso salvo." },
-      500
-    );
-  }
-
-  return jsonResponse({
-    entry: {
-      id: savedEntry.id,
-      email: normalizeEmail(savedEntry.email),
-      role: savedEntry.role,
-      active: savedEntry.active,
-      createdAt: savedEntry.created_at,
-      updatedAt: savedEntry.updated_at
-    }
-  });
 });

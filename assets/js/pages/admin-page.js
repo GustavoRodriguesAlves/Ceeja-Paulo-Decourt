@@ -41,7 +41,7 @@ function mustInput(id) {
 function mustSelect(id) {
     const element = mustElement(id);
     if (!(element instanceof HTMLSelectElement)) {
-        throw new Error(`Sele??o obrigat?ria inv?lida: #${id}`);
+        throw new Error(`Seleção obrigatória inválida: #${id}`);
     }
     return element;
 }
@@ -104,6 +104,7 @@ let imageLibraryEntries = [];
 let mediaPreviewObjectUrl = "";
 let currentPanelAccess = null;
 let panelAllowlist = [];
+let isSavingOwnerAccess = false;
 const panelButtons = Array.from(document.querySelectorAll("[data-panel]"));
 const panels = Array.from(document.querySelectorAll(".content-panel"));
 const noticeForm = mustForm("noticeForm");
@@ -284,15 +285,15 @@ function updateSyncIndicator(forcedState = "") {
     adminSyncIndicator.className = config.className;
     adminSyncIndicator.title =
         state === "synced"
-            ? `ConteÃºdo jÃ¡ publicado no site. Ãšltima publicaÃ§Ã£o conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+            ? `Conteúdo já publicado no site. �altima publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
             : state === "publishing"
-                ? "O painel estÃ¡ enviando as alteraÃ§Ãµes para o repositÃ³rio e atualizando o site."
+                ? "O painel está enviando as alterações para o repositório e atualizando o site."
                 : state === "pending"
-                    ? `Existe um rascunho diferente do site pÃºblico. Ãšltima versÃ£o publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
+                    ? `Existe um rascunho diferente do site público. �altima versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
                     : state === "local"
-                        ? "Existe conteÃºdo salvo apenas neste computador."
+                        ? "Existe conteúdo salvo apenas neste computador."
                         : state === "offline"
-                            ? "O painel nÃ£o conseguiu consultar a versÃ£o publicada do site agora."
+                            ? "O painel não conseguiu consultar a versão publicada do site agora."
                             : "O painel estÃ¡ verificando o estado da publicaÃ§Ã£o.";
 }
 /**
@@ -374,7 +375,7 @@ function updateGitHubTokenStatus() {
         return;
     }
     githubTokenStatus.textContent = hasToken
-        ? "Token conectado. As alteraÃ§Ãµes serÃ£o enviadas ao GitHub automaticamente."
+        ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
         : "Nenhum token conectado. As alteraÃ§Ãµes ficarÃ£o apenas neste navegador atÃ© vocÃª conectar o GitHub.";
     githubTokenStatus.className = hasToken ? "text-sm text-green-700" : "text-sm text-yellow-700";
     if (clearGitHubTokenButton) {
@@ -401,6 +402,18 @@ function updateOwnerAccessVisibility() {
         showPanel("dashboardPanel");
     }
 }
+function setOwnerAccessBusy(nextState) {
+    isSavingOwnerAccess = nextState;
+    ownerAccessEmail.disabled = nextState;
+    ownerAccessPassword.disabled = nextState;
+    ownerAccessRole.disabled = nextState;
+    ownerAccessActive.disabled = nextState;
+    clearOwnerAccessFormButton.disabled = nextState;
+    if (saveOwnerAccessButton) {
+        saveOwnerAccessButton.disabled = nextState;
+        saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar acesso";
+    }
+}
 function updateSupabaseAuthStatus() {
     const configured = isSupabaseConfigured();
     const session = getSupabaseAdminSession();
@@ -413,10 +426,10 @@ function updateSupabaseAuthStatus() {
     }
     if (session) {
         const scopeLabel = isOwnerPanelUser()
-            ? "Voc? tamb?m pode gerenciar os e-mails permitidos do painel."
-            : "Avisos e links r?pidos j? podem ser salvos no banco.";
+            ? "Você também pode gerenciar os e-mails permitidos do painel."
+            : "Avisos e links rápidos já podem ser salvos no banco.";
         supabaseAuthStatus.textContent =
-            `Sess?o do Supabase conectada como ${session.email}. ${scopeLabel}`;
+            `Sessão do Supabase conectada como ${session.email}. ${scopeLabel}`;
         supabaseAuthStatus.className = "mt-4 text-sm text-green-700";
         supabaseEmailInput.value = session.email;
         supabasePasswordInput.value = "";
@@ -611,7 +624,7 @@ function renderImageLibrary() {
             <p class="image-library-name">${escapeHtml(item.name)}</p>
             <p class="image-library-path">${escapeHtml(item.path)}</p>
             <div class="image-library-actions">
-              <span class="image-library-badge">${isInGallery ? "Na galeria" : "DisponÃ­vel"}</span>
+              <span class="image-library-badge">${isInGallery ? "Na galeria" : "Disponível"}</span>
               <button type="button" class="btn-secondary text-xs px-3 py-1.5" data-use-library-image="${escapeHtml(item.path)}">Usar</button>
             </div>
           </div>
@@ -1082,7 +1095,7 @@ function renderOwnerAccessList() {
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <span class="chip">${escapeHtml(entry.role === "owner" ? "Dono" : "Secretaria")}</span>
               <span class="status-badge ${entry.active ? "status-live" : "status-draft"}">${entry.active ? "Ativo" : "Bloqueado"}</span>
-              ${isCurrentUser ? '<span class="status-badge status-live">VocÃª</span>' : ""}
+              ${isCurrentUser ? '<span class="status-badge status-live">Você</span>' : ""}
             </div>
             <h4 class="text-lg font-bold text-[var(--brand-primary)]">${escapeHtml(entry.email)}</h4>
             <p class="helper-text mt-1 text-sm">Atualizado em ${escapeHtml(formatDateTime(entry.updatedAt))}</p>
@@ -1218,17 +1231,20 @@ mediaForm?.addEventListener("submit", async (event) => {
 });
 ownerAccessForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (isPublishing || !isOwnerPanelUser()) {
+    if (isPublishing || isSavingOwnerAccess || !isOwnerPanelUser()) {
         return;
     }
+    setOwnerAccessBusy(true);
     const email = ownerAccessEmail.value.trim().toLowerCase();
     const password = ownerAccessPassword.value.trim();
     if (!email) {
         setStatus("Informe o e-mail que deve ser autorizado a entrar no painel.", "warning");
+        setOwnerAccessBusy(false);
         return;
     }
     if (!ownerAccessId.value && !password) {
         setStatus("Defina uma senha para o novo acesso antes de salvar.", "warning");
+        setOwnerAccessBusy(false);
         return;
     }
     const payload = {
@@ -1243,6 +1259,7 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
         payload.email === currentPanelAccess.email &&
         (payload.role !== "owner" || !payload.active)) {
         setStatus("O dono atual do painel não pode remover o próprio acesso por aqui.", "warning");
+        setOwnerAccessBusy(false);
         return;
     }
     const existingIndex = panelAllowlist.findIndex((item) => item.id === payload.id);
@@ -1257,6 +1274,7 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     }
     try {
         setPublishingState(true);
+        setStatus("Salvando acesso do painel no Supabase...", "info");
         const savedEntry = await manageSupabasePanelUser({
             id: ownerAccessId.value || undefined,
             email,
@@ -1287,6 +1305,7 @@ ownerAccessForm?.addEventListener("submit", async (event) => {
     }
     finally {
         setPublishingState(false);
+        setOwnerAccessBusy(false);
     }
 });
 supabaseAuthForm?.addEventListener("submit", async (event) => {
@@ -1478,7 +1497,7 @@ async function bootstrap() {
         return;
     }
     setStatus(getGitHubPublishToken()
-        ? `Existe um rascunho salvo neste computador diferente do site publicado. Ãšltima versÃ£o pÃºblica conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
+        ? `Existe um rascunho salvo neste computador diferente do site publicado. �altima versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
         : "Existe um rascunho salvo sÃ³ neste computador. Conecte o GitHub para publicar essa versÃ£o no site.", "warning", getGitHubPublishToken() ? "pending" : "local");
 }
 bootstrap();
