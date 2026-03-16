@@ -66,10 +66,22 @@
           <div class="status-banner-copy">
             <span id="adminStatusMessage">Carregando painel...</span>
           </div>
-          <span id="adminSyncIndicator" class="sync-indicator sync-indicator-info">Sincronizando</span>
+          <span id="adminSyncIndicator" class="sync-indicator sync-indicator-info">Verificando</span>
         </div>
 
         <section id="dashboardPanel" class="content-panel active">
+          <div class="dashboard-hero panel">
+            <div>
+              <p class="dashboard-eyebrow">Rotina da secretaria</p>
+              <h3 class="dashboard-title">Acompanhe o que está no ar e atualize o portal com rapidez.</h3>
+              <p class="helper-text dashboard-copy">Comece pelos atalhos abaixo para publicar avisos, revisar links úteis e manter a galeria visual do portal organizada.</p>
+            </div>
+            <div class="dashboard-hero-note">
+              <span class="dashboard-hero-note-label">Resumo do dia</span>
+              <p class="dashboard-hero-note-value">Tudo o que for salvo aqui reflete no portal dos alunos.</p>
+            </div>
+          </div>
+
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <article class="metric-card border-l-4 border-l-blue-500">
               <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Avisos</p>
@@ -77,6 +89,7 @@
                 <p id="dashboardNoticeCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
                 <span class="text-sm font-medium text-gray-400">ativos</span>
               </div>
+              <p class="metric-note">Comunicados visíveis para os alunos.</p>
             </article>
             <article class="metric-card border-l-4 border-l-green-500">
               <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Links</p>
@@ -84,6 +97,7 @@
                 <p id="dashboardLinkCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
                 <span class="text-sm font-medium text-gray-400">ativos</span>
               </div>
+              <p class="metric-note">Acessos rápidos publicados no portal.</p>
             </article>
             <article class="metric-card border-l-4 border-l-purple-500">
               <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Galeria</p>
@@ -91,26 +105,34 @@
                 <p id="dashboardGalleryCount" class="text-3xl font-black text-[var(--brand-primary)]">0</p>
                 <span class="text-sm font-medium text-gray-400">imagens</span>
               </div>
+              <p class="metric-note">Imagens visíveis na área do aluno.</p>
             </article>
             <article class="metric-card border-l-4 border-l-yellow-500">
               <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Última atualização</p>
               <div class="mt-2 text-sm font-medium text-gray-600">
                 <p id="dashboardUpdatedAt" class="text-lg font-bold text-[var(--brand-primary)]">-</p>
               </div>
+              <p class="metric-note">Referência da edição mais recente.</p>
             </article>
           </div>
 
           <div class="panel p-6">
-            <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Ações rápidas</h3>
-            <div class="space-y-3">
-              <button id="goToNoticesButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Atalhos</p>
+                <h3 class="text-lg font-bold text-[var(--brand-primary)]">Ações rápidas</h3>
+              </div>
+              <p class="helper-text">Escolha por onde você quer começar agora.</p>
+            </div>
+            <div class="quick-actions-grid">
+              <button id="goToNoticesButton" type="button" class="quick-action-card">
                 <div>
                   <span class="block font-semibold text-gray-800">Novo aviso</span>
                   <span class="block text-sm text-gray-500">Atualize o mural do Portal do Aluno</span>
                 </div>
                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
               </button>
-              <button id="goToMediaButton" type="button" class="w-full text-left px-4 py-3 rounded border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors flex items-center justify-between">
+              <button id="goToMediaButton" type="button" class="quick-action-card">
                 <div>
                   <span class="block font-semibold text-gray-800">Galeria do portal</span>
                   <span class="block text-sm text-gray-500">Envie imagens novas ou reaproveite arquivos já cadastrados na biblioteca</span>
@@ -150,7 +172,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Avisos cadastrados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Avisos publicados</h3>
               <div id="noticeItems" class="space-y-3"></div>
             </div>
           </div>
@@ -292,7 +314,7 @@
             </div>
 
             <div>
-              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Acessos cadastrados</h3>
+              <h3 class="text-xl font-bold text-[var(--brand-primary)] mb-5">Acessos ativos</h3>
               <div id="ownerAccessItems" class="space-y-3"></div>
             </div>
           </div>

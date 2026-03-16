@@ -395,7 +395,7 @@ function setOwnerAccessBusy(nextState) {
     clearOwnerAccessFormButton.disabled = nextState;
     if (saveOwnerAccessButton) {
         saveOwnerAccessButton.disabled = nextState;
-        saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar acesso";
+        saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar";
     }
 }
 function buildSupabasePublishErrorMessage(error, sectionLabel) {

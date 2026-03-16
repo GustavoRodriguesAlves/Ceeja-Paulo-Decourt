@@ -525,7 +525,7 @@ function setOwnerAccessBusy(nextState: boolean): void {
 
   if (saveOwnerAccessButton) {
     saveOwnerAccessButton.disabled = nextState;
-    saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar acesso";
+    saveOwnerAccessButton.textContent = nextState ? "Salvando..." : "Salvar";
   }
 }
 
