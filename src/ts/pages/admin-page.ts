@@ -1,35 +1,32 @@
 ﻿import {
   clearDraftSiteContent,
-  clearGitHubPublishToken,
   createPortalImagePath,
   fetchPublishedSiteContent,
-  fetchPublishedSiteContentMeta,
-  getGitHubPublishToken,
   isAllowedPortalImageFileName,
-  listPortalImageLibrary,
   readDraftSiteContent,
   loadEditorSiteContent,
   normalizePortalImageLibraryEntries,
   normalizeSiteContent,
-  publishSiteContentToGitHub,
   saveDraftSiteContent,
-  setGitHubPublishToken,
-  uploadPortalImageToGitHub
 } from "../core/site-content.js";
 import {
   clearSupabaseAdminSession,
   ensureSupabasePanelAccess,
+  extractSupabaseStoragePath,
   fetchPanelAllowlist,
   fetchSupabaseEditorSiteContent,
   getSupabaseAdminSession,
   getSupabasePublicConfig,
+  listSupabasePortalImageLibrary,
   manageSupabasePanelUser,
   type PanelAccessEntry,
   signInSupabaseAdmin,
   syncPanelAllowlist,
   syncRememberedSupabaseAdminSession,
+  syncSupabaseGallery,
   syncSupabaseNotices,
-  syncSupabaseQuickLinks
+  syncSupabaseQuickLinks,
+  uploadPortalImageToSupabase
 } from "../core/supabase.js";
 import type {
   GalleryItem,
@@ -161,7 +158,6 @@ const defaultContent = {
 let adminState: SiteContent = structuredClone(defaultContent);
 let publishedSnapshot: SiteContent = structuredClone(defaultContent);
 let pendingConfirmation: ConfirmHandler | null = null;
-let publishQueue: Promise<void> = Promise.resolve();
 let isPublishing = false;
 let lastFocusedElement: HTMLElement | null = null;
 let selectedLibraryImagePath = "";
@@ -219,11 +215,6 @@ const supabasePasswordInput = mustInput("supabasePasswordInput");
 const supabaseRememberSession = mustInput("supabaseRememberSession");
 const supabaseAuthStatus = mustElement("supabaseAuthStatus");
 const clearSupabaseSessionButton = mustButton("clearSupabaseSessionButton");
-const githubTokenForm = mustForm("githubTokenForm");
-const githubTokenInput = mustInput("githubTokenInput");
-const githubTokenStatus = mustElement("githubTokenStatus");
-const clearGitHubTokenButton = mustButton("clearGitHubTokenButton");
-const usePublishedContentButton = mustButton("usePublishedContentButton");
 
 const confirmModal = mustElement("confirmModal");
 const confirmModalCard = confirmModal.querySelector<HTMLElement>(".modal-card");
@@ -252,7 +243,6 @@ const saveLinkButton = queryButton(linkForm, 'button[type="submit"]');
 const saveMediaButton = queryButton(mediaForm, 'button[type="submit"]');
 const saveOwnerAccessButton = queryButton(ownerAccessForm, 'button[type="submit"]');
 const connectSupabaseButton = queryButton(supabaseAuthForm, 'button[type="submit"]');
-const connectGitHubButton = queryButton(githubTokenForm, 'button[type="submit"]');
 
 const publishLockedControls = [
   saveNoticeButton,
@@ -261,9 +251,6 @@ const publishLockedControls = [
   saveOwnerAccessButton,
   connectSupabaseButton,
   clearSupabaseSessionButton,
-  connectGitHubButton,
-  clearGitHubTokenButton,
-  usePublishedContentButton,
   confirmActionButton,
   refreshImageLibraryButton
 ].filter((control): control is HTMLButtonElement => control instanceof HTMLButtonElement);
@@ -357,7 +344,7 @@ function updateSyncIndicator(forcedState: SyncState = ""): void {
     return;
   }
 
-  const hasToken = Boolean(getGitHubPublishToken());
+  const canPublish = isSupabaseConfigured() && isSupabaseConnected();
   let state = forcedState;
 
   if (!state) {
@@ -365,7 +352,7 @@ function updateSyncIndicator(forcedState: SyncState = ""): void {
       state = "publishing";
     } else if (isPublishedSnapshotInSync()) {
       state = "synced";
-    } else if (hasToken) {
+    } else if (canPublish) {
       state = "pending";
     } else {
       state = "local";
@@ -386,7 +373,7 @@ function updateSyncIndicator(forcedState: SyncState = ""): void {
     state === "synced"
       ? `Conteúdo já publicado no site. Última publicação conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
       : state === "publishing"
-        ? "O painel está enviando as alterações para o repositório e atualizando o site."
+        ? "O painel está enviando as alterações para o Supabase e atualizando o conteúdo público."
         : state === "pending"
           ? `Existe um rascunho diferente do site público. Última versão publicada conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}`
           : state === "local"
@@ -435,11 +422,11 @@ function buildPublishErrorMessage(error: unknown): string {
   const publishError = error as { status?: number };
 
   if (publishError.status === 401 || publishError.status === 403) {
-    return "O GitHub recusou a publicação. Verifique se o token ainda é válido e se possui permissão Contents: write.";
+    return "O Supabase recusou a publicação. Verifique se a sessão administrativa ainda é válida.";
   }
 
   if (publishError.status === 404) {
-    return "O GitHub não encontrou o repositório ou o arquivo de conteúdo. Verifique o acesso da conta e do token.";
+    return "O Supabase não encontrou o recurso solicitado. Verifique a configuração do projeto e do Storage.";
   }
 
   if (publishError.status === 409) {
@@ -447,14 +434,14 @@ function buildPublishErrorMessage(error: unknown): string {
   }
 
   if (publishError.status === 422) {
-    return "O GitHub recusou esta publicação por validação ou excesso de tentativas seguidas. Aguarde alguns segundos e tente novamente.";
+    return "O Supabase recusou esta publicação por validação. Revise os dados e tente novamente.";
   }
 
   if (publishError.status === 503) {
-    return "O GitHub ficou indisponível no momento da publicação. Tente novamente em instantes.";
+    return "O Supabase ficou indisponível no momento da publicação. Tente novamente em instantes.";
   }
 
-  return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique o token e as permissões de escrita no repositório.";
+  return "Não foi possível publicar agora. O conteúdo continua salvo só neste computador. Verifique a sessão e as permissões no Supabase.";
 }
 
 /**
@@ -469,50 +456,26 @@ function buildLibraryRefreshErrorMessage(error: unknown): string {
   const repositoryError = error as { status?: number };
 
   if (repositoryError.status === 401 || repositoryError.status === 403) {
-    return "A biblioteca de imagens não pôde ser atualizada porque o GitHub recusou o token. Verifique se ele ainda é válido e se tem acesso ao repositório.";
+    return "A biblioteca de imagens não pôde ser atualizada porque o Supabase recusou a sessão atual. Conecte-se novamente ao painel.";
   }
 
   if (repositoryError.status === 404) {
-    return "A biblioteca de imagens não pôde ser atualizada porque a pasta de imagens ou o repositório não foi encontrado no GitHub.";
+    return "A biblioteca de imagens não pôde ser atualizada porque o bucket de mídia não foi encontrado no Supabase.";
   }
 
   if (repositoryError.status === 409 || repositoryError.status === 422) {
-    return "A biblioteca de imagens encontrou um conflito temporário ao consultar o GitHub. Tente novamente em alguns segundos.";
+    return "A biblioteca de imagens encontrou um conflito temporário ao consultar o Supabase. Tente novamente em alguns segundos.";
   }
 
   if (repositoryError.status === 429) {
-    return "O GitHub limitou temporariamente as consultas da biblioteca de imagens. Aguarde um pouco e tente novamente.";
+    return "O Supabase limitou temporariamente as consultas da biblioteca de imagens. Aguarde um pouco e tente novamente.";
   }
 
   if (repositoryError.status === 503) {
-    return "O GitHub estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
+    return "O Supabase estava indisponível no momento da atualização da biblioteca de imagens. Tente novamente em instantes.";
   }
 
-  return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão, o token e o acesso ao repositório.";
-}
-
-function updateGitHubTokenStatus(): void {
-  const savedToken = getGitHubPublishToken();
-  const hasToken = Boolean(savedToken);
-
-  if (!githubTokenStatus) {
-    return;
-  }
-
-  githubTokenStatus.textContent = hasToken
-    ? "Token conectado. As alterações serão enviadas ao GitHub automaticamente."
-    : "Nenhum token conectado. As alterações ficarão apenas neste navegador até você conectar o GitHub.";
-  githubTokenStatus.className = hasToken ? "text-sm text-green-700" : "text-sm text-yellow-700";
-
-  if (clearGitHubTokenButton) {
-    clearGitHubTokenButton.disabled = !hasToken || isPublishing;
-  }
-
-  if (githubTokenInput) {
-    githubTokenInput.value = savedToken;
-  }
-
-  updateSyncIndicator();
+  return "Não foi possível atualizar a biblioteca de imagens agora. Verifique a conexão com o Supabase e o acesso ao bucket.";
 }
 
 function isSupabaseConfigured(): boolean {
@@ -778,8 +741,8 @@ function setMediaPreviewFromFile(file: File): void {
 function buildGalleryLibraryEntries(): PortalImageLibraryEntry[] {
   return normalizePortalImageLibraryEntries(
     adminState.gallery.map((item) => ({
-      path: item.src,
-      name: item.title || item.src.split("/").pop() || "imagem",
+      path: extractSupabaseStoragePath(item.src),
+      name: item.title || extractSupabaseStoragePath(item.src).split("/").pop() || "imagem",
       previewSrc: item.src,
       source: "gallery" as const
     }))
@@ -803,11 +766,11 @@ function renderImageLibrary(): void {
   }
 
   if (!imageLibraryEntries.length) {
-    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Conecte o GitHub para carregar o repositório ou envie a primeira imagem.</div>';
+    imageLibrary.innerHTML = '<div class="empty-state">Nenhuma imagem disponível ainda. Envie a primeira imagem ao Supabase Storage para começar a biblioteca.</div>';
     return;
   }
 
-  const activeGalleryPaths = new Set(adminState.gallery.map((item) => item.src));
+  const activeGalleryPaths = new Set(adminState.gallery.map((item) => extractSupabaseStoragePath(item.src)));
 
   imageLibrary.innerHTML = imageLibraryEntries
     .map((item) => {
@@ -868,14 +831,15 @@ async function refreshImageLibrary(
   options: RefreshImageLibraryOptions = {}
 ): Promise<void> {
   const { silent = false } = options;
-  const token = getGitHubPublishToken();
 
   try {
-    const repositoryEntries = token ? await listPortalImageLibrary(token) : [];
+    const repositoryEntries = isSupabaseConfigured() && isSupabaseConnected()
+      ? await listSupabasePortalImageLibrary()
+      : [];
     mergeImageLibraryEntries(repositoryEntries);
     renderImageLibrary();
-    if (!silent && token) {
-      setStatus("Biblioteca de imagens atualizada a partir do repositório.", "success");
+    if (!silent && repositoryEntries.length) {
+      setStatus("Biblioteca de imagens atualizada a partir do Supabase.", "success");
     }
   } catch (error) {
     console.error(error);
@@ -885,65 +849,6 @@ async function refreshImageLibrary(
       setStatus(buildLibraryRefreshErrorMessage(error), "warning");
     }
   }
-}
-
-/**
- * @param {string} reason
- * @returns {Promise<void>}
- */
-async function publishStateToGitHub(reason: string): Promise<void> {
-  const token = getGitHubPublishToken();
-  if (!token) {
-    setStatus(
-      "Alteração salva só neste computador. Conecte o GitHub para enviar isso ao site público.",
-      "warning",
-      "local"
-    );
-    return;
-  }
-
-  publishQueue = publishQueue
-    .catch(() => null)
-    .then(async () => {
-      setPublishingState(true);
-      setStatus("Publicando alterações no GitHub. O deploy do Pages será disparado em seguida.", "info", "publishing");
-
-      try {
-        await publishSiteContentToGitHub(adminState, token, reason);
-        publishedSnapshot = cloneContent(adminState);
-        setStatus(
-          "Alterações publicadas com sucesso. O site público pode levar alguns segundos para mostrar a nova versão.",
-          "success",
-          "synced"
-        );
-      } catch (error) {
-        console.error(error);
-        setStatus(buildPublishErrorMessage(error), "danger", "pending");
-      } finally {
-        setPublishingState(false);
-      }
-    });
-
-  return publishQueue;
-}
-
-/**
- * @param {string} localMessage
- * @param {string} publishMessage
- * @returns {void}
- */
-function saveState(localMessage: string, publishMessage: string): void {
-  adminState.updatedAt = new Date().toISOString();
-  saveDraftSiteContent(adminState);
-  renderAll();
-
-  if (!getGitHubPublishToken()) {
-    setStatus(`${localMessage} O conteúdo segue salvo localmente neste navegador.`, "warning", "local");
-    return;
-  }
-
-  setStatus(`${localMessage} Enviando atualização para o GitHub...`, "info", "publishing");
-  publishStateToGitHub(publishMessage);
 }
 
 async function saveNoticesToPrimaryStore(localMessage: string): Promise<void> {
@@ -1020,10 +925,47 @@ async function saveQuickLinksToPrimaryStore(localMessage: string): Promise<void>
   }
 }
 
+async function saveMediaWithCurrentGallery(localMessage: string): Promise<void> {
+  adminState.updatedAt = new Date().toISOString();
+  saveDraftSiteContent(adminState);
+  renderAll();
+
+  if (!isSupabaseConfigured()) {
+    setStatus(`${localMessage} O Supabase ainda não está habilitado neste projeto.`, "warning", "local");
+    return;
+  }
+
+  if (!isSupabaseConnected()) {
+    setStatus(`${localMessage} Conecte o Supabase para publicar a galeria no portal.`, "warning", "local");
+    return;
+  }
+
+  try {
+    setPublishingState(true);
+    setStatus("Salvando galeria no Supabase...", "info", "publishing");
+    const persistedGallery = await syncSupabaseGallery(adminState.gallery);
+    adminState.gallery = persistedGallery;
+    adminState.updatedAt = new Date().toISOString();
+    saveDraftSiteContent(adminState);
+    publishedSnapshot = cloneContent({
+      ...publishedSnapshot,
+      updatedAt: adminState.updatedAt,
+      gallery: persistedGallery
+    });
+    renderAll();
+    await refreshImageLibrary({ silent: true });
+    setStatus(`${localMessage} A galeria do portal já foi atualizada no Supabase.`, "success", "synced");
+  } catch (error) {
+    console.error(error);
+    setStatus(buildPublishErrorMessage(error), "danger", isSupabaseConnected() ? "pending" : "local");
+  } finally {
+    setPublishingState(false);
+  }
+}
+
 async function saveMediaWithUpload(): Promise<void> {
   const selectedFile = mediaFile?.files?.[0] || null;
   const selectedPath = mediaPath.value.trim();
-  const token = getGitHubPublishToken();
 
   if (!selectedFile && !selectedPath) {
     setStatus("Escolha uma imagem existente ou envie um arquivo do computador antes de salvar.", "warning");
@@ -1041,8 +983,13 @@ async function saveMediaWithUpload(): Promise<void> {
       return;
     }
 
-    if (!token) {
-      setStatus("Conecte um token do GitHub antes de enviar uma nova imagem do computador.", "warning", "local");
+    if (!isSupabaseConfigured()) {
+      setStatus("O Supabase ainda não está habilitado neste projeto.", "warning", "local");
+      return;
+    }
+
+    if (!isSupabaseConnected()) {
+      setStatus("Conecte o Supabase antes de enviar uma nova imagem do computador.", "warning", "local");
       return;
     }
   }
@@ -1053,14 +1000,9 @@ async function saveMediaWithUpload(): Promise<void> {
   try {
     if (selectedFile) {
       setPublishingState(true);
-      setStatus("Enviando imagem para o repositório do GitHub...", "info", "publishing");
+      setStatus("Enviando imagem para o Supabase Storage...", "info", "publishing");
       const generatedPath = createPortalImagePath(mediaTitle.value.trim(), selectedFile.name);
-      const uploadResult = await uploadPortalImageToGitHub(
-        selectedFile,
-        token,
-        generatedPath,
-        `Upload portal image ${mediaTitle.value.trim() || selectedFile.name}`
-      );
+      const uploadResult = await uploadPortalImageToSupabase(selectedFile, generatedPath);
       uploadedImagePath = uploadResult.path;
       uploadSucceeded = true;
       mediaPath.value = uploadedImagePath;
@@ -1098,23 +1040,37 @@ async function saveMediaWithUpload(): Promise<void> {
     saveDraftSiteContent(adminState);
     renderAll();
 
-    if (!token) {
-      setStatus("Imagem salva só neste computador. Conecte o GitHub para publicá-la no portal.", "warning", "local");
+    if (!isSupabaseConfigured()) {
+      setStatus("Imagem salva só neste computador. O Supabase ainda não está habilitado neste projeto.", "warning", "local");
+      fillMediaForm();
+      return;
+    }
+
+    if (!isSupabaseConnected()) {
+      setStatus("Imagem salva só neste computador. Conecte o Supabase para publicá-la no portal.", "warning", "local");
       fillMediaForm();
       return;
     }
 
     if (!isPublishing) {
       setPublishingState(true);
-      setStatus("Publicando atualização da galeria no GitHub...", "info", "publishing");
+      setStatus("Salvando galeria no Supabase...", "info", "publishing");
     }
 
-    await publishSiteContentToGitHub(adminState, token, "Update gallery in site content");
-    publishedSnapshot = cloneContent(adminState);
+    const persistedGallery = await syncSupabaseGallery(adminState.gallery);
+    adminState.gallery = persistedGallery;
+    adminState.updatedAt = new Date().toISOString();
+    saveDraftSiteContent(adminState);
+    publishedSnapshot = cloneContent({
+      ...publishedSnapshot,
+      updatedAt: adminState.updatedAt,
+      gallery: persistedGallery
+    });
     fillMediaForm();
     await refreshImageLibrary({ silent: true });
-      setStatus(
-        uploadSucceeded
+    renderAll();
+    setStatus(
+      uploadSucceeded
         ? "Imagem enviada e galeria publicada com sucesso."
         : "Imagem da biblioteca aplicada e galeria publicada com sucesso.",
       "success",
@@ -1124,12 +1080,12 @@ async function saveMediaWithUpload(): Promise<void> {
     console.error(error);
     if (uploadSucceeded) {
       setStatus(
-        "A imagem foi enviada ao repositório, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.",
+        "A imagem foi enviada ao Supabase Storage, mas a galeria ainda não foi publicada no site. Salve novamente para concluir.",
         "danger",
         "pending"
       );
     } else {
-      setStatus(buildPublishErrorMessage(error), "danger", token ? "pending" : "local");
+      setStatus(buildPublishErrorMessage(error), "danger", isSupabaseConnected() ? "pending" : "local");
     }
   } finally {
     setPublishingState(false);
@@ -1169,7 +1125,7 @@ function fillMediaForm(item: GalleryItem | null = null): void {
   revokeMediaPreviewObjectUrl();
   mediaId.value = item?.id || "";
   mediaTitle.value = item?.title || "";
-  mediaPath.value = item?.src || "";
+  mediaPath.value = item?.src ? extractSupabaseStoragePath(item.src) : "";
   mediaAlt.value = item?.alt || "";
   mediaOrder.value = String(item?.order || adminState.gallery.length + 1);
   mediaPublished.checked = item?.published !== false;
@@ -1177,7 +1133,7 @@ function fillMediaForm(item: GalleryItem | null = null): void {
     mediaFile.value = "";
   }
 
-  selectedLibraryImagePath = item?.src || "";
+  selectedLibraryImagePath = item?.src ? extractSupabaseStoragePath(item.src) : "";
   if (item?.src) {
     const entry = imageLibraryEntries.find((libraryItem) => libraryItem.path === item.src);
     setMediaPreview(item.src, `Imagem escolhida: ${entry?.name || item.title || item.src}`, item.alt || item.title);
@@ -1325,12 +1281,9 @@ function renderGallery(): void {
 
   Array.from(mediaItems.querySelectorAll<HTMLButtonElement>("[data-delete-media]")).forEach((button) => {
     button.addEventListener("click", () => {
-      openConfirmModal("Essa imagem será retirada da galeria pública do portal.", () => {
+      openConfirmModal("Essa imagem será retirada da galeria pública do portal.", async () => {
         adminState.gallery = adminState.gallery.filter((entry) => entry.id !== button.dataset.deleteMedia);
-        saveState(
-          "Imagem removida da galeria local.",
-          `Remove gallery item ${button.dataset.deleteMedia} from site content`
-        );
+        await saveMediaWithCurrentGallery("Imagem removida da galeria.");
       });
     });
   });
@@ -1652,75 +1605,6 @@ clearSupabaseSessionButton?.addEventListener("click", () => {
   setStatus("Sessão administrativa do Supabase removida deste navegador.", "warning", "local");
 });
 
-githubTokenForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (isPublishing) {
-    return;
-  }
-
-  const token = githubTokenInput.value.trim();
-  if (!token) {
-    setStatus("Informe um token do GitHub com permissão de escrita no repositório.", "warning");
-    return;
-  }
-
-  try {
-    setStatus("Validando token e conectando ao GitHub...", "info");
-    await fetchPublishedSiteContentMeta(token);
-    setGitHubPublishToken(token);
-    updateGitHubTokenStatus();
-    await refreshImageLibrary({ silent: true });
-
-    if (!isPublishedSnapshotInSync()) {
-      setStatus("Token validado. Publicando o rascunho atual para sincronizar o site.", "info", "publishing");
-      await publishStateToGitHub("Publish current site content after GitHub token connect");
-      return;
-    }
-
-    setStatus(
-      "Conexão com o GitHub validada. As próximas alterações poderão ser enviadas direto para o site.",
-      "success",
-      "synced"
-    );
-  } catch (error) {
-    console.error(error);
-    setStatus(
-      "Não foi possível validar o token. Verifique se ele tem permissão de Contents: write neste repositório.",
-      "danger"
-    );
-  }
-});
-
-clearGitHubTokenButton?.addEventListener("click", () => {
-  clearGitHubPublishToken();
-  updateGitHubTokenStatus();
-  refreshImageLibrary({ silent: true });
-  setStatus("Token removido da sessão atual. O painel voltou para modo local.", "warning", "local");
-});
-
-usePublishedContentButton?.addEventListener("click", async () => {
-  openConfirmModal(
-    "Isso vai descartar o rascunho salvo neste navegador e recarregar o conteúdo publicado atualmente no GitHub.",
-    async () => {
-      try {
-        clearDraftSiteContent();
-        const publishedContent = normalizeSiteContent(await fetchPublishedSiteContent());
-        adminState = cloneContent(publishedContent);
-        publishedSnapshot = cloneContent(publishedContent);
-        renderAll();
-        fillNoticeForm();
-        fillLinkForm();
-        fillMediaForm();
-        await refreshImageLibrary({ silent: true });
-        setStatus("Conteúdo publicado recarregado com sucesso.", "success", "synced");
-      } catch (error) {
-        console.error(error);
-        setStatus("Não foi possível recarregar o conteúdo publicado agora.", "danger");
-      }
-    }
-  );
-});
-
 clearNoticeFormButton?.addEventListener("click", () => fillNoticeForm());
 clearLinkFormButton?.addEventListener("click", () => fillLinkForm());
 clearMediaFormButton?.addEventListener("click", () => fillMediaForm());
@@ -1809,7 +1693,6 @@ async function bootstrap() {
   renderAll();
   showPanel("dashboardPanel");
   updateSupabaseAuthStatus();
-  updateGitHubTokenStatus();
   await refreshImageLibrary({ silent: true });
 
   if (!publishedContent) {
@@ -1824,18 +1707,18 @@ async function bootstrap() {
   if (isPublishedSnapshotInSync()) {
     setStatus(
       `Painel carregado. O conteúdo abaixo já está igual ao que foi publicado no site em ${formatDateTime(publishedSnapshot.updatedAt)}.`,
-      getGitHubPublishToken() ? "success" : "info",
+      isSupabaseConnected() ? "success" : "info",
       "synced"
     );
     return;
   }
 
   setStatus(
-    getGitHubPublishToken()
+    isSupabaseConnected()
       ? `Existe um rascunho salvo neste computador diferente do site publicado. Última versão pública conhecida: ${formatDateTime(publishedSnapshot.updatedAt)}.`
-      : "Existe um rascunho salvo só neste computador. Conecte o GitHub para publicar essa versão no site.",
+      : "Existe um rascunho salvo só neste computador. Conecte o Supabase para publicar essa versão no site.",
     "warning",
-    getGitHubPublishToken() ? "pending" : "local"
+    isSupabaseConnected() ? "pending" : "local"
   );
 }
 

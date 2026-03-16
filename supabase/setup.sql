@@ -161,6 +161,20 @@ to authenticated
 using (public.is_panel_owner())
 with check (public.is_panel_owner());
 
+insert into storage.buckets (id, name, public)
+values ('portal-media', 'portal-media', true)
+on conflict (id)
+do update set
+  public = excluded.public;
+
+drop policy if exists "Authenticated users can manage portal media" on storage.objects;
+create policy "Authenticated users can manage portal media"
+on storage.objects
+for all
+to authenticated
+using (bucket_id = 'portal-media')
+with check (bucket_id = 'portal-media');
+
 insert into public.admin_allowlist (email, role, active)
 values ('chief@gmail.com', 'owner', true)
 on conflict (lower(email))

@@ -64,6 +64,10 @@ export interface ManagePanelUserPayload {
   active: boolean;
 }
 
+type SupabaseStorageListItem = {
+  name: string;
+};
+
 export const SUPABASE_TABLES = {
   notices: "notices",
   quickLinks: "quick_links",
@@ -106,6 +110,22 @@ function resolvePublicImageUrl(path: string): string {
   const bucket = encodeURIComponent(SUPABASE_CONFIG.storageBucket);
   const encodedPath = encodeStoragePath(path);
   return `${baseUrl}/storage/v1/object/public/${bucket}/${encodedPath}`;
+}
+
+export function extractSupabaseStoragePath(path: string): string {
+  if (!path) {
+    return "";
+  }
+
+  const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
+  const bucket = encodeURIComponent(SUPABASE_CONFIG.storageBucket);
+  const marker = `${baseUrl}/storage/v1/object/public/${bucket}/`;
+
+  if (path.startsWith(marker)) {
+    return decodeURIComponent(path.slice(marker.length));
+  }
+
+  return path;
 }
 
 function buildRestUrl(table: string, query: URLSearchParams): string {
@@ -682,4 +702,122 @@ export async function syncSupabaseQuickLinks(links: QuickLinkItem[]): Promise<Qu
   await deleteSupabaseAdminRows(SUPABASE_TABLES.quickLinks, deleteIds);
   const persistedById = new Map(mapQuickLinks(persistedRows).map((item) => [item.id, item]));
   return payload.map((item) => persistedById.get(item.id) || mapQuickLinks([item])[0]);
+}
+
+export async function syncSupabaseGallery(gallery: GalleryItem[]): Promise<GalleryItem[]> {
+  const existingRows = await fetchSupabaseAdminRows<Pick<SupabaseGalleryRow, "id">>(
+    SUPABASE_TABLES.gallery,
+    new URLSearchParams({
+      select: "id"
+    })
+  );
+
+  const payload = gallery.map((item) => ({
+    id: ensureSupabaseRecordId(item.id),
+    title: item.title,
+    alt: item.alt,
+    image_path: extractSupabaseStoragePath(item.src),
+    sort_order: Number(item.order || 0),
+    published: item.published
+  }));
+
+  const persistedRows = payload.length
+    ? await upsertSupabaseAdminRows<SupabaseGalleryRow>(SUPABASE_TABLES.gallery, payload)
+    : [];
+
+  const payloadIds = new Set(payload.map((item) => item.id));
+  const deleteIds = existingRows
+    .map((row) => row.id)
+    .filter((id) => !payloadIds.has(id));
+
+  await deleteSupabaseAdminRows(SUPABASE_TABLES.gallery, deleteIds);
+  const persistedById = new Map(mapGallery(persistedRows).map((item) => [item.id, item]));
+  return payload.map((item) => {
+    const persisted = persistedById.get(item.id);
+    return (
+      persisted || {
+        id: item.id,
+        title: item.title,
+        src: resolvePublicImageUrl(item.image_path),
+        alt: item.alt,
+        order: item.sort_order,
+        published: item.published
+      }
+    );
+  });
+}
+
+export async function uploadPortalImageToSupabase(
+  file: File,
+  path: string
+): Promise<{ path: string; publicUrl: string }> {
+  const accessToken = await getSupabaseAdminAccessToken();
+  const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
+  const bucket = encodeURIComponent(SUPABASE_CONFIG.storageBucket);
+  const normalizedPath = path.replace(/^\/+/, "");
+  const encodedPath = encodeStoragePath(normalizedPath);
+
+  const response = await fetch(`${baseUrl}/storage/v1/object/${bucket}/${encodedPath}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_CONFIG.publishableKey,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "true"
+    },
+    body: file
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Supabase ${response.status}: ${details}`);
+  }
+
+  return {
+    path: normalizedPath,
+    publicUrl: resolvePublicImageUrl(normalizedPath)
+  };
+}
+
+export async function listSupabasePortalImageLibrary(): Promise<Array<{
+  path: string;
+  name: string;
+  previewSrc: string;
+  source: "repository";
+}>> {
+  const accessToken = await getSupabaseAdminAccessToken();
+  const baseUrl = trimTrailingSlash(SUPABASE_CONFIG.projectUrl);
+  const bucket = encodeURIComponent(SUPABASE_CONFIG.storageBucket);
+
+  const response = await fetch(`${baseUrl}/storage/v1/object/list/${bucket}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_CONFIG.publishableKey,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      limit: 200,
+      offset: 0,
+      sortBy: {
+        column: "name",
+        order: "asc"
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Supabase ${response.status}: ${details}`);
+  }
+
+  const items = (await response.json()) as SupabaseStorageListItem[];
+  return items
+    .filter((item) => item.name && !item.name.endsWith("/"))
+    .map((item) => ({
+      path: item.name,
+      name: item.name.split("/").pop() || item.name,
+      previewSrc: resolvePublicImageUrl(item.name),
+      source: "repository" as const
+    }));
 }

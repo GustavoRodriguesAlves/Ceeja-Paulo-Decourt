@@ -1,4 +1,4 @@
-import type { NoticeItem, QuickLinkItem, SiteContent } from "../../../assets/js/types/core";
+import type { GalleryItem, NoticeItem, QuickLinkItem, SiteContent } from "../../../assets/js/types/core";
 import { type SupabasePublicConfig } from "./supabase-config.js";
 export interface PanelAccessEntry {
     id: string;
@@ -27,6 +27,7 @@ export interface SupabaseAdminSession {
     expiresAt: number;
     email: string;
 }
+export declare function extractSupabaseStoragePath(path: string): string;
 export declare function getSupabaseAdminSession(): SupabaseAdminSession | null;
 export declare function getRememberedSupabaseAdminSession(): SupabaseAdminSession | null;
 export declare function syncRememberedSupabaseAdminSession(): SupabaseAdminSession | null;
@@ -43,3 +44,14 @@ export declare function syncPanelAllowlist(entries: PanelAccessEntry[]): Promise
 export declare function manageSupabasePanelUser(payload: ManagePanelUserPayload): Promise<PanelAccessEntry>;
 export declare function syncSupabaseNotices(notices: NoticeItem[]): Promise<NoticeItem[]>;
 export declare function syncSupabaseQuickLinks(links: QuickLinkItem[]): Promise<QuickLinkItem[]>;
+export declare function syncSupabaseGallery(gallery: GalleryItem[]): Promise<GalleryItem[]>;
+export declare function uploadPortalImageToSupabase(file: File, path: string): Promise<{
+    path: string;
+    publicUrl: string;
+}>;
+export declare function listSupabasePortalImageLibrary(): Promise<Array<{
+    path: string;
+    name: string;
+    previewSrc: string;
+    source: "repository";
+}>>;

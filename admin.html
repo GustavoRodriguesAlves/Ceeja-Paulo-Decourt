@@ -149,21 +149,10 @@
               </div>
 
               <div class="panel-soft p-6">
-              <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Publicação automática no GitHub</h3>
-              <p class="helper-text mb-4">Para que os comunicados apareçam para todos, o painel precisa enviar o arquivo <code class="bg-gray-200 text-gray-800 px-1 rounded">data/site-content.json</code> e as imagens da galeria para o repositório. Sem isso, a alteração fica apenas nesta máquina.</p>
-              <form id="githubTokenForm" class="space-y-4">
-                <div>
-                  <label for="githubTokenInput" class="mb-1 block text-sm font-semibold">Token fino do GitHub</label>
-                  <input id="githubTokenInput" type="password" class="field" placeholder="Cole aqui um token com Contents: write" autocomplete="off" />
-                </div>
-                <div class="flex flex-wrap gap-3">
-                  <button type="submit" class="btn-primary text-sm">Conectar GitHub</button>
-                  <button id="clearGitHubTokenButton" type="button" class="btn-secondary text-sm">Desconectar</button>
-                  <button id="usePublishedContentButton" type="button" class="btn-secondary text-sm">Recarregar conteúdo publicado</button>
-                </div>
-              </form>
-              <p id="githubTokenStatus" class="mt-4 text-sm text-yellow-700">Nenhum token conectado.</p>
-            </div>
+                <h3 class="text-lg font-bold text-[var(--brand-primary)] mb-4">Fluxo editorial</h3>
+                <p class="helper-text mb-4">O painel já publica avisos, links rápidos e galeria diretamente no Supabase. O GitHub continua responsável apenas pelo código do site e pelo deploy do frontend.</p>
+                <p class="helper-text">Com isso, a secretaria não precisa mais lidar com token manual para atualizar o conteúdo do portal.</p>
+              </div>
           </div>
         </section>
 
